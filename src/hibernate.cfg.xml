@@ -16,7 +16,7 @@
     <property name="hibernate.hbm2ddl.auto">update</property>
 
     <mapping class="br.com.sgv.model.UserType"/>
-    <mapping class="br.com.sgv.model.AcessType"/>
+    <mapping class="br.com.sgv.model.AcessScreen"/>
     <mapping class="br.com.sgv.model.AcessPermission"/>
     <mapping class="br.com.sgv.model.User" />
   </session-factory>

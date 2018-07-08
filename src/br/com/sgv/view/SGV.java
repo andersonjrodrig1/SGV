@@ -1,11 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.view;
 
-import br.com.sgv.enumerator.LogoutEnum;
+import br.com.sgv.enumerator.OptionEnum;
+import br.com.sgv.shared.Messages;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import javax.swing.JOptionPane;
 
 /**
@@ -14,11 +12,21 @@ import javax.swing.JOptionPane;
  */
 public class SGV extends javax.swing.JFrame {
 
-    /**
-     * Creates new form SGV
-     */
+    private Login login = null;
+    private RegisterUser registerUser = null;
+    private About about = null;
+    
     public SGV() {
         initComponents();
+    }
+    
+    public void initScreen() {     
+        Rectangle rect = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        this.setLocation(0, 0);
+        this.setSize((int)rect.getWidth(), (int)rect.getHeight());       
+        this.setLocationRelativeTo(null);
+        //this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        this.setVisible(true);
     }
 
     /**
@@ -31,25 +39,33 @@ public class SGV extends javax.swing.JFrame {
     private void initComponents() {
 
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        nmRegisterUser = new javax.swing.JMenu();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenu3 = new javax.swing.JMenu();
-        jMenu4 = new javax.swing.JMenu();
-        jMenu5 = new javax.swing.JMenu();
+        mnAbout = new javax.swing.JMenu();
+        nmExit = new javax.swing.JMenu();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setBackground(new java.awt.Color(153, 153, 255));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setResizable(false);
 
-        jMenu1.setText("Cadastro");
+        nmRegisterUser.setText("Cadastro");
 
         jMenuItem2.setText("Produto");
-        jMenu1.add(jMenuItem2);
+        nmRegisterUser.add(jMenuItem2);
 
         jMenuItem3.setText("Usuário");
-        jMenu1.add(jMenuItem3);
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        nmRegisterUser.add(jMenuItem3);
 
-        jMenuBar1.add(jMenu1);
+        jMenuBar1.add(nmRegisterUser);
 
         jMenu2.setText("Ações");
         jMenuBar1.add(jMenu2);
@@ -57,16 +73,21 @@ public class SGV extends javax.swing.JFrame {
         jMenu3.setText("Relatório");
         jMenuBar1.add(jMenu3);
 
-        jMenu4.setText("Sobre");
-        jMenuBar1.add(jMenu4);
-
-        jMenu5.setText("Sair");
-        jMenu5.addMouseListener(new java.awt.event.MouseAdapter() {
+        mnAbout.setText("Sobre");
+        mnAbout.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jMenu5MouseClicked(evt);
+                mnAboutMouseClicked(evt);
             }
         });
-        jMenuBar1.add(jMenu5);
+        jMenuBar1.add(mnAbout);
+
+        nmExit.setText("Sair");
+        nmExit.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                nmExitMouseClicked(evt);
+            }
+        });
+        jMenuBar1.add(nmExit);
 
         setJMenuBar(jMenuBar1);
 
@@ -74,25 +95,37 @@ public class SGV extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1100, Short.MAX_VALUE)
+            .addGap(0, 1000, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 519, Short.MAX_VALUE)
+            .addGap(0, 499, Short.MAX_VALUE)
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenu5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu5MouseClicked
-        // TODO add your handling code here:
-        int response = JOptionPane.showConfirmDialog(null, "Deseja sair do sistema?");
+    private void nmExitMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_nmExitMouseClicked
+        int response = JOptionPane.showConfirmDialog(null, Messages.logout_system);
         
-        if (response == LogoutEnum.YES.value) {
+        if (response == OptionEnum.YES.value) {
             this.dispose();
+            
+            this.login = new Login(this, true);
+            this.login.initScreen();
         }
-    }//GEN-LAST:event_jMenu5MouseClicked
+    }//GEN-LAST:event_nmExitMouseClicked
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        this.registerUser = new RegisterUser(this, true);
+        this.registerUser.initScreen();
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void mnAboutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnAboutMouseClicked
+        this.about = new About(this, true);
+        this.about.initScreen();
+    }//GEN-LAST:event_mnAboutMouseClicked
 
     /**
      * @param args the command line arguments
@@ -130,13 +163,13 @@ public class SGV extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenu jMenu4;
-    private javax.swing.JMenu jMenu5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenu mnAbout;
+    private javax.swing.JMenu nmExit;
+    private javax.swing.JMenu nmRegisterUser;
     // End of variables declaration//GEN-END:variables
 }

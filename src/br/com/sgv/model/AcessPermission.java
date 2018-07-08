@@ -19,7 +19,7 @@ import javax.persistence.Table;
 public class AcessPermission implements Serializable {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
     
     @ManyToOne
@@ -27,18 +27,18 @@ public class AcessPermission implements Serializable {
     private UserType userType;
     
     @ManyToOne
-    @JoinColumn(name = "acess_type_id", nullable = false)
-    private AcessType acessType;
+    @JoinColumn(name = "acess_screen_id", nullable = false)
+    private AcessScreen acessScreen;
     
     @Column(name = "has_acess_permission", nullable = false)
     private boolean hasAcessPermission;
     
     public AcessPermission() { }
     
-    public AcessPermission(long id, UserType userType, AcessType acessType, boolean hasAcessPermission) {
+    public AcessPermission(long id, UserType userType, AcessScreen acessScreen, boolean hasAcessPermission) {
         this.id = id;
         this.userType = userType;
-        this.acessType = acessType;
+        this.acessScreen = acessScreen;
         this.hasAcessPermission = hasAcessPermission;
     }
 
@@ -58,12 +58,12 @@ public class AcessPermission implements Serializable {
         this.userType = userType;
     }
 
-    public AcessType getAcessType() {
-        return acessType;
+    public AcessScreen getAcessScreen() {
+        return acessScreen;
     }
 
-    public void setAcessType(AcessType acessType) {
-        this.acessType = acessType;
+    public void setAcessScreen(AcessScreen acessScreen) {
+        this.acessScreen = acessScreen;
     }
 
     public boolean isHasAcessPermission() {

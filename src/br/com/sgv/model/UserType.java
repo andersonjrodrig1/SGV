@@ -25,6 +25,10 @@ public class UserType implements Serializable{
     
     public UserType() { }
     
+    public UserType(String userType) {
+        this.userType = userType;
+    }
+    
     public UserType(long id, String userType) {
         this.id = id;
         this.userType = userType;
