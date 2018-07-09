@@ -35,8 +35,7 @@ public class AcessPermission implements Serializable {
     
     public AcessPermission() { }
     
-    public AcessPermission(long id, UserType userType, AcessScreen acessScreen, boolean hasAcessPermission) {
-        this.id = id;
+    public AcessPermission(UserType userType, AcessScreen acessScreen, boolean hasAcessPermission) {
         this.userType = userType;
         this.acessScreen = acessScreen;
         this.hasAcessPermission = hasAcessPermission;

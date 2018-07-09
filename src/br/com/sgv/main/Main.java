@@ -2,7 +2,6 @@ package br.com.sgv.main;
 
 import br.com.sgv.database.InitializerDb;
 import br.com.sgv.shared.Messages;
-import br.com.sgv.view.About;
 import br.com.sgv.view.Login;
 import java.awt.GridLayout;
 import java.util.logging.Level;
@@ -13,7 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 /**
- * @author Anderson Junior Rodriugues
+ * @author Anderson Junior Rodrigues
  */
 
 public class Main {
@@ -21,7 +20,7 @@ public class Main {
     private static Login login;
     private static JDialog dialog;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) {        
         initiliazerDb();
         modalPresentation();
         modalLogin();

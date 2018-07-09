@@ -1,8 +1,6 @@
 package br.com.sgv.model;
 
-import com.sun.istack.internal.NotNull;
 import java.io.Serializable;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
