@@ -21,7 +21,7 @@ public class PersistenceController {
         ss = sf.openSession();
     }
 
-    public <T> boolean save(T t) {
+    public <T> void save(T t) {
         try {
             initFactoryContext();            
             ts = ss.beginTransaction();
@@ -31,8 +31,6 @@ public class PersistenceController {
             ts.commit();
             ss.flush();
             ss.close();
-            
-            return true;
         } catch(Exception e) {
             Logger.getLogger(PersistenceController.class.getName()).log(Level.SEVERE, "Error: " + e.getMessage(), e);
             throw e;
@@ -57,7 +55,7 @@ public class PersistenceController {
         }
     }
 
-    public <T> boolean update(T t) {
+    public <T> void update(T t) {
        try {
             initFactoryContext();            
             ts = ss.beginTransaction();
@@ -67,8 +65,6 @@ public class PersistenceController {
             ts.commit();
             ss.flush();
             ss.close();
-            
-            return true;
        } catch(Exception e) {
             Logger.getLogger(PersistenceController.class.getName()).log(Level.SEVERE, "Error: " + e.getMessage(), e);
             throw e;

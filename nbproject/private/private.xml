@@ -3,10 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/enumerator/OptionEnum.java</file>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/SGV.java</file>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/shared/Messages.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/model/User.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/controller/PersistenceController.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/database/InitializerDb.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/model/AcessScreen.java</file>
             <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/main/Main.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/RegisterUser.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/model/AcessPermission.java</file>
         </group>
     </open-files>
 </project-private>

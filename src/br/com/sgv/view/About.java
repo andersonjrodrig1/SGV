@@ -51,6 +51,7 @@ public class About extends javax.swing.JDialog {
         lblRight = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Sistema de Gerenciamento de Vendas");
 
         lblImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/images/sobre.png"))); // NOI18N
 

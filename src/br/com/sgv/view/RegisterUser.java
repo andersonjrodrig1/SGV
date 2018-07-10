@@ -5,11 +5,17 @@
  */
 package br.com.sgv.view;
 
+import br.com.sgv.service.UserService;
+import br.com.sgv.shared.Messages;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author ander
  */
 public class RegisterUser extends javax.swing.JDialog {
+    
+    private UserService userservice = null;
 
     /**
      * Creates new form RegisterUser
@@ -19,10 +25,84 @@ public class RegisterUser extends javax.swing.JDialog {
         initComponents();
     }
     
-    public void initScreen(){
-        this.setSize(600, 350);
+    public void initScreen() {
+        this.setSize(600, 400);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+    
+    private void closeScreen() {
+        this.dispose();
+    }
+    
+    private void insertNewUser() {
+        if (verifyFields()) {
+            userservice = new UserService();
+            
+            String name = txtName.getText();
+            String login = txtUser.getText();
+            String password = txtPassword.getText();
+            
+            userservice.saveUser(name, login, password);
+            
+            JOptionPane.showMessageDialog(null, Messages.save_success);
+            cleanFields();
+        }
+    }
+    
+    private boolean verifyFields() {
+        String message = "";
+        boolean isVerify = true;
+        
+        if (txtName.getText().trim().isEmpty()) {
+            message += Messages.name_required;
+        } else if (!verifyNameUser(txtName.getText())) {
+            message += "\n" + Messages.name_complete;
+        }
+        
+        if (txtUser.getText().trim().isEmpty()) {
+            message += "\n" + Messages.user_required;
+        }
+        
+        if (txtPassword.getText().trim().isEmpty()) {
+            message += "\n" + Messages.password_required;
+        } else if (txtPassword.getText().trim().length() < 4 || txtPassword.getText().trim().length() > 10) {
+            message += "\n" + Messages.password_format;
+        }
+        
+        if (!txtConfirmPassword.getText().equals(txtPassword.getText())) {
+            message += "\n" + Messages.password_equals;
+        }
+        
+        if (!message.isEmpty()){
+            isVerify = false;
+            JOptionPane.showMessageDialog(null, message);
+        }
+        
+        return isVerify;
+    }
+    
+    private boolean verifyNameUser(String fullName) {
+        String[] names = fullName.split(" ");
+        
+        for (int i = names.length -1; i >= 0; i--) {
+            if (!names[i].isEmpty()){
+                if (names[i].length() <= 1) {
+                    return false;
+                }                
+                break;
+            }
+        }
+        
+        return true;
+    }
+    
+    private void cleanFields() {
+        txtName.setText("");
+        txtUser.setText("");
+        txtPassword.setText("");
+        txtConfirmPassword.setText("");
+        txtName.grabFocus();
     }
 
     /**
@@ -43,6 +123,8 @@ public class RegisterUser extends javax.swing.JDialog {
         btnRegister = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         txtPassword = new javax.swing.JPasswordField();
+        txtConfirmPassword = new javax.swing.JPasswordField();
+        lblConfirmPassword = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sistema de Gerenciamento de Vendas");
@@ -50,7 +132,7 @@ public class RegisterUser extends javax.swing.JDialog {
         lblTitle.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblTitle.setText("Cadastro de Usuário");
 
-        lblName.setText("Nome..:");
+        lblName.setText("Nome Completo..:");
 
         lblUser.setText("Usuário..:");
 
@@ -58,9 +140,21 @@ public class RegisterUser extends javax.swing.JDialog {
 
         btnRegister.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Create.png"))); // NOI18N
         btnRegister.setText("Cadastrar");
+        btnRegister.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegisterActionPerformed(evt);
+            }
+        });
 
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Erase.png"))); // NOI18N
         btnCancel.setText("Cancelar");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        lblConfirmPassword.setText("Confirmar Senha..:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -73,20 +167,29 @@ public class RegisterUser extends javax.swing.JDialog {
                         .addComponent(lblTitle))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(26, 26, 26)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(lblName)
-                            .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(lblUser)
-                                    .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lblPassword)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(txtPassword, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(txtUser, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE))
                                     .addComponent(btnRegister, javax.swing.GroupLayout.Alignment.TRAILING))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(btnCancel)
-                                    .addComponent(lblPassword)
-                                    .addComponent(txtPassword))))))
-                .addContainerGap(38, Short.MAX_VALUE))
+                                    .addComponent(txtConfirmPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(lblConfirmPassword)
+                                            .addComponent(btnCancel))
+                                        .addGap(0, 162, Short.MAX_VALUE))))
+                            .addComponent(txtName)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblName)
+                                    .addComponent(lblUser))
+                                .addGap(0, 0, Short.MAX_VALUE)))))
+                .addGap(34, 34, 34))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -98,22 +201,36 @@ public class RegisterUser extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblUser)
-                    .addComponent(lblPassword))
+                .addComponent(lblUser)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblPassword)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblConfirmPassword)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtConfirmPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(52, 52, 52)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(56, 56, 56)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnRegister)
-                    .addComponent(btnCancel))
-                .addContainerGap(98, Short.MAX_VALUE))
+                    .addComponent(btnCancel)
+                    .addComponent(btnRegister))
+                .addContainerGap(94, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        closeScreen();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
+        insertNewUser();
+    }//GEN-LAST:event_btnRegisterActionPerformed
 
     /**
      * @param args the command line arguments
@@ -160,10 +277,12 @@ public class RegisterUser extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnRegister;
+    private javax.swing.JLabel lblConfirmPassword;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblPassword;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblUser;
+    private javax.swing.JPasswordField txtConfirmPassword;
     private javax.swing.JTextField txtName;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUser;
