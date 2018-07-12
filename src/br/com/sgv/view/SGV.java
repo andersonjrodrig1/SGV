@@ -13,8 +13,9 @@ import javax.swing.JOptionPane;
 public class SGV extends javax.swing.JFrame {
 
     private Login login = null;
-    private RegisterUser registerUser = null;
     private About about = null;
+    private ListUser listUser = null;
+    private RegisterUser registerUser = null;    
     
     public SGV() {
         initComponents();
@@ -28,6 +29,32 @@ public class SGV extends javax.swing.JFrame {
         //this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setVisible(true);
     }
+    
+    private void exitSystem() {
+        int response = JOptionPane.showConfirmDialog(null, Messages.logout_system);
+        
+        if (response == OptionEnum.YES.value) {
+            this.dispose();
+            
+            this.login = new Login(this, true);
+            this.login.initScreen();
+        }
+    }
+    
+    private void initRegisterUser() {
+        this.registerUser = new RegisterUser(this, true);
+        this.registerUser.initScreen();
+    }
+    
+    private void initAbout() {
+        this.about = new About(this, true);
+        this.about.initScreen();
+    }
+    
+    private void initListUser() {
+        this.listUser = new ListUser(this, true);
+        this.listUser.initScreen();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -39,12 +66,14 @@ public class SGV extends javax.swing.JFrame {
     private void initComponents() {
 
         jMenuBar1 = new javax.swing.JMenuBar();
-        nmRegisterUser = new javax.swing.JMenu();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
+        nmRegister = new javax.swing.JMenu();
+        nmRegisterProduct = new javax.swing.JMenuItem();
+        nmRegisterUser = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
+        nmListProduct = new javax.swing.JMenuItem();
+        nmListUser = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
-        mnAbout = new javax.swing.JMenu();
+        nmAbout = new javax.swing.JMenu();
         nmExit = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -52,34 +81,46 @@ public class SGV extends javax.swing.JFrame {
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setResizable(false);
 
-        nmRegisterUser.setText("Cadastro");
+        nmRegister.setText("Cadastro");
 
-        jMenuItem2.setText("Produto");
-        nmRegisterUser.add(jMenuItem2);
+        nmRegisterProduct.setText("Cadastrar Produto");
+        nmRegister.add(nmRegisterProduct);
 
-        jMenuItem3.setText("Usuário");
-        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+        nmRegisterUser.setText("Cadastrar Usuário");
+        nmRegisterUser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem3ActionPerformed(evt);
+                nmRegisterUserActionPerformed(evt);
             }
         });
-        nmRegisterUser.add(jMenuItem3);
+        nmRegister.add(nmRegisterUser);
 
-        jMenuBar1.add(nmRegisterUser);
+        jMenuBar1.add(nmRegister);
 
         jMenu2.setText("Ações");
+
+        nmListProduct.setText("Listar Produtos");
+        jMenu2.add(nmListProduct);
+
+        nmListUser.setText("Listar Usuários");
+        nmListUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nmListUserActionPerformed(evt);
+            }
+        });
+        jMenu2.add(nmListUser);
+
         jMenuBar1.add(jMenu2);
 
         jMenu3.setText("Relatório");
         jMenuBar1.add(jMenu3);
 
-        mnAbout.setText("Sobre");
-        mnAbout.addMouseListener(new java.awt.event.MouseAdapter() {
+        nmAbout.setText("Sobre");
+        nmAbout.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mnAboutMouseClicked(evt);
+                nmAboutMouseClicked(evt);
             }
         });
-        jMenuBar1.add(mnAbout);
+        jMenuBar1.add(nmAbout);
 
         nmExit.setText("Sair");
         nmExit.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -107,25 +148,20 @@ public class SGV extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void nmExitMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_nmExitMouseClicked
-        int response = JOptionPane.showConfirmDialog(null, Messages.logout_system);
-        
-        if (response == OptionEnum.YES.value) {
-            this.dispose();
-            
-            this.login = new Login(this, true);
-            this.login.initScreen();
-        }
+        this.exitSystem();
     }//GEN-LAST:event_nmExitMouseClicked
 
-    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-        this.registerUser = new RegisterUser(this, true);
-        this.registerUser.initScreen();
-    }//GEN-LAST:event_jMenuItem3ActionPerformed
+    private void nmRegisterUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nmRegisterUserActionPerformed
+        this.initRegisterUser();
+    }//GEN-LAST:event_nmRegisterUserActionPerformed
 
-    private void mnAboutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnAboutMouseClicked
-        this.about = new About(this, true);
-        this.about.initScreen();
-    }//GEN-LAST:event_mnAboutMouseClicked
+    private void nmAboutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_nmAboutMouseClicked
+        this.initAbout();
+    }//GEN-LAST:event_nmAboutMouseClicked
+
+    private void nmListUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nmListUserActionPerformed
+        this.initListUser();
+    }//GEN-LAST:event_nmListUserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -166,10 +202,12 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenu mnAbout;
+    private javax.swing.JMenu nmAbout;
     private javax.swing.JMenu nmExit;
-    private javax.swing.JMenu nmRegisterUser;
+    private javax.swing.JMenuItem nmListProduct;
+    private javax.swing.JMenuItem nmListUser;
+    private javax.swing.JMenu nmRegister;
+    private javax.swing.JMenuItem nmRegisterProduct;
+    private javax.swing.JMenuItem nmRegisterUser;
     // End of variables declaration//GEN-END:variables
 }

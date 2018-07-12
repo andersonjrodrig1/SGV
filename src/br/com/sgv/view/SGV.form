@@ -4,22 +4,22 @@
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="nmRegisterUser">
+        <Menu class="javax.swing.JMenu" name="nmRegister">
           <Properties>
             <Property name="text" type="java.lang.String" value="Cadastro"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem2">
+            <MenuItem class="javax.swing.JMenuItem" name="nmRegisterProduct">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Produto"/>
+                <Property name="text" type="java.lang.String" value="Cadastrar Produto"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem3">
+            <MenuItem class="javax.swing.JMenuItem" name="nmRegisterUser">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Usu&#xe1;rio"/>
+                <Property name="text" type="java.lang.String" value="Cadastrar Usu&#xe1;rio"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem3ActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nmRegisterUserActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -28,18 +28,33 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="A&#xe7;&#xf5;es"/>
           </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="nmListProduct">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Listar Produtos"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="nmListUser">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Listar Usu&#xe1;rios"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nmListUserActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="jMenu3">
           <Properties>
             <Property name="text" type="java.lang.String" value="Relat&#xf3;rio"/>
           </Properties>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="mnAbout">
+        <Menu class="javax.swing.JMenu" name="nmAbout">
           <Properties>
             <Property name="text" type="java.lang.String" value="Sobre"/>
           </Properties>
           <Events>
-            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mnAboutMouseClicked"/>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="nmAboutMouseClicked"/>
           </Events>
         </Menu>
         <Menu class="javax.swing.JMenu" name="nmExit">

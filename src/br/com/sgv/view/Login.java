@@ -1,5 +1,7 @@
 package br.com.sgv.view;
 
+import br.com.sgv.service.UserService;
+
 /**
  * @author Anderson Junior Rodrigues
  */
@@ -17,6 +19,18 @@ public class Login extends javax.swing.JDialog {
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
+    
+    private void loginSystem() {
+        this.dispose();
+        
+        sgv = new SGV();
+        sgv.initScreen();
+    }
+    
+    private void closeSystem() {
+        this.dispose();
+        System.exit(0);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -31,8 +45,8 @@ public class Login extends javax.swing.JDialog {
         jTextField1 = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jTextField2 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnEntry = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
 
@@ -46,21 +60,21 @@ public class Login extends javax.swing.JDialog {
 
         jTextField2.setName("txtPassword"); // NOI18N
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
-        jButton1.setText("Entrar");
-        jButton1.setName("btnEntry"); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnEntry.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
+        btnEntry.setText("Entrar");
+        btnEntry.setName("btnEntry"); // NOI18N
+        btnEntry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnEntryActionPerformed(evt);
             }
         });
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Close.png"))); // NOI18N
-        jButton2.setText("Cancelar");
-        jButton2.setName("btnCancel"); // NOI18N
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Close.png"))); // NOI18N
+        btnCancel.setText("Cancelar");
+        btnCancel.setName("btnCancel"); // NOI18N
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnCancelActionPerformed(evt);
             }
         });
 
@@ -84,9 +98,9 @@ public class Login extends javax.swing.JDialog {
                 .addGap(0, 83, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(149, 149, 149)
-                .addComponent(jButton1)
+                .addComponent(btnEntry)
                 .addGap(18, 18, 18)
-                .addComponent(jButton2)
+                .addComponent(btnCancel)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -115,27 +129,27 @@ public class Login extends javax.swing.JDialog {
                     .addComponent(jLabel2))
                 .addGap(36, 36, 36)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(btnEntry)
+                    .addComponent(btnCancel))
                 .addContainerGap(55, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        this.dispose();
+    private void btnEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntryActionPerformed
+        //loginSystem();
         
-        sgv = new SGV();
-        sgv.initScreen();
-    }//GEN-LAST:event_jButton1ActionPerformed
+        String usuario = "admin";
+        String senha = "admin";
+        
+        new UserService().findUser(usuario, senha);
+        
+    }//GEN-LAST:event_btnEntryActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-        this.dispose();
-        System.exit(0);
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        closeSystem();
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * @param args the command line arguments
@@ -180,8 +194,8 @@ public class Login extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnEntry;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

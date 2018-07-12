@@ -33,4 +33,7 @@ public class Messages {
     public static String password_required = "Senha obrigatória!";
     public static String password_format = "Senha deve ter entre 4 e 10 caracteres!";
     public static String password_equals = "Confirmação senha e senha informada devem ser iguais!";
+    
+    /* List User */
+    public static String title_list_user = "Lista de Usuários Cadastrados";
 }

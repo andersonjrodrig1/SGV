@@ -5,26 +5,65 @@
  */
 package br.com.sgv.service;
 
-import br.com.sgv.controller.UserController;
+import br.com.sgv.repository.UserRepository;
 import br.com.sgv.enumerator.UserTypeEnum;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
 import br.com.sgv.shared.Messages;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
  *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class UserService {
     
-    private UserController userController = null;
+    private UserRepository userRepository = null;
     private User user = null;
     private UserType usertype = null;
     
     public UserService() {
-        userController = new UserController();
+        userRepository = new UserRepository();
+    }
+    
+    public List<User> getAll() {
+        List<User> users = new ArrayList<>();
+        
+        try {
+            users = userRepository.getAll();
+
+            users.stream().forEach(u -> {
+                String password = this.decode(u.getUserPassword());
+                u.setUserPassword(password);
+            });
+        } catch(Exception ex){
+            JOptionPane.showMessageDialog(null, Messages.fail_save);
+            System.out.printf("Eror: ", ex);
+            throw ex;
+        }
+        
+        return users;
+    }
+    
+    public User findUser(String userName, String userPassword) {
+        String cryptoPassword = this.encode(userPassword);
+        
+        User userLogin = new User();
+        userLogin.setUserName(userName);
+        userLogin.setUserPassword(cryptoPassword);
+        
+        try {
+            userLogin = userRepository.findUser(userLogin);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, Messages.fail_save);
+            System.out.printf("Eror: ", ex);
+            throw ex;
+        }
+        
+        return userLogin;
     }
     
     public void saveUser(String name, String login, String password) {
@@ -42,7 +81,7 @@ public class UserService {
             
             this.user.setUserType(this.usertype);
             
-            userController.save(this.user);            
+            userRepository.save(this.user);            
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, Messages.fail_save);
             System.out.printf("Eror: ", ex);
@@ -55,5 +94,12 @@ public class UserService {
         String encode = Base64.getEncoder().encodeToString(encodeBytes);
         
         return encode;
+    }
+    
+    private String decode(String text) {
+        byte[] decodeBytes = Base64.getMimeDecoder().decode(text);
+        String decode = new String(decodeBytes);
+        
+        return decode;
     }
 }
