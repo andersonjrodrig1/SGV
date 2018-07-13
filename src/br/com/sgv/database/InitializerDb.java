@@ -7,42 +7,34 @@ import br.com.sgv.model.UserType;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 
 /**
  * @author Anderson Junior Rodrigues
  */
 public class InitializerDb {
     
-    private static SessionFactory sf;
-    private static Session ss;
-    private static Transaction ts;
+    private static Session session;
     
     public static void initializerDatabase() {
-        sf = HibernateDb.getSessionFactory();
-        ss = sf.openSession();
-        ts = ss.beginTransaction();
+        session = ContextFactory.initContextDb();
         
-        if (ss.createQuery("from " + AcessScreen.class.getName()).list().size() <= 0) {
+        if (session.createQuery("from AcessScreen").list().size() <= 0) {
             insertAcessScreen();
         }
         
-        if (ss.createQuery("from " + UserType.class.getName()).list().size() <= 0) {
+        if (session.createQuery("from UserType").list().size() <= 0) {
             insertUserType();
         }
         
-        if (ss.createQuery("from " + AcessPermission.class.getName()).list().size() <= 0) {
+        if (session.createQuery("from AcessPermission").list().size() <= 0) {
             insertAcessPermission();
         }
         
-        if (ss.createQuery("from " + User.class.getName()).list().size() <= 0) {
+        if (session.createQuery("from User").list().size() <= 0) {
             insertUser();
         }
         
-        ts.commit();
-        ss.flush();
-        ss.close();
+        ContextFactory.commit();
     }
     
     private static void insertUserType() {
@@ -50,7 +42,7 @@ public class InitializerDb {
         listUserType.add(new UserType("Administrador"));
         listUserType.add(new UserType("Vendedor"));
         
-        listUserType.stream().forEach(user -> ss.save(user));
+        listUserType.stream().forEach(user -> session.save(user));
     }
     
     private static void insertAcessScreen() {
@@ -65,7 +57,7 @@ public class InitializerDb {
         listAcessScreen.add(new AcessScreen("Gerar Relatório"));
         listAcessScreen.add(new AcessScreen("Consultar Relatório"));
         
-        listAcessScreen.stream().forEach(screen -> ss.save(screen));
+        listAcessScreen.stream().forEach(screen -> session.save(screen));
     }
     
     private static void insertUser() {
@@ -78,7 +70,7 @@ public class InitializerDb {
         userType.setId(1l);
         user.setUserType(userType);
         
-        ss.save(user);
+        session.save(user);
     }
     
     private static void insertAcessPermission() {
@@ -102,6 +94,6 @@ public class InitializerDb {
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(8, "Gerar Relatório"), true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(9, "Consultar Relatório"), false));
         
-        listAcess.stream().forEach(acess -> ss.save(acess));
+        listAcess.stream().forEach(acess -> session.save(acess));
     }
 }

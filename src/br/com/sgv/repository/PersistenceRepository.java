@@ -1,64 +1,41 @@
 package br.com.sgv.repository;
 
-import br.com.sgv.database.HibernateDb;
+import br.com.sgv.database.ContextFactory;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 
 /**
  * @author Anderson Junior Rodrigues
  */
 public class PersistenceRepository {
     
-    private static SessionFactory sf = null;
-    private static Session ss = null;
-    private static Transaction ts = null;
+    private static Session session = null;
     
-    public PersistenceRepository() {
-        sf = HibernateDb.getSessionFactory();
-        ss = sf.openSession();
-    }
-
     public <T> void save(T t) {        
-        ts = ss.beginTransaction();
+        session = ContextFactory.initContextDb();
+        session.save(t);
 
-        ss.save(t);
-
-        ts.commit();
-        ss.flush();
-        ss.close();
+        ContextFactory.commit();
     }
 
     public <T> T find(T t, long id) {
-        ts = ss.beginTransaction();
-
-        T response = (T) ss.get(t.getClass(), id);
-
-        ts.commit();
-        ss.flush();
-        ss.close();
+        session = ContextFactory.initContextDb();
+        T response = (T) session.get(t.getClass(), id);
+        ContextFactory.commit();
 
         return response;
     }
 
     public <T> void update(T t) {
-        ts = ss.beginTransaction();
+        session = ContextFactory.initContextDb();
+        session.saveOrUpdate(t);
 
-        ss.saveOrUpdate(t);
-
-        ts.commit();
-        ss.flush();
-        ss.close();
+        ContextFactory.commit();
     }
 
     public <T> boolean remove(T t) {
-        ts = ss.beginTransaction();
-
-        ss.delete(t);
-
-        ts.commit();
-        ss.flush();
-        ss.close();
+        session = ContextFactory.initContextDb();
+        session.delete(t);
+        ContextFactory.commit();
 
         return true;
     }

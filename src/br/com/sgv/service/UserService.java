@@ -40,7 +40,7 @@ public class UserService {
                 u.setUserPassword(password);
             });
         } catch(Exception ex){
-            JOptionPane.showMessageDialog(null, Messages.fail_save);
+            JOptionPane.showMessageDialog(null, Messages.fail_find);
             System.out.printf("Eror: ", ex);
             throw ex;
         }
@@ -58,7 +58,7 @@ public class UserService {
         try {
             userLogin = userRepository.findUser(userLogin);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, Messages.fail_save);
+            JOptionPane.showMessageDialog(null, Messages.fail_find);
             System.out.printf("Eror: ", ex);
             throw ex;
         }

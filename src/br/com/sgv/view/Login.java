@@ -1,6 +1,9 @@
 package br.com.sgv.view;
 
-import br.com.sgv.service.UserService;
+import br.com.sgv.model.AcessPermission;
+import br.com.sgv.model.User;
+import br.com.sgv.model.UserType;
+import java.util.List;
 
 /**
  * @author Anderson Junior Rodrigues
@@ -9,6 +12,10 @@ import br.com.sgv.service.UserService;
 public class Login extends javax.swing.JDialog {
 
     private static SGV sgv = null;
+    
+    private User user = null;
+    private UserType userType = null;
+    private List<AcessPermission> listAcessPermission = null;
     
     public Login(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -138,13 +145,7 @@ public class Login extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntryActionPerformed
-        //loginSystem();
-        
-        String usuario = "admin";
-        String senha = "admin";
-        
-        new UserService().findUser(usuario, senha);
-        
+        loginSystem();        
     }//GEN-LAST:event_btnEntryActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed

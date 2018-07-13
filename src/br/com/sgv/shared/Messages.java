@@ -8,6 +8,7 @@ public class Messages {
     /* General */
     public static String title_presentation = "Sitema de Gerenciamento de Vendas";
     public static String fail_save = "Falha ao salvar os dados";
+    public static String fail_find = "Falha ao buscar os dados";
     public static String save_success = "Salvo com sucesso!";
     
     /* Login */
