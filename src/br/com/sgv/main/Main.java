@@ -41,7 +41,7 @@ public class Main {
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
             
-            thread.sleep(3000);
+            thread.sleep(2000);
             
             dialog.dispose();
         } catch(Exception ie) {

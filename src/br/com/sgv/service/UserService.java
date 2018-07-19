@@ -9,11 +9,10 @@ import br.com.sgv.repository.UserRepository;
 import br.com.sgv.enumerator.UserTypeEnum;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
+import br.com.sgv.shared.ArchiveBase64;
 import br.com.sgv.shared.Messages;
-import java.util.ArrayList;
-import java.util.Base64;
+import br.com.sgv.shared.ResponseModel;
 import java.util.List;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -29,47 +28,59 @@ public class UserService {
         userRepository = new UserRepository();
     }
     
-    public List<User> getAll() {
-        List<User> users = new ArrayList<>();
+    public ResponseModel<List<User>> getAll() {
+        ResponseModel<List<User>> response = new ResponseModel<>();
+        List<User> users = null;
         
         try {
             users = userRepository.getAll();
 
             users.stream().forEach(u -> {
-                String password = this.decode(u.getUserPassword());
+                String password = ArchiveBase64.decode(u.getUserPassword());
                 u.setUserPassword(password);
             });
+            
+            response.setModel(users);
         } catch(Exception ex){
-            JOptionPane.showMessageDialog(null, Messages.fail_find);
             System.out.printf("Eror: ", ex);
-            throw ex;
+            response.setModel(null);
+            response.setError(ex.getMessage());
+            response.setError(ex.getMessage());
+            response.setMensage(Messages.fail_find);
         }
         
-        return users;
+        return response;
     }
     
-    public User findUser(String userName, String userPassword) {
-        String cryptoPassword = this.encode(userPassword);
+    public ResponseModel<User> findUser(String userName, String userPassword) {
+        ResponseModel<User> response = new ResponseModel<>();
+        this.user = new User();
         
-        User userLogin = new User();
-        userLogin.setUserName(userName);
-        userLogin.setUserPassword(cryptoPassword);
+        String cryptoPassword = ArchiveBase64.encode(userPassword);        
+        
+        this.user.setUserName(userName);
+        this.user.setUserPassword(cryptoPassword);
         
         try {
-            userLogin = userRepository.findUser(userLogin);
+            this.user = userRepository.findUser(this.user);
+            response.setModel(this.user);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, Messages.fail_find);
-            System.out.printf("Eror: ", ex);
-            throw ex;
+            System.out.printf("Error: ", ex);
+            response.setException(ex);
+            response.setError(ex.getMessage());
+            response.setError(Messages.fail_find);
+            response.setModel(null);
         }
         
-        return userLogin;
+        return response;
     }
     
-    public void saveUser(String name, String login, String password) {
+    public ResponseModel<Boolean> saveUser(String name, String login, String password) {
+        ResponseModel<Boolean> response = null;
+        
         try {
             long type = UserTypeEnum.SALESMAN.value;
-            String passwordEncode = this.encode(password);
+            String passwordEncode = ArchiveBase64.encode(password);
             
             this.user = new User();
             this.user.setUserName(name);
@@ -81,25 +92,16 @@ public class UserService {
             
             this.user.setUserType(this.usertype);
             
-            userRepository.save(this.user);            
+            userRepository.save(this.user);
+            response.setModel(true);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, Messages.fail_save);
-            System.out.printf("Eror: ", ex);
-            throw ex;
+            System.out.printf("Error: ", ex);
+            response.setModel(false);
+            response.setError(ex.getMessage());
+            response.setMensage(Messages.fail_save);
+            response.setException(ex);
         }
-    }
-    
-    private String encode(String text) {
-        byte[] encodeBytes = text.getBytes();
-        String encode = Base64.getEncoder().encodeToString(encodeBytes);
         
-        return encode;
-    }
-    
-    private String decode(String text) {
-        byte[] decodeBytes = Base64.getMimeDecoder().decode(text);
-        String decode = new String(decodeBytes);
-        
-        return decode;
+        return response;
     }
 }

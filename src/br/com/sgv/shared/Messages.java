@@ -10,10 +10,12 @@ public class Messages {
     public static String fail_save = "Falha ao salvar os dados";
     public static String fail_find = "Falha ao buscar os dados";
     public static String save_success = "Salvo com sucesso!";
+    public static String data_inconsistent = "Dados inconsistentes, \nnão foi possível fazer o login.";
     
     /* Login */
     public static String user = "Usuário..:";
     public static String password = "Senha..:";
+    public static String user_not_found = "Usuário e/ou senha inválida!";
     
     /* Modal logout*/
     public static String login = "Entrar no sistema";
@@ -23,7 +25,7 @@ public class Messages {
     public static String title_sobre = "Sistema de Gerenciamento de Vendas";
     public static String version = "versão 1.0.0";
     public static String text_dev = "Desenvolvido em Java";
-    public static String text_db = "Bando de Dados: MySQL";
+    public static String text_db = "Banco de Dados: MySQL";
     public static String text_copyright = "Copyright © 2018 Du Rei LTDA";
     public static String text_right = "Todos os Direitos Reservados.";
     
@@ -37,4 +39,11 @@ public class Messages {
     
     /* List User */
     public static String title_list_user = "Lista de Usuários Cadastrados";
+    
+    /* Register Product */
+    public static String key_register_product = "Código de Produto obrigatório.";
+    public static String name_register_product = "Nome do Produto obrigatório.";
+    public static String value_register_product = "Valor do Produto obrigatório.";
+    public static String measure_register_product = "Volume do Produto obrigatório.";
+    public static String verif_value_field = "Valor informado inválido.\nDigite apenas números.";
 }

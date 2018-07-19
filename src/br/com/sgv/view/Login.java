@@ -1,9 +1,11 @@
 package br.com.sgv.view;
 
-import br.com.sgv.model.AcessPermission;
 import br.com.sgv.model.User;
-import br.com.sgv.model.UserType;
-import java.util.List;
+import br.com.sgv.service.UserService;
+import br.com.sgv.shared.Messages;
+import br.com.sgv.shared.ResponseModel;
+import com.sun.glass.events.KeyEvent;
+import javax.swing.JOptionPane;
 
 /**
  * @author Anderson Junior Rodrigues
@@ -12,10 +14,8 @@ import java.util.List;
 public class Login extends javax.swing.JDialog {
 
     private static SGV sgv = null;
-    
+    private ResponseModel<User> userModel = null;
     private User user = null;
-    private UserType userType = null;
-    private List<AcessPermission> listAcessPermission = null;
     
     public Login(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -28,13 +28,50 @@ public class Login extends javax.swing.JDialog {
     }
     
     private void loginSystem() {
-        this.dispose();
+        if (verifyFields()) {
+            String username = txtUser.getText().trim();
+            String password = txtPassword.getText().trim();
+            
+            this.userModel = new UserService().findUser(username, password);
+            this.user = this.userModel.getModel();
+            
+            if (this.userModel.getModel() != null) {
+                this.dispose();
+                sgv = new SGV(this.user);
+                sgv.initScreen();
+            } else if (!this.userModel.getError().isEmpty()) {
+                JOptionPane.showMessageDialog(null, this.userModel.getModel());
+            } else {
+                JOptionPane.showMessageDialog(null, Messages.user_not_found);
+            }
+        }
+    }
+    
+    private boolean verifyFields() {
+        String messages = "";
+        boolean isValid = true;
         
-        sgv = new SGV();
-        sgv.initScreen();
+        if (txtUser.getText().trim().isEmpty()) {
+            messages += Messages.user_required + "\n";
+        }
+        
+        if (txtPassword.getText().trim().isEmpty()) {
+            messages += Messages.password_required + "\n";
+        } else if (txtPassword.getText().trim().length() < 4 || txtPassword.getText().trim().length() > 10) {
+            messages += Messages.password_format + "\n";
+        }
+        
+        if (!messages.isEmpty()){
+            JOptionPane.showMessageDialog(null, messages);
+            isValid = false;
+        }
+        
+        return isValid;
     }
     
     private void closeSystem() {
+        this.user = null;
+        this.userModel = null;
         this.dispose();
         System.exit(0);
     }
@@ -49,23 +86,21 @@ public class Login extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        txtUser = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
         btnEntry = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        txtPassword = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
         jLabel1.setText("Usuário..:");
 
-        jTextField1.setName("txtUser"); // NOI18N
+        txtUser.setName("txtUser"); // NOI18N
 
         jLabel2.setText("Senha..:");
-
-        jTextField2.setName("txtPassword"); // NOI18N
 
         btnEntry.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
         btnEntry.setText("Entrar");
@@ -73,6 +108,11 @@ public class Login extends javax.swing.JDialog {
         btnEntry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEntryActionPerformed(evt);
+            }
+        });
+        btnEntry.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnEntryKeyPressed(evt);
             }
         });
 
@@ -100,15 +140,15 @@ public class Login extends javax.swing.JDialog {
                     .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jTextField1)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 83, Short.MAX_VALUE))
+                    .addComponent(txtUser, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+                    .addComponent(txtPassword))
+                .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(149, 149, 149)
                 .addComponent(btnEntry)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(150, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -128,12 +168,12 @@ public class Login extends javax.swing.JDialog {
                 .addComponent(jLabel4)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(jLabel2)
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(36, 36, 36)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnEntry)
@@ -151,6 +191,12 @@ public class Login extends javax.swing.JDialog {
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         closeSystem();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnEntryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnEntryKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            loginSystem();
+        }
+    }//GEN-LAST:event_btnEntryKeyPressed
 
     /**
      * @param args the command line arguments
@@ -201,7 +247,7 @@ public class Login extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JPasswordField txtPassword;
+    private javax.swing.JTextField txtUser;
     // End of variables declaration//GEN-END:variables
 }

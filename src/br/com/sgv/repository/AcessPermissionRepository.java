@@ -13,13 +13,13 @@ public class AcessPermissionRepository extends PersistenceRepository{
     
     private Session session = null;
     
-    public List<AcessPermission> findByUserTypeId(int userTypeId) {
-        String hql = "from AcessPermission where user_type_id = :usertype";
+    public List<AcessPermission> findByUserTypeId(long userTypeId) {
+        String hql = "from AcessPermission where user_type_id = :usertypeid";
         
         session = ContextFactory.initContextDb();
-        Query query = session.createQuery(hql).setParameter("usertype", userTypeId);        
-        ContextFactory.commit();
+        Query query = session.createQuery(hql).setParameter("usertypeid", userTypeId);        
         List<AcessPermission> listAcessPermission = query.list();
+        ContextFactory.commit();
         
         return listAcessPermission;
     }

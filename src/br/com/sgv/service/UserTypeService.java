@@ -8,7 +8,7 @@ package br.com.sgv.service;
 import br.com.sgv.model.UserType;
 import br.com.sgv.repository.UserTypeRepository;
 import br.com.sgv.shared.Messages;
-import javax.swing.JOptionPane;
+import br.com.sgv.shared.ResponseModel;
 
 /**
  *
@@ -17,21 +17,27 @@ import javax.swing.JOptionPane;
 public class UserTypeService {
     
     private UserTypeRepository userTypeRepository = null;
+    private ResponseModel<UserType> response = null;
     private UserType userType = null;
     
     public UserTypeService() {
         userTypeRepository = new UserTypeRepository();
     }
     
-    public UserType findUserTypeById(int userTypeId) {
+    public ResponseModel<UserType> findUserTypeById(long userTypeId) {
+        this.response = new ResponseModel<>();
+        
         try {
-            userType = userTypeRepository.find(new UserType(), userTypeId);
+            this.userType = userTypeRepository.find(new UserType(), userTypeId);
+            this.response.setModel(userType);
         } catch(Exception ex){
-            JOptionPane.showMessageDialog(null, Messages.fail_find);
             System.out.printf("Eror: ", ex);
-            throw ex;
+            this.response.setError(ex.getMessage());
+            this.response.setMensage(Messages.fail_find);
+            this.response.setException(ex);
+            this.response.setModel(null);
         }
         
-        return userType;
+        return response;
     }
 }

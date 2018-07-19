@@ -1,23 +1,41 @@
 package br.com.sgv.view;
 
 import br.com.sgv.enumerator.OptionEnum;
+import br.com.sgv.model.AcessPermission;
+import br.com.sgv.model.User;
+import br.com.sgv.model.UserType;
+import br.com.sgv.service.AcessPermissionService;
+import br.com.sgv.service.UserTypeService;
 import br.com.sgv.shared.Messages;
+import br.com.sgv.shared.ResponseModel;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class SGV extends javax.swing.JFrame {
 
     private Login login = null;
     private About about = null;
     private ListUser listUser = null;
-    private RegisterUser registerUser = null;    
+    private RegisterUser registerUser = null;
+    private RegisterProduct registerProduct = null;
     
-    public SGV() {
+    private User user = null;
+    private UserType userType = null;
+    private List<AcessPermission> listAcessPermission = null;
+    private ResponseModel<List<AcessPermission>> responseAcessPermission = null;
+    private ResponseModel<UserType> responseUserType = null;
+    
+    public SGV() { }
+    
+    public SGV(User user) {
+        this.user = user;
+        this.getAcessUserLogin();
+        
         initComponents();
     }
     
@@ -30,10 +48,28 @@ public class SGV extends javax.swing.JFrame {
         this.setVisible(true);
     }
     
+    private void getAcessUserLogin() {
+        if (this.user.getUserType() != null && this.user.getUserType().getId() > 0) {
+            this.responseUserType = new UserTypeService().findUserTypeById(this.user.getUserType().getId());
+            this.userType = this.responseUserType.getModel();
+            this.responseAcessPermission = new AcessPermissionService().findListAcessPermissonByUserType(this.userType.getId());
+            this.listAcessPermission = this.responseAcessPermission.getModel();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.data_inconsistent);
+            return;
+        }        
+    }
+    
     private void exitSystem() {
         int response = JOptionPane.showConfirmDialog(null, Messages.logout_system);
         
         if (response == OptionEnum.YES.value) {
+            this.about = null;
+            this.listUser = null;
+            this.registerUser = null;
+            this.user = null;
+            this.userType = null;
+            this.listAcessPermission = null;
             this.dispose();
             
             this.login = new Login(this, true);
@@ -46,6 +82,11 @@ public class SGV extends javax.swing.JFrame {
         this.registerUser.initScreen();
     }
     
+    private void initRegisterProduct() {
+        this.registerProduct = new RegisterProduct(this, true);
+        this.registerProduct.initScreen();
+    }
+    
     private void initAbout() {
         this.about = new About(this, true);
         this.about.initScreen();
@@ -55,7 +96,6 @@ public class SGV extends javax.swing.JFrame {
         this.listUser = new ListUser(this, true);
         this.listUser.initScreen();
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -65,16 +105,25 @@ public class SGV extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JSeparator();
         jMenuBar1 = new javax.swing.JMenuBar();
         nmRegister = new javax.swing.JMenu();
         nmRegisterProduct = new javax.swing.JMenuItem();
+        mnRegisterMeasure = new javax.swing.JMenuItem();
         nmRegisterUser = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         nmListProduct = new javax.swing.JMenuItem();
         nmListUser = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        jMenuItem2 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
         nmAbout = new javax.swing.JMenu();
         nmExit = new javax.swing.JMenu();
+
+        jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setBackground(new java.awt.Color(153, 153, 255));
@@ -84,7 +133,15 @@ public class SGV extends javax.swing.JFrame {
         nmRegister.setText("Cadastro");
 
         nmRegisterProduct.setText("Cadastrar Produto");
+        nmRegisterProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nmRegisterProductActionPerformed(evt);
+            }
+        });
         nmRegister.add(nmRegisterProduct);
+
+        mnRegisterMeasure.setText("Cadastrar Volume");
+        nmRegister.add(mnRegisterMeasure);
 
         nmRegisterUser.setText("Cadastrar Usuário");
         nmRegisterUser.addActionListener(new java.awt.event.ActionListener() {
@@ -108,10 +165,21 @@ public class SGV extends javax.swing.JFrame {
             }
         });
         jMenu2.add(nmListUser);
+        jMenu2.add(jSeparator2);
+
+        jMenuItem2.setText("Registrar Saída");
+        jMenu2.add(jMenuItem2);
 
         jMenuBar1.add(jMenu2);
 
         jMenu3.setText("Relatório");
+
+        jMenuItem3.setText("Gerar Relatório");
+        jMenu3.add(jMenuItem3);
+
+        jMenuItem4.setText("Consultar Relatórios");
+        jMenu3.add(jMenuItem4);
+
         jMenuBar1.add(jMenu3);
 
         nmAbout.setText("Sobre");
@@ -140,7 +208,7 @@ public class SGV extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 499, Short.MAX_VALUE)
+            .addGap(0, 501, Short.MAX_VALUE)
         );
 
         pack();
@@ -162,6 +230,10 @@ public class SGV extends javax.swing.JFrame {
     private void nmListUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nmListUserActionPerformed
         this.initListUser();
     }//GEN-LAST:event_nmListUserActionPerformed
+
+    private void nmRegisterProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nmRegisterProductActionPerformed
+        this.initRegisterProduct();
+    }//GEN-LAST:event_nmRegisterProductActionPerformed
 
     /**
      * @param args the command line arguments
@@ -202,6 +274,13 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JMenuItem mnRegisterMeasure;
     private javax.swing.JMenu nmAbout;
     private javax.swing.JMenu nmExit;
     private javax.swing.JMenuItem nmListProduct;

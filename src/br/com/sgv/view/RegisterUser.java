@@ -7,6 +7,7 @@ package br.com.sgv.view;
 
 import br.com.sgv.service.UserService;
 import br.com.sgv.shared.Messages;
+import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
 /**
@@ -55,23 +56,23 @@ public class RegisterUser extends javax.swing.JDialog {
         boolean isVerify = true;
         
         if (txtName.getText().trim().isEmpty()) {
-            message += Messages.name_required;
+            message += Messages.name_required + "\n";
         } else if (!verifyNameUser(txtName.getText())) {
-            message += "\n" + Messages.name_complete;
+            message += Messages.name_complete + "\n";
         }
         
         if (txtUser.getText().trim().isEmpty()) {
-            message += "\n" + Messages.user_required;
+            message += Messages.user_required + "\n";
         }
         
         if (txtPassword.getText().trim().isEmpty()) {
-            message += "\n" + Messages.password_required;
+            message += Messages.password_required + "\n";
         } else if (txtPassword.getText().trim().length() < 4 || txtPassword.getText().trim().length() > 10) {
-            message += "\n" + Messages.password_format;
+            message += Messages.password_format + "\n";
         }
         
         if (!txtConfirmPassword.getText().equals(txtPassword.getText())) {
-            message += "\n" + Messages.password_equals;
+            message += Messages.password_equals + "\n";
         }
         
         if (!message.isEmpty()){
@@ -145,12 +146,22 @@ public class RegisterUser extends javax.swing.JDialog {
                 btnRegisterActionPerformed(evt);
             }
         });
+        btnRegister.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnRegisterKeyPressed(evt);
+            }
+        });
 
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Erase.png"))); // NOI18N
         btnCancel.setText("Cancelar");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCancelActionPerformed(evt);
+            }
+        });
+        btnCancel.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnCancelKeyPressed(evt);
             }
         });
 
@@ -231,6 +242,18 @@ public class RegisterUser extends javax.swing.JDialog {
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
         insertNewUser();
     }//GEN-LAST:event_btnRegisterActionPerformed
+
+    private void btnRegisterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnRegisterKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            insertNewUser();
+        }
+    }//GEN-LAST:event_btnRegisterKeyPressed
+
+    private void btnCancelKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnCancelKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            closeScreen();
+        }
+    }//GEN-LAST:event_btnCancelKeyPressed
 
     /**
      * @param args the command line arguments

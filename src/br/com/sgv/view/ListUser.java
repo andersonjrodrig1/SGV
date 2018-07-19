@@ -8,6 +8,7 @@ package br.com.sgv.view;
 import br.com.sgv.model.User;
 import br.com.sgv.service.UserService;
 import br.com.sgv.shared.Messages;
+import br.com.sgv.shared.ResponseModel;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
@@ -18,6 +19,8 @@ import javax.swing.table.DefaultTableModel;
 public class ListUser extends javax.swing.JDialog {
 
     private static UserService userService = null;
+    private ResponseModel<List<User>> response = null;
+    private List<User> users = null;
     
     public ListUser(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -38,13 +41,20 @@ public class ListUser extends javax.swing.JDialog {
         DefaultTableModel table = (DefaultTableModel) tblListUser.getModel();
         userService = new UserService();
         
-        List<User> users = userService.getAll();
+        this.response = userService.getAll();
+        this.users = response.getModel();
         
         if (users != null && users.size() > 0) {
             users.stream().forEach(user -> {
                 table.addRow(new Object[] { user.getId(), user.getUserName(), user.getUserLogin() });
             });
         }
+    }
+    
+    private void closeSystem() {
+        userService = null;
+        this.response = null;
+        this.users = null;
     }
 
     /**

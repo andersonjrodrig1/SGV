@@ -19,5 +19,8 @@
     <mapping class="br.com.sgv.model.AcessScreen"/>
     <mapping class="br.com.sgv.model.AcessPermission"/>
     <mapping class="br.com.sgv.model.User" />
+    <mapping class="br.com.sgv.model.MeasureType" />
+    <mapping class="br.com.sgv.model.CalcType" />
+    <mapping class="br.com.sgv.model.Product" />
   </session-factory>
 </hibernate-configuration>

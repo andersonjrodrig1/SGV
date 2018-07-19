@@ -2,6 +2,8 @@ package br.com.sgv.database;
 
 import br.com.sgv.model.AcessPermission;
 import br.com.sgv.model.AcessScreen;
+import br.com.sgv.model.CalcType;
+import br.com.sgv.model.MeasureType;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
 import java.util.ArrayList;
@@ -13,7 +15,9 @@ import org.hibernate.Session;
  */
 public class InitializerDb {
     
-    private static Session session;
+    private static Session session;    
+    private static final CalcType calcUnity = new CalcType("Unidade");
+    private static final CalcType calcWeight = new CalcType("Peso");
     
     public static void initializerDatabase() {
         session = ContextFactory.initContextDb();
@@ -32,6 +36,14 @@ public class InitializerDb {
         
         if (session.createQuery("from User").list().size() <= 0) {
             insertUser();
+        }
+        
+        if (session.createQuery("from CalcType").list().size() <= 0) {
+            insertCalcType();
+        }
+        
+        if (session.createQuery("from MeasureType").list().size() <= 0) {
+            insertMeasureType();
         }
         
         ContextFactory.commit();
@@ -95,5 +107,25 @@ public class InitializerDb {
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(9, "Consultar Relatório"), false));
         
         listAcess.stream().forEach(acess -> session.save(acess));
+    }
+    
+    private static void insertCalcType() {
+        List<CalcType> listCalcType = new ArrayList<>();
+        listCalcType.add(calcUnity);
+        listCalcType.add(calcWeight);
+        
+        listCalcType.stream().forEach(calc -> session.save(calc));
+    }
+    
+    private static void insertMeasureType() {
+        List<MeasureType> listMeasureType = new ArrayList<>();
+        listMeasureType.add(new MeasureType("Unidade(s)", null, calcUnity));
+        listMeasureType.add(new MeasureType("Pedaço(s)", null, calcUnity));
+        listMeasureType.add(new MeasureType("Litro(s)", "L", calcWeight));
+        listMeasureType.add(new MeasureType("Quilograma(s)", "kg", calcWeight));
+        listMeasureType.add(new MeasureType("Miligrama(s)", "ml", calcWeight));
+        listMeasureType.add(new MeasureType("Grama(s)", "g", calcWeight));        
+        
+        listMeasureType.stream().forEach(measure -> session.save(measure));
     }
 }
