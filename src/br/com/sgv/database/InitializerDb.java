@@ -15,9 +15,21 @@ import org.hibernate.Session;
  */
 public class InitializerDb {
     
-    private static Session session;    
+    private static Session session;
+    
     private static final CalcType calcUnity = new CalcType("Unidade");
     private static final CalcType calcWeight = new CalcType("Peso");
+    
+    private static final AcessScreen registerProduct = new AcessScreen(1, "Cadastro Produto");
+    private static final AcessScreen registerMeasure = new AcessScreen(2, "Cadastro Volume");
+    private static final AcessScreen registerUser = new AcessScreen(3, "Cadastro Usuário");
+    private static final AcessScreen viewProduct = new AcessScreen(4, "Visualizar Produtos");
+    private static final AcessScreen viewMeasure = new AcessScreen(5, "Visualizar Volumes");
+    private static final AcessScreen viewUser = new AcessScreen(6, "Visualizar Usuários");
+    private static final AcessScreen registerExit = new AcessScreen(7, "Registrar Saída");
+    private static final AcessScreen registerReport = new AcessScreen(8, "Gerar Relatório");
+    private static final AcessScreen viewReport = new AcessScreen(9, "Consultar Relatório");
+    private static final AcessScreen viewAbout = new AcessScreen(10, "Visualizar Sobre");
     
     public static void initializerDatabase() {
         session = ContextFactory.initContextDb();
@@ -59,15 +71,16 @@ public class InitializerDb {
     
     private static void insertAcessScreen() {
         List<AcessScreen> listAcessScreen = new ArrayList<>();
-        listAcessScreen.add(new AcessScreen("Cadastro Usuário"));
-        listAcessScreen.add(new AcessScreen("Consulta Usuário"));
-        listAcessScreen.add(new AcessScreen("Excluir Usuário"));
-        listAcessScreen.add(new AcessScreen("Cadastro Produto"));
-        listAcessScreen.add(new AcessScreen("Consulta Produto"));
-        listAcessScreen.add(new AcessScreen("Atualizar Produto"));
-        listAcessScreen.add(new AcessScreen("Excluir Produto"));
-        listAcessScreen.add(new AcessScreen("Gerar Relatório"));
-        listAcessScreen.add(new AcessScreen("Consultar Relatório"));
+        listAcessScreen.add(registerProduct);
+        listAcessScreen.add(registerMeasure);
+        listAcessScreen.add(registerUser);
+        listAcessScreen.add(viewProduct);
+        listAcessScreen.add(viewMeasure);
+        listAcessScreen.add(viewUser);
+        listAcessScreen.add(registerExit);
+        listAcessScreen.add(registerReport);
+        listAcessScreen.add(viewReport);
+        listAcessScreen.add(viewAbout);
         
         listAcessScreen.stream().forEach(screen -> session.save(screen));
     }
@@ -87,24 +100,26 @@ public class InitializerDb {
     
     private static void insertAcessPermission() {
         List<AcessPermission> listAcess = new ArrayList<>();
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(1, "Cadastro Usuário"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(2, "Consulta Usuário"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(3, "Excluir Usuário"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(4, "Cadastro Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(5, "Consulta Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(6, "Atualizar Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(7, "Excluir Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(8, "Gerar Relatório"), true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), new AcessScreen(9, "Consultar Relatório"), true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(1, "Cadastro Usuário"), false));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(2, "Consulta Usuário"), true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(3, "Excluir Usuário"), false));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(4, "Cadastro Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(5, "Consulta Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(6, "Atualizar Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(7, "Excluir Produto"), true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(8, "Gerar Relatório"), true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), new AcessScreen(9, "Consultar Relatório"), false));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerProduct, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerMeasure, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerUser, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewProduct, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewMeasure, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewUser, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerExit, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerReport, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewReport, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewAbout, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerProduct, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerMeasure, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerUser, false));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewProduct, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewMeasure, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewUser, false));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerExit, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerReport, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewReport, false));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewAbout, true));
         
         listAcess.stream().forEach(acess -> session.save(acess));
     }

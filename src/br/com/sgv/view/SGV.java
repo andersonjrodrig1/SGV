@@ -1,5 +1,6 @@
 package br.com.sgv.view;
 
+import br.com.sgv.enumerator.AcessScreenEnum;
 import br.com.sgv.enumerator.OptionEnum;
 import br.com.sgv.model.AcessPermission;
 import br.com.sgv.model.User;
@@ -18,14 +19,18 @@ import javax.swing.JOptionPane;
  */
 public class SGV extends javax.swing.JFrame {
 
+    private int screenType;
+    
     private Login login = null;
     private About about = null;
     private ListUser listUser = null;
     private RegisterUser registerUser = null;
     private RegisterProduct registerProduct = null;
+    private RegisterMeasure registerMeasure = null;
     
     private User user = null;
     private UserType userType = null;
+    private AcessPermission acessPermission = null;
     private List<AcessPermission> listAcessPermission = null;
     private ResponseModel<List<AcessPermission>> responseAcessPermission = null;
     private ResponseModel<UserType> responseUserType = null;
@@ -70,6 +75,8 @@ public class SGV extends javax.swing.JFrame {
             this.user = null;
             this.userType = null;
             this.listAcessPermission = null;
+            this.registerMeasure = null;
+            this.registerProduct = null;
             this.dispose();
             
             this.login = new Login(this, true);
@@ -78,24 +85,75 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void initRegisterUser() {
-        this.registerUser = new RegisterUser(this, true);
-        this.registerUser.initScreen();
+        this.screenType = AcessScreenEnum.REGISTER_USER.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.registerUser = new RegisterUser(this, true);
+            this.registerUser.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void initRegisterProduct() {
-        this.registerProduct = new RegisterProduct(this, true);
-        this.registerProduct.initScreen();
+        this.screenType = AcessScreenEnum.REGISTER_PRODUCT.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.registerProduct = new RegisterProduct(this, true);
+            this.registerProduct.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void initAbout() {
-        this.about = new About(this, true);
-        this.about.initScreen();
+        this.screenType = AcessScreenEnum.VIEW_ABOUT.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.about = new About(this, true);
+            this.about.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void initListUser() {
-        this.listUser = new ListUser(this, true);
-        this.listUser.initScreen();
+        this.screenType = AcessScreenEnum.VIEW_USER.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.listUser = new ListUser(this, true);
+            this.listUser.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
     }
+    
+    private void initRegisterMeasure() {
+        this.screenType = AcessScreenEnum.REGISTER_MEASURE.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.registerMeasure = new RegisterMeasure(this, true);
+            this.registerMeasure.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private AcessPermission verifyPermissionAcess(int screenType) {
+        AcessPermission acessPermission = this.listAcessPermission
+                .stream()
+                .filter(x -> x.getAcessScreen().getId() == screenType)
+                .findAny()
+                .orElse(null);        
+        
+        return acessPermission;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -114,6 +172,7 @@ public class SGV extends javax.swing.JFrame {
         nmRegisterUser = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         nmListProduct = new javax.swing.JMenuItem();
+        mnMeasure = new javax.swing.JMenuItem();
         nmListUser = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         jMenuItem2 = new javax.swing.JMenuItem();
@@ -140,7 +199,12 @@ public class SGV extends javax.swing.JFrame {
         });
         nmRegister.add(nmRegisterProduct);
 
-        mnRegisterMeasure.setText("Cadastrar Volume");
+        mnRegisterMeasure.setText("Cadastrar Unidade de Medida");
+        mnRegisterMeasure.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnRegisterMeasureActionPerformed(evt);
+            }
+        });
         nmRegister.add(mnRegisterMeasure);
 
         nmRegisterUser.setText("Cadastrar Usuário");
@@ -157,6 +221,9 @@ public class SGV extends javax.swing.JFrame {
 
         nmListProduct.setText("Listar Produtos");
         jMenu2.add(nmListProduct);
+
+        mnMeasure.setText("Listar Unidades de Medida");
+        jMenu2.add(mnMeasure);
 
         nmListUser.setText("Listar Usuários");
         nmListUser.addActionListener(new java.awt.event.ActionListener() {
@@ -235,6 +302,10 @@ public class SGV extends javax.swing.JFrame {
         this.initRegisterProduct();
     }//GEN-LAST:event_nmRegisterProductActionPerformed
 
+    private void mnRegisterMeasureActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnRegisterMeasureActionPerformed
+        this.initRegisterMeasure();
+    }//GEN-LAST:event_mnRegisterMeasureActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -280,6 +351,7 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JMenuItem mnMeasure;
     private javax.swing.JMenuItem mnRegisterMeasure;
     private javax.swing.JMenu nmAbout;
     private javax.swing.JMenu nmExit;

@@ -5,15 +5,16 @@ package br.com.sgv.enumerator;
  */
 public enum AcessScreenEnum {
     
-    INSERT_USER(1),
-    CONSULT_USER(2),
-    DELETE_USER(3),
-    INSERT_PRODUCT(4),
-    CONSULT_PRODUCT(5),
-    UPDATE_PRODUCT(6),
-    DELETE_PRODUCT(7),
-    GENERATE_REPORT(8),
-    CONSULTE_PRODUCT(9);
+    REGISTER_PRODUCT(1),
+    REGISTER_MEASURE(2),
+    REGISTER_USER(3),
+    VIEW_PRODUCT(4),
+    VIEW_MEASURE(5),
+    VIEW_USER(6),
+    REGISTER_EXIT(7),
+    REGISTER_REPORT(8),
+    VIEW_REPORT(9),
+    VIEW_ABOUT(10);
     
     public int value;
     

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.repository;
 
 import br.com.sgv.database.ContextFactory;
@@ -12,8 +7,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class MeasureTypeRepository extends PersistenceRepository {
     
@@ -22,7 +16,8 @@ public class MeasureTypeRepository extends PersistenceRepository {
     public List<MeasureType> getAll() {
         session = ContextFactory.initContextDb();
         Query query = session.createQuery("from MeasureType");
-        List<MeasureType> listMeasureType = query.list();        
+        List<MeasureType> listMeasureType = query.list();
+        ContextFactory.commit();
         
         return listMeasureType;
     }

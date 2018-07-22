@@ -43,5 +43,10 @@ public class CalcType implements Serializable {
 
     public void setCalcType(String calcType) {
         this.calcType = calcType;
-    }    
+    }
+
+    @Override
+    public String toString() {
+        return this.getCalcType();
+    }
 }

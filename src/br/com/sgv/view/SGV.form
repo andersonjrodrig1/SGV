@@ -26,8 +26,11 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mnRegisterMeasure">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Cadastrar Volume"/>
+                <Property name="text" type="java.lang.String" value="Cadastrar Unidade de Medida"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnRegisterMeasureActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="nmRegisterUser">
               <Properties>
@@ -47,6 +50,11 @@
             <MenuItem class="javax.swing.JMenuItem" name="nmListProduct">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Listar Produtos"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mnMeasure">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Listar Unidades de Medida"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="nmListUser">

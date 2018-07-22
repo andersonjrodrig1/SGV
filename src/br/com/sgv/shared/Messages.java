@@ -11,6 +11,7 @@ public class Messages {
     public static String fail_find = "Falha ao buscar os dados";
     public static String save_success = "Salvo com sucesso!";
     public static String data_inconsistent = "Dados inconsistentes, \nnão foi possível fazer o login.";
+    public static String negative_acess = "Usuário não possui permissão de acesso à tela.";
     
     /* Login */
     public static String user = "Usuário..:";
@@ -46,4 +47,8 @@ public class Messages {
     public static String value_register_product = "Valor do Produto obrigatório.";
     public static String measure_register_product = "Volume do Produto obrigatório.";
     public static String verif_value_field = "Valor informado inválido.\nDigite apenas números.";
+    
+    /* Register Measure */
+    public static String name_register_measure = "Nome da Unidade obrigatório.";
+    public static String calc_register_measure = "Tipo de Calculo obrigatório.";
 }

@@ -64,12 +64,16 @@ public class UserService {
         try {
             this.user = userRepository.findUser(this.user);
             response.setModel(this.user);
+            
+            if (this.user == null) {
+                response.setMensage(Messages.user_not_found);
+                response.setModel(null);
+            }
         } catch (Exception ex) {
             System.out.printf("Error: ", ex);
             response.setException(ex);
             response.setError(ex.getMessage());
-            response.setError(Messages.fail_find);
-            response.setModel(null);
+            response.setMensage(Messages.fail_find);
         }
         
         return response;

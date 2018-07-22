@@ -39,10 +39,10 @@ public class Login extends javax.swing.JDialog {
                 this.dispose();
                 sgv = new SGV(this.user);
                 sgv.initScreen();
+            } else if (!this.userModel.getMensage().isEmpty()) {
+                JOptionPane.showMessageDialog(null, this.userModel.getMensage());
             } else if (!this.userModel.getError().isEmpty()) {
-                JOptionPane.showMessageDialog(null, this.userModel.getModel());
-            } else {
-                JOptionPane.showMessageDialog(null, Messages.user_not_found);
+                JOptionPane.showMessageDialog(null, this.userModel.getMensage());
             }
         }
     }
