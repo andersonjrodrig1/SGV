@@ -51,4 +51,5 @@ public class Messages {
     /* Register Measure */
     public static String name_register_measure = "Nome da Unidade obrigatório.";
     public static String calc_register_measure = "Tipo de Calculo obrigatório.";
+    public static String initials_register_measure = "Sigla não pode conter mais de 2 caracteres.";
 }

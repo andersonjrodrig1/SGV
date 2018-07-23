@@ -2,6 +2,7 @@ package br.com.sgv.view;
 
 import br.com.sgv.model.CalcType;
 import br.com.sgv.service.CalcTypeService;
+import br.com.sgv.service.MeasureTypeService;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.util.List;
@@ -33,12 +34,35 @@ public class RegisterMeasure extends javax.swing.JDialog {
         this.setVisible(true);
     }
     
+    private void resgisterMeasureType() {
+        if (verifyFields()) {
+            String measureName = txtMeasureName.getText();
+            String initials = txtInitials.getText();
+            CalcType calcType = (CalcType)cbxCalc.getSelectedItem();
+            
+            ResponseModel<Boolean> response = new MeasureTypeService().saveMeasureType(measureName, initials, calcType);
+            
+            if (response.getModel() == true) {
+                JOptionPane.showMessageDialog(null, Messages.save_success);
+                this.clearFields();
+            } else {
+                JOptionPane.showMessageDialog(null, response.getMensage());
+            }
+        }
+    }
+    
     private boolean verifyFields() {
         String message = "";
         boolean isVerify = true;
         
-        if (txtNameMeasure.getText().isEmpty()) {
+        if (txtMeasureName.getText().isEmpty()) {
             message += Messages.name_register_measure + "\n";
+        }
+        
+        if (!txtInitials.getText().trim().isEmpty()) {
+            if (txtInitials.getText().trim().length() > 2) {
+                message += Messages.initials_register_measure += "\n";
+            }
         }
         
         if (cbxCalc.getSelectedIndex() == 0 || cbxCalc.getSelectedItem().equals("Selecione")) {
@@ -64,6 +88,14 @@ public class RegisterMeasure extends javax.swing.JDialog {
         }
     }
     
+    private void clearFields() {
+        txtMeasureName.setText("");
+        txtInitials.setText("");
+        cbxCalc.setSelectedIndex(0);
+        
+        txtMeasureName.grabFocus();
+    }
+    
     private void closeScreen() {
         this.response = null;
         this.listCalcType = null;
@@ -82,7 +114,7 @@ public class RegisterMeasure extends javax.swing.JDialog {
 
         lblTitle = new javax.swing.JLabel();
         lblNameMeasure = new javax.swing.JLabel();
-        txtNameMeasure = new javax.swing.JTextField();
+        txtMeasureName = new javax.swing.JTextField();
         lblTypeCalc = new javax.swing.JLabel();
         cbxCalc = new javax.swing.JComboBox();
         btnRegister = new javax.swing.JButton();
@@ -103,6 +135,11 @@ public class RegisterMeasure extends javax.swing.JDialog {
 
         btnRegister.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
         btnRegister.setText("Cadastrar");
+        btnRegister.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegisterActionPerformed(evt);
+            }
+        });
 
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Erase.png"))); // NOI18N
         btnCancel.setText("Cancelar");
@@ -112,7 +149,7 @@ public class RegisterMeasure extends javax.swing.JDialog {
             }
         });
 
-        lblInitials.setText("Sigla");
+        lblInitials.setText("Sigla..:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -127,7 +164,7 @@ public class RegisterMeasure extends javax.swing.JDialog {
                         .addGap(20, 20, 20)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(txtNameMeasure)
+                                .addComponent(txtMeasureName)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(lblNameMeasure)
@@ -158,7 +195,7 @@ public class RegisterMeasure extends javax.swing.JDialog {
                     .addComponent(lblInitials))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNameMeasure, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtMeasureName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbxCalc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtInitials, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(39, 39, 39)
@@ -174,6 +211,10 @@ public class RegisterMeasure extends javax.swing.JDialog {
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.closeScreen();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
+        this.resgisterMeasureType();
+    }//GEN-LAST:event_btnRegisterActionPerformed
 
     /**
      * @param args the command line arguments
@@ -226,6 +267,6 @@ public class RegisterMeasure extends javax.swing.JDialog {
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblTypeCalc;
     private javax.swing.JTextField txtInitials;
-    private javax.swing.JTextField txtNameMeasure;
+    private javax.swing.JTextField txtMeasureName;
     // End of variables declaration//GEN-END:variables
 }

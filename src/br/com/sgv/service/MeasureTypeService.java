@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.service;
 
+import br.com.sgv.model.CalcType;
 import br.com.sgv.model.MeasureType;
 import br.com.sgv.repository.MeasureTypeRepository;
 import br.com.sgv.shared.Messages;
@@ -12,11 +8,11 @@ import br.com.sgv.shared.ResponseModel;
 import java.util.List;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class MeasureTypeService {
     
+    private MeasureType measureType = null;
     private ResponseModel<List<MeasureType>> response = null;
     private MeasureTypeRepository measureTypeRepository = null;
     
@@ -32,11 +28,33 @@ public class MeasureTypeService {
            listMeasureType = this.measureTypeRepository.getAll();
            response.setModel(listMeasureType);
         } catch (Exception ex) {
-            System.out.printf("Eror: ", ex);
+            System.out.printf("Error: ", ex);
             response.setError(ex.getMessage());
             response.setException(ex);
             response.setMensage(Messages.fail_find);
             response.setModel(null);
+        }
+        
+        return response;
+    }
+    
+    public ResponseModel<Boolean> saveMeasureType(String name, String initials, CalcType calcType) {
+        ResponseModel<Boolean> response = new ResponseModel<>();
+        
+        try {
+            this.measureType = new MeasureType();
+            this.measureType.setMeasureType(name);
+            this.measureType.setInitials(initials);
+            this.measureType.setCalcType(calcType);
+            
+            this.measureTypeRepository.save(this.measureType);
+            response.setModel(true);
+        } catch (Exception ex) {
+            System.out.printf("Error: ", ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setMensage(Messages.fail_save);
+            response.setModel(false);
         }
         
         return response;

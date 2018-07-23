@@ -2,6 +2,7 @@ package br.com.sgv.view;
 
 import br.com.sgv.model.MeasureType;
 import br.com.sgv.service.MeasureTypeService;
+import br.com.sgv.service.ProductService;
 import br.com.sgv.shared.FormatMoney;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
@@ -24,11 +25,11 @@ public class RegisterProduct extends javax.swing.JDialog {
     public RegisterProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        this.getMeasureType();
     }
     
-    public void initScreen() {
-        this.getMeasureType();
-        
+    public void initScreen() {        
         this.setSize(600, 400);
         this.setLocationRelativeTo(null);
         this.setVisible(true);       
@@ -47,7 +48,19 @@ public class RegisterProduct extends javax.swing.JDialog {
     
     private void registerProduct() {
         if (verifyFields()) {
+            String productKey = txtKey.getText().trim();
+            String productName = txtName.getText();
+            String productValue = frmValue.getText().replaceAll("\\.", "").replace(",", ".");
+            MeasureType measureType = (MeasureType)cbxMeasureType.getSelectedItem();
             
+            ResponseModel<Boolean> responseProduct = new ProductService().saveProduct(productKey, productName, productValue, measureType);
+            
+            if (responseProduct.getModel() == true) {
+                JOptionPane.showMessageDialog(null, Messages.save_success);
+                this.clearFields();
+            } else {
+                JOptionPane.showMessageDialog(null, response.getMensage());
+            }
         }
     }
     
@@ -85,6 +98,15 @@ public class RegisterProduct extends javax.swing.JDialog {
         String valueFormat = FormatMoney.formatMoney(valueDigit);
         
         frmValue.setText(valueFormat);
+    }
+    
+    private void clearFields() {
+        txtKey.setText("");
+        txtName.setText("");
+        frmValue.setText("");
+        cbxMeasureType.setSelectedIndex(0);
+        
+        txtKey.grabFocus();
     }
     
     private void closeScreen() {
@@ -125,6 +147,12 @@ public class RegisterProduct extends javax.swing.JDialog {
         lblTitle.setText("Cadastro de Produto");
 
         lblKey.setText("Código do Produto..:");
+
+        txtKey.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtKeyKeyReleased(evt);
+            }
+        });
 
         lblName.setText("Nome do Produto..:");
 
@@ -255,6 +283,11 @@ public class RegisterProduct extends javax.swing.JDialog {
             this.registerProduct();
         }
     }//GEN-LAST:event_btnRegisterKeyPressed
+
+    private void txtKeyKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtKeyKeyReleased
+        String text = txtKey.getText().toUpperCase();
+        txtKey.setText(text);
+    }//GEN-LAST:event_txtKeyKeyReleased
 
     /**
      * @param args the command line arguments

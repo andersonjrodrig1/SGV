@@ -136,7 +136,6 @@ public class InitializerDb {
         List<MeasureType> listMeasureType = new ArrayList<>();
         listMeasureType.add(new MeasureType("Unidade(s)", null, calcUnity));
         listMeasureType.add(new MeasureType("Pedaço(s)", null, calcUnity));
-        listMeasureType.add(new MeasureType("Litro(s)", "L", calcWeight));
         listMeasureType.add(new MeasureType("Quilograma(s)", "kg", calcWeight));
         listMeasureType.add(new MeasureType("Miligrama(s)", "ml", calcWeight));
         listMeasureType.add(new MeasureType("Grama(s)", "g", calcWeight));        

@@ -7,6 +7,7 @@ package br.com.sgv.view;
 
 import br.com.sgv.service.UserService;
 import br.com.sgv.shared.Messages;
+import br.com.sgv.shared.ResponseModel;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
@@ -44,10 +45,14 @@ public class RegisterUser extends javax.swing.JDialog {
             String login = txtUser.getText();
             String password = txtPassword.getText();
             
-            userservice.saveUser(name, login, password);
+            ResponseModel<Boolean> response = userservice.saveUser(name, login, password);
             
-            JOptionPane.showMessageDialog(null, Messages.save_success);
-            cleanFields();
+            if (response.getModel() == true) {
+                JOptionPane.showMessageDialog(null, Messages.save_success);
+                this.cleanFields();
+            } else {
+                JOptionPane.showMessageDialog(null, response.getMensage());
+            }
         }
     }
     

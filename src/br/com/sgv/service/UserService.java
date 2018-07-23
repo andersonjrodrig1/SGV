@@ -80,7 +80,7 @@ public class UserService {
     }
     
     public ResponseModel<Boolean> saveUser(String name, String login, String password) {
-        ResponseModel<Boolean> response = null;
+        ResponseModel<Boolean> response = new ResponseModel<>();
         
         try {
             long type = UserTypeEnum.SALESMAN.value;
