@@ -24,6 +24,8 @@ public class SGV extends javax.swing.JFrame {
     private Login login = null;
     private About about = null;
     private ListUser listUser = null;
+    private ListProduct listProduct = null;
+    private ListMeasure listMeasure = null;
     private RegisterUser registerUser = null;
     private RegisterProduct registerProduct = null;
     private RegisterMeasure registerMeasure = null;
@@ -48,8 +50,8 @@ public class SGV extends javax.swing.JFrame {
         Rectangle rect = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         this.setLocation(0, 0);
         this.setSize((int)rect.getWidth(), (int)rect.getHeight());       
-        this.setLocationRelativeTo(null);
         //this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
     
@@ -71,6 +73,8 @@ public class SGV extends javax.swing.JFrame {
         if (response == OptionEnum.YES.value) {
             this.about = null;
             this.listUser = null;
+            this.listProduct = null;
+            this.listMeasure = null;
             this.registerUser = null;
             this.user = null;
             this.userType = null;
@@ -144,6 +148,30 @@ public class SGV extends javax.swing.JFrame {
         }
     }
     
+    private void initListMeasure() {
+        this.screenType = AcessScreenEnum.VIEW_MEASURE.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.listMeasure = new ListMeasure(this, true);
+            this.listMeasure.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void initListProduct() {
+        this.screenType = AcessScreenEnum.VIEW_PRODUCT.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.listProduct = new ListProduct(this, true);
+            this.listProduct.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
     private AcessPermission verifyPermissionAcess(int screenType) {
         AcessPermission acessPermission = this.listAcessPermission
                 .stream()
@@ -199,7 +227,7 @@ public class SGV extends javax.swing.JFrame {
         });
         nmRegister.add(nmRegisterProduct);
 
-        mnRegisterMeasure.setText("Cadastrar Unidade de Medida");
+        mnRegisterMeasure.setText("Cadastrar Volume");
         mnRegisterMeasure.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnRegisterMeasureActionPerformed(evt);
@@ -220,9 +248,19 @@ public class SGV extends javax.swing.JFrame {
         jMenu2.setText("Ações");
 
         nmListProduct.setText("Listar Produtos");
+        nmListProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nmListProductActionPerformed(evt);
+            }
+        });
         jMenu2.add(nmListProduct);
 
-        mnMeasure.setText("Listar Unidades de Medida");
+        mnMeasure.setText("Listar Volume");
+        mnMeasure.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnMeasureActionPerformed(evt);
+            }
+        });
         jMenu2.add(mnMeasure);
 
         nmListUser.setText("Listar Usuários");
@@ -305,6 +343,14 @@ public class SGV extends javax.swing.JFrame {
     private void mnRegisterMeasureActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnRegisterMeasureActionPerformed
         this.initRegisterMeasure();
     }//GEN-LAST:event_mnRegisterMeasureActionPerformed
+
+    private void mnMeasureActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnMeasureActionPerformed
+        this.initListMeasure();
+    }//GEN-LAST:event_mnMeasureActionPerformed
+
+    private void nmListProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nmListProductActionPerformed
+        this.initListProduct();
+    }//GEN-LAST:event_nmListProductActionPerformed
 
     /**
      * @param args the command line arguments

@@ -5,10 +5,25 @@
  */
 package br.com.sgv.repository;
 
+import br.com.sgv.database.ContextFactory;
+import br.com.sgv.model.Product;
+import java.util.List;
+import org.hibernate.Query;
+import org.hibernate.Session;
+
 /**
  *
  * @author ander
  */
 public class ProductRepository extends PersistenceRepository {
     
+    private Session session = null;
+    
+    public List<Product> getAll() {
+        this.session = ContextFactory.initContextDb();
+        Query query = this.session.createQuery("from Product");
+        List<Product> products = query.list();
+        
+        return products;
+    }
 }

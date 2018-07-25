@@ -32,7 +32,8 @@ public class RegisterProduct extends javax.swing.JDialog {
     public void initScreen() {        
         this.setSize(600, 400);
         this.setLocationRelativeTo(null);
-        this.setVisible(true);       
+        this.pack();
+        this.setVisible(true);
     }
     
     private void getMeasureType() {

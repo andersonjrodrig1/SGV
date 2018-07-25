@@ -5,57 +5,53 @@
  */
 package br.com.sgv.view;
 
-import br.com.sgv.model.User;
-import br.com.sgv.service.UserService;
-import br.com.sgv.shared.Messages;
+import br.com.sgv.model.MeasureType;
+import br.com.sgv.service.MeasureTypeService;
 import br.com.sgv.shared.ResponseModel;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * @author Anderson Junior Rodrigues
+ * @author ander
  */
-public class ListUser extends javax.swing.JDialog {
+public class ListMeasure extends javax.swing.JDialog {
 
-    private static UserService userService = null;
-    private ResponseModel<List<User>> response = null;
-    private List<User> users = null;
+    /**
+     * Creates new form ListMeasure
+     */
     
-    public ListUser(java.awt.Frame parent, boolean modal) {
+    ResponseModel<List<MeasureType>> listResponse = null; 
+    
+    public ListMeasure(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         
-        this.listUsers();
+        this.getMeasureType();
     }
     
     public void initScreen() {
-        this.lblTitle.setText(Messages.title_list_user);
-        
         this.setSize(600, 400);
-        this.setLocationRelativeTo(null);
+        this.setLocationRelativeTo(this);
         this.pack();
         this.setVisible(true);
     }
     
-    private void listUsers() {
-        DefaultTableModel table = (DefaultTableModel) tblListUser.getModel();
-        userService = new UserService();
+    private void getMeasureType() {
+        this.listResponse = new MeasureTypeService().getMeasureType();
+        List<MeasureType> listMeasureType = this.listResponse.getModel();
         
-        this.response = userService.getAll();
-        this.users = response.getModel();
-        
-        if (users != null && users.size() > 0) {
-            users.stream().forEach(user -> {
-                table.addRow(new Object[] { user.getId(), user.getUserName(), user.getUserLogin() });
-            });
+        if (listMeasureType != null && listMeasureType.size() > 0) {
+            DefaultTableModel table = (DefaultTableModel)tblMeasure.getModel();
+            
+            listMeasureType.stream().forEach(measure -> {
+                table.addRow(new Object[] {
+                    measure.getMeasureType(), 
+                    measure.getInitials(), 
+                    measure.getCalcType().getCalcType()
+                });
+            });            
         }
-    }
-    
-    private void closeSystem() {
-        userService = null;
-        this.response = null;
-        this.users = null;
     }
 
     /**
@@ -67,23 +63,26 @@ public class ListUser extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        lblMeasure = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblListUser = new javax.swing.JTable();
-        lblTitle = new javax.swing.JLabel();
+        tblMeasure = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sistema de Gerenciamento de Vendas");
 
-        tblListUser.setModel(new javax.swing.table.DefaultTableModel(
+        lblMeasure.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblMeasure.setText("Lista de Volumes Cadastrados");
+
+        tblMeasure.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Código", "Nome Completo", "Usuário Login"
+                "Unidade de Medida", "Sigla", "Tipo de Calculo"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false
@@ -97,16 +96,18 @@ public class ListUser extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(tblListUser);
-        if (tblListUser.getColumnModel().getColumnCount() > 0) {
-            tblListUser.getColumnModel().getColumn(0).setMinWidth(80);
-            tblListUser.getColumnModel().getColumn(0).setMaxWidth(80);
-            tblListUser.getColumnModel().getColumn(2).setMinWidth(150);
-            tblListUser.getColumnModel().getColumn(2).setMaxWidth(150);
+        jScrollPane1.setViewportView(tblMeasure);
+        if (tblMeasure.getColumnModel().getColumnCount() > 0) {
+            tblMeasure.getColumnModel().getColumn(0).setMinWidth(300);
+            tblMeasure.getColumnModel().getColumn(0).setPreferredWidth(300);
+            tblMeasure.getColumnModel().getColumn(0).setMaxWidth(300);
+            tblMeasure.getColumnModel().getColumn(1).setMinWidth(100);
+            tblMeasure.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tblMeasure.getColumnModel().getColumn(1).setMaxWidth(100);
+            tblMeasure.getColumnModel().getColumn(2).setMinWidth(200);
+            tblMeasure.getColumnModel().getColumn(2).setPreferredWidth(200);
+            tblMeasure.getColumnModel().getColumn(2).setMaxWidth(200);
         }
-
-        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblTitle.setText("Lista de Usuários Cadastrados");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -117,15 +118,15 @@ public class ListUser extends javax.swing.JDialog {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
-                .addGap(191, 191, 191)
-                .addComponent(lblTitle)
+                .addGap(192, 192, 192)
+                .addComponent(lblMeasure)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addGap(18, 18, 18)
-                .addComponent(lblTitle)
+                .addComponent(lblMeasure)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(24, Short.MAX_VALUE))
@@ -151,20 +152,20 @@ public class ListUser extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ListUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ListUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ListUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ListUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ListUser dialog = new ListUser(new javax.swing.JFrame(), true);
+                ListMeasure dialog = new ListMeasure(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -178,7 +179,7 @@ public class ListUser extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel lblTitle;
-    private javax.swing.JTable tblListUser;
+    private javax.swing.JLabel lblMeasure;
+    private javax.swing.JTable tblMeasure;
     // End of variables declaration//GEN-END:variables
 }

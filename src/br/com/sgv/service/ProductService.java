@@ -11,8 +11,8 @@ import br.com.sgv.repository.ProductRepository;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -49,6 +49,22 @@ public class ProductService {
             response.setMensage(Messages.fail_save);
             response.setModel(false);
         }
+        
+        return response;
+    }
+    
+    public ResponseModel<List<Product>> getProducts() {
+        ResponseModel<List<Product>> response = new ResponseModel<>();
+        
+        try {
+            List<Product> listProduct = this.productRepository.getAll();
+            response.setModel(listProduct);
+        } catch(Exception ex) {
+            System.out.println("Error: " + ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setModel(null);
+        }       
         
         return response;
     }
