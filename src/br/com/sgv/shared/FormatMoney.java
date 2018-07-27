@@ -14,7 +14,7 @@ public class FormatMoney {
     public static String formatMoney(String money) {
         String moneyFormat = "";
         String moneyAux = money.replace(",", "").replaceAll("\\.", "");
-        moneyAux = String.valueOf(Long.parseLong(moneyAux));
+        moneyAux = String.valueOf(Long.valueOf(moneyAux));
         
         if (moneyAux.length() == 1)
             moneyFormat = "0,0".concat(moneyAux);

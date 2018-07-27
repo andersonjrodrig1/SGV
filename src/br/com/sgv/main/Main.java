@@ -10,6 +10,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * @author Anderson Junior Rodrigues
@@ -21,9 +23,27 @@ public class Main {
     private static JDialog dialog;
 
     public static void main(String[] args) {        
+        initializerApp();
+    }
+    
+    private static void initializerApp() {
         initiliazerDb();
+        addThemeInterface();
         modalPresentation();
         modalLogin();
+    }
+    
+    private static void initiliazerDb() {
+        InitializerDb.initializerDatabase();
+    }
+    
+    private static void addThemeInterface() {
+        try {
+            //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private static void modalPresentation() {
@@ -54,9 +74,5 @@ public class Main {
     private static void modalLogin() {
         login = new Login(new JFrame(), true);
         login.initScreen();
-    }
-    
-    private static void initiliazerDb() {
-        InitializerDb.initializerDatabase();
     }
 }

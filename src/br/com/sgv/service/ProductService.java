@@ -11,6 +11,7 @@ import br.com.sgv.repository.ProductRepository;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -65,6 +66,44 @@ public class ProductService {
             response.setException(ex);
             response.setModel(null);
         }       
+        
+        return response;
+    }
+    
+    public ResponseModel<List<Product>> getProductByNameOrKey(String productKey, String productName) {
+        ResponseModel<List<Product>> response = new ResponseModel<>();
+        List<Product> listProduct = new ArrayList<>();
+        
+        try {
+            Product product = new Product();
+            product.setProductKey(productKey);
+            product.setProductName(productName);
+            
+            listProduct = this.productRepository.getProductByKeyOrName(product);
+            response.setModel(listProduct);
+        } catch(Exception ex) {
+            System.out.println("Error: " + ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setModel(null);
+        }
+        
+        return response;
+    }
+    
+    public ResponseModel<Boolean> removeProduct(Product product) {
+        ResponseModel<Boolean> response = new ResponseModel<>();
+        
+        try {
+            boolean status = this.productRepository.remove(product);
+            response.setModel(status);
+        } catch(Exception ex) {
+            System.out.println("Error: " + ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setMensage(Messages.fail_remove);
+            response.setModel(false);
+        }
         
         return response;
     }

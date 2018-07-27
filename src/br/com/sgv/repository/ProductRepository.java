@@ -23,6 +23,26 @@ public class ProductRepository extends PersistenceRepository {
         this.session = ContextFactory.initContextDb();
         Query query = this.session.createQuery("from Product");
         List<Product> products = query.list();
+        ContextFactory.commit();
+        
+        return products;
+    }
+    
+    public List<Product> getProductByKeyOrName(Product product) {
+        String hql = "from Product where 1 = 1";
+        
+        if (!product.getProductKey().isEmpty()) {
+            hql += " and product_key like '%" + product.getProductKey() + "%'";
+        }
+        
+        if (!product.getProductName().isEmpty()) {
+            hql += " and product_name like '%" + product.getProductName() + "%'";
+        }
+        
+        this.session = ContextFactory.initContextDb();
+        Query query = this.session.createQuery(hql);        
+        List<Product> products = query.list();
+        ContextFactory.commit();
         
         return products;
     }

@@ -95,6 +95,7 @@ public class Login extends javax.swing.JDialog {
         txtPassword = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setTitle("Sistema de Gerenciamento de Vendas");
 
         jLabel1.setText("Usuário..:");
 
@@ -144,9 +145,9 @@ public class Login extends javax.swing.JDialog {
                     .addComponent(txtPassword))
                 .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGap(149, 149, 149)
+                .addGap(157, 157, 157)
                 .addComponent(btnEntry)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnCancel)
                 .addContainerGap(150, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()

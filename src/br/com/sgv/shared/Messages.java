@@ -9,9 +9,13 @@ public class Messages {
     public static String title_presentation = "Sitema de Gerenciamento de Vendas";
     public static String fail_save = "Falha ao salvar os dados";
     public static String fail_find = "Falha ao buscar os dados";
+    public static String fail_remove = "Falha ao excluir o produto.";
     public static String save_success = "Salvo com sucesso!";
+    public static String remove_sucess = "Excluido com sucesso!";
     public static String data_inconsistent = "Dados inconsistentes, \nnão foi possível fazer o login.";
     public static String negative_acess = "Usuário não possui permissão de acesso à tela.";
+    public static String select_row = "Selecione um produto para executar está ação.";
+    public static String remove_modal = "Deseja excluir o produto selecionado?";
     
     /* Login */
     public static String user = "Usuário..:";
