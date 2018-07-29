@@ -25,11 +25,11 @@ public class ListUser extends javax.swing.JDialog {
     public ListUser(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        
-        this.listUsers();
     }
     
     public void initScreen() {
+        this.listUsers();
+        
         this.lblTitle.setText(Messages.title_list_user);
         
         this.setSize(600, 400);

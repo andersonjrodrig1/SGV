@@ -1,6 +1,7 @@
 package br.com.sgv.view;
 
 import br.com.sgv.model.MeasureType;
+import br.com.sgv.model.Product;
 import br.com.sgv.service.MeasureTypeService;
 import br.com.sgv.service.ProductService;
 import br.com.sgv.shared.FormatMoney;
@@ -19,8 +20,12 @@ public class RegisterProduct extends javax.swing.JDialog {
      * Creates new form RegisterProduct
      */
     
+    ListProduct jDialog = null;
+    ResponseModel<Boolean> responseProduct = null;
     ResponseModel<List<MeasureType>> response = null;
     List<MeasureType> listMeasureType = null;
+    boolean isUpdateProduct = false;
+    long idProductUpdate = 0;
     
     public RegisterProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -29,11 +34,45 @@ public class RegisterProduct extends javax.swing.JDialog {
         this.getMeasureType();
     }
     
-    public void initScreen() {        
-        this.setSize(600, 400);
+    public void initScreen() {
+        if (this.listMeasureType == null) {
+            this.getMeasureType();
+        }
+                
+        this.setSize(600, 350);
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
+    }
+    
+    public void initScreenUpdate(Product product, boolean isUpdate, ListProduct jDialog) {
+        String value = FormatMoney.verifyDecimalMoney(String.valueOf(product.getProductValue()));
+        value = FormatMoney.formatMoney(value);
+        
+        int index = this.listMeasureType.indexOf(product.getMeasureType());
+        
+        if (index < 0) {
+            MeasureType measureType = this.listMeasureType
+                    .stream()
+                    .filter(x -> x.getId() == product.getMeasureType().getId())
+                    .findAny()
+                    .orElse(null);
+            
+            index = this.listMeasureType.indexOf(measureType);
+        }
+        
+        this.lblTitle.setText(Messages.title_update_product);
+        this.btnRegister.setText(Messages.btn_update_product);
+        this.txtKey.setText(product.getProductKey());
+        this.txtName.setText(product.getProductName());
+        this.frmValue.setText(value);
+        this.cbxMeasureType.setSelectedIndex(++index);
+        this.idProductUpdate = product.getId();
+        
+        this.isUpdateProduct = isUpdate;
+        this.jDialog = jDialog;
+        
+        this.initScreen();
     }
     
     private void getMeasureType() {
@@ -54,11 +93,23 @@ public class RegisterProduct extends javax.swing.JDialog {
             String productValue = frmValue.getText().replaceAll("\\.", "").replace(",", ".");
             MeasureType measureType = (MeasureType)cbxMeasureType.getSelectedItem();
             
-            ResponseModel<Boolean> responseProduct = new ProductService().saveProduct(productKey, productName, productValue, measureType);
+            if (this.isUpdateProduct) {
+                this.responseProduct = new ProductService().updateProduct(this.idProductUpdate, productKey, productName, productValue, measureType);                
+            } else {
+                this.responseProduct = new ProductService().saveProduct(productKey, productName, productValue, measureType);
+            }
             
-            if (responseProduct.getModel() == true) {
-                JOptionPane.showMessageDialog(null, Messages.save_success);
-                this.clearFields();
+            if (responseProduct.getModel()) {
+                if (this.isUpdateProduct) {
+                    this.isUpdateProduct = false;
+                    this.idProductUpdate = 0;
+                    JOptionPane.showMessageDialog(null, Messages.update_sucess);
+                    this.closeScreen();
+                    this.jDialog.initScreen();
+                } else {
+                    JOptionPane.showMessageDialog(null, Messages.save_success);
+                    this.clearFields();
+                }
             } else {
                 JOptionPane.showMessageDialog(null, response.getMensage());
             }
@@ -118,6 +169,7 @@ public class RegisterProduct extends javax.swing.JDialog {
     private void closeSystem() {
         this.response = null;
         this.listMeasureType = null;
+        this.responseProduct = null;
     }
 
     /**
@@ -246,11 +298,11 @@ public class RegisterProduct extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbxMeasureType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(frmValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(41, 41, 41)
+                .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnRegister)
-                    .addComponent(btnCancel))
-                .addContainerGap(111, Short.MAX_VALUE))
+                    .addComponent(btnCancel)
+                    .addComponent(btnRegister))
+                .addContainerGap(76, Short.MAX_VALUE))
         );
 
         pack();
@@ -261,12 +313,14 @@ public class RegisterProduct extends javax.swing.JDialog {
     }//GEN-LAST:event_btnRegisterActionPerformed
 
     private void frmValueKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_frmValueKeyReleased
-        if (!FormatMoney.verifyCodeChar(evt.getKeyChar())) {
-            JOptionPane.showMessageDialog(null, Messages.verif_value_field);
-            frmValue.setText("0,00");
-        } else {
-            this.setMaskMoney();
-        }        
+        if (evt.getKeyCode() != KeyEvent.VK_ENTER && evt.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
+            if (!FormatMoney.verifyCodeChar(evt.getKeyChar())) {
+                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                frmValue.setText("0,00");
+            } else {
+                this.setMaskMoney();
+            }   
+        }
     }//GEN-LAST:event_frmValueKeyReleased
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed

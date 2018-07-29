@@ -27,7 +27,7 @@ public class PersistenceRepository {
 
     public <T> void update(T t) {
         session = ContextFactory.initContextDb();
-        session.saveOrUpdate(t);
+        session.update(t);
 
         ContextFactory.commit();
     }

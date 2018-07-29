@@ -23,11 +23,11 @@ public class RegisterMeasure extends javax.swing.JDialog {
     public RegisterMeasure(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        
-        this.getCalcType();
     }
     
     public void initScreen() {
+        this.getCalcType();
+        
         this.setSize(600, 300);
         this.setLocationRelativeTo(null);
         this.pack();

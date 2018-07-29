@@ -30,18 +30,10 @@ public class ProductService {
     public ResponseModel<Boolean> saveProduct(String productKey, String productName, String productValue, MeasureType measureType) {
         ResponseModel<Boolean> response = new ResponseModel<>();
         
-        try {
-            double value = Double.parseDouble(productValue);
-            Date now = Date.from(Instant.now());
-            
-            Product product = new Product();
-            product.setProductKey(productKey);
-            product.setProductName(productName);
-            product.setProductValue(value);
-            product.setMeasureType(measureType);
-            product.setRegisterDate(now);
-            
+        try {            
+            Product product = this.setProduct(productKey, productName, productValue, measureType);
             this.productRepository.save(product);
+            
             response.setModel(true);
         } catch(Exception ex) {
             System.out.println("Error: " + ex);
@@ -106,5 +98,39 @@ public class ProductService {
         }
         
         return response;
+    }
+    
+    public ResponseModel<Boolean> updateProduct(long productId, String productKey, String productName, String productValue, MeasureType measureType) {
+        ResponseModel<Boolean> response = new ResponseModel<>();
+        
+        try {
+            Product product = this.setProduct(productKey, productName, productValue, measureType);
+            product.setId(productId);
+            this.productRepository.update(product);
+            
+            response.setModel(true);
+        } catch(Exception ex) {
+            System.out.println("Error: " + ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setMensage(Messages.fail_update);
+            response.setModel(false);
+        }
+        
+        return response;
+    }
+    
+    private Product setProduct(String productKey, String productName, String productValue, MeasureType measureType) {
+        double value = Double.parseDouble(productValue);
+        Date now = Date.from(Instant.now());
+
+        Product product = new Product();
+        product.setProductKey(productKey);
+        product.setProductName(productName);
+        product.setProductValue(value);
+        product.setMeasureType(measureType);
+        product.setRegisterDate(now);
+        
+        return product;
     }
 }

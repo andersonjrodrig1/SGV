@@ -7,11 +7,13 @@ public class Messages {
     
     /* General */
     public static String title_presentation = "Sitema de Gerenciamento de Vendas";
-    public static String fail_save = "Falha ao salvar os dados";
-    public static String fail_find = "Falha ao buscar os dados";
-    public static String fail_remove = "Falha ao excluir o produto.";
+    public static String fail_save = "Falha ao salvar os dados!";
+    public static String fail_find = "Falha ao buscar os dados!";
+    public static String fail_remove = "Falha ao excluir produto!";
     public static String save_success = "Salvo com sucesso!";
+    public static String fail_update = "Falha ao atualizar produto!";
     public static String remove_sucess = "Excluido com sucesso!";
+    public static String update_sucess = "Atualizado com sucesso!";
     public static String data_inconsistent = "Dados inconsistentes, \nnão foi possível fazer o login.";
     public static String negative_acess = "Usuário não possui permissão de acesso à tela.";
     public static String select_row = "Selecione um produto para executar está ação.";
@@ -51,6 +53,10 @@ public class Messages {
     public static String value_register_product = "Valor do Produto obrigatório.";
     public static String measure_register_product = "Volume do Produto obrigatório.";
     public static String verif_value_field = "Valor informado inválido.\nDigite apenas números.";
+    public static String title_register_product = "Cadastro de Produto";
+    public static String title_update_product = "Atualizar Produto";
+    public static String btn_register_product = "Cadastrar";
+    public static String btn_update_product = "Atualizar";
     
     /* Register Measure */
     public static String name_register_measure = "Nome da Unidade obrigatório.";

@@ -12,7 +12,7 @@ package br.com.sgv.shared;
 public class FormatMoney {
     
     public static String formatMoney(String money) {
-        String moneyFormat = "";
+        String moneyFormat;
         String moneyAux = money.replace(",", "").replaceAll("\\.", "");
         moneyAux = String.valueOf(Long.valueOf(moneyAux));
         
@@ -39,6 +39,18 @@ public class FormatMoney {
         }
         
         return moneyFormat;
+    }
+    
+    public static String verifyDecimalMoney(String money) {
+        String[] splitMoney = money.split("\\.");
+        
+        if (splitMoney.length == 1) {
+            money = money.concat(".00");
+        } else if (splitMoney[splitMoney.length -1].length() == 1) {
+            money = money.concat("0");
+        }
+        
+        return money;
     }
     
     public static boolean verifyCodeChar(char letter) {

@@ -25,17 +25,18 @@ public class ListProduct extends javax.swing.JDialog {
      * Creates new form ListProduct
      */
     
+    private RegisterProduct registerProduct = null;
     private ResponseModel<List<Product>> listResponse = null;
     private List<Product> listProduct = null;
     
     public ListProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        
-        this.getProducts();
     }
     
     public void initScreen() {
+        this.getProducts();
+                
         this.setSize(600, 500);
         this.setLocationRelativeTo(null);
         this.pack();
@@ -56,9 +57,6 @@ public class ListProduct extends javax.swing.JDialog {
         listResponse = new ProductService().getProductByNameOrKey(productKey, productName);
         this.listProduct = this.listResponse.getModel();
         
-        DefaultTableModel table = (DefaultTableModel)tblProducts.getModel();
-        table.setNumRows(0);
-        
         this.setTableProduct();
     }
     
@@ -76,6 +74,8 @@ public class ListProduct extends javax.swing.JDialog {
                         .filter(x -> x.getId() == idProduct)
                         .findAny()
                         .orElse(null);
+                
+                //TODO: verify if product has send
 
                 ResponseModel<Boolean> response = new ProductService().removeProduct(productSelect);
 
@@ -92,6 +92,25 @@ public class ListProduct extends javax.swing.JDialog {
                     JOptionPane.showMessageDialog(null, response.getMensage());
                 }
             }
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.select_row);
+        }
+    }
+    
+    private void updateProduct() {
+        int row = tblProducts.getSelectedRow();
+        
+        if (row >= 0) {
+            Object objColumn = tblProducts.getValueAt(row, 0);
+            int idProduct = Integer.valueOf(objColumn.toString());
+            Product productSelect = this.listProduct
+                        .stream()
+                        .filter(x -> x.getId() == idProduct)
+                        .findAny()
+                        .orElse(null);
+            this.dispose();
+            this.registerProduct = new RegisterProduct(new SGV(), true);
+            this.registerProduct.initScreenUpdate(productSelect, true, new ListProduct(null, true));
         } else {
             JOptionPane.showMessageDialog(null, Messages.select_row);
         }
@@ -117,6 +136,7 @@ public class ListProduct extends javax.swing.JDialog {
     private void closeScreen() {
         this.listResponse = null;
         this.listProduct = null;
+        this.registerProduct = null;
         
         this.dispose();
     }
@@ -208,6 +228,11 @@ public class ListProduct extends javax.swing.JDialog {
 
         btnChange.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Modify.png"))); // NOI18N
         btnChange.setText("Alterar");
+        btnChange.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnChangeActionPerformed(evt);
+            }
+        });
 
         btnRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Delete.png"))); // NOI18N
         btnRemove.setText("Excluir");
@@ -307,6 +332,10 @@ public class ListProduct extends javax.swing.JDialog {
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         this.removeProduct();
     }//GEN-LAST:event_btnRemoveActionPerformed
+
+    private void btnChangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChangeActionPerformed
+        this.updateProduct();
+    }//GEN-LAST:event_btnChangeActionPerformed
 
     /**
      * @param args the command line arguments

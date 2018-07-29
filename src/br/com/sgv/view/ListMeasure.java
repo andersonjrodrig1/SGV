@@ -26,11 +26,11 @@ public class ListMeasure extends javax.swing.JDialog {
     public ListMeasure(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        
-        this.getMeasureType();
     }
     
     public void initScreen() {
+        this.getMeasureType();
+        
         this.setSize(600, 400);
         this.setLocationRelativeTo(this);
         this.pack();
