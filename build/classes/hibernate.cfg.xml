@@ -22,5 +22,7 @@
     <mapping class="br.com.sgv.model.MeasureType" />
     <mapping class="br.com.sgv.model.CalcType" />
     <mapping class="br.com.sgv.model.Product" />
+    <mapping class="br.com.sgv.model.StatusRegister" />
+    <mapping class="br.com.sgv.model.Checkout" />
   </session-factory>
 </hibernate-configuration>

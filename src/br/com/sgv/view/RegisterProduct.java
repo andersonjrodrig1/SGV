@@ -313,13 +313,11 @@ public class RegisterProduct extends javax.swing.JDialog {
     }//GEN-LAST:event_btnRegisterActionPerformed
 
     private void frmValueKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_frmValueKeyReleased
-        if (evt.getKeyCode() != KeyEvent.VK_ENTER && evt.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
-            if (!FormatMoney.verifyCodeChar(evt.getKeyChar())) {
-                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
-                frmValue.setText("0,00");
-            } else {
-                this.setMaskMoney();
-            }   
+        if (!FormatMoney.verifyCodeChar(evt.getKeyChar()) || frmValue.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+            frmValue.setText("0,00");
+        } else {
+            this.setMaskMoney();
         }
     }//GEN-LAST:event_frmValueKeyReleased
 

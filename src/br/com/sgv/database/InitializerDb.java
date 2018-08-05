@@ -4,6 +4,7 @@ import br.com.sgv.model.AcessPermission;
 import br.com.sgv.model.AcessScreen;
 import br.com.sgv.model.CalcType;
 import br.com.sgv.model.MeasureType;
+import br.com.sgv.model.StatusRegister;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class InitializerDb {
     private static final AcessScreen viewProduct = new AcessScreen(4, "Visualizar Produtos");
     private static final AcessScreen viewMeasure = new AcessScreen(5, "Visualizar Volumes");
     private static final AcessScreen viewUser = new AcessScreen(6, "Visualizar Usuários");
-    private static final AcessScreen registerExit = new AcessScreen(7, "Registrar Saída");
+    private static final AcessScreen checkout = new AcessScreen(7, "Registrar Saída");
     private static final AcessScreen registerReport = new AcessScreen(8, "Gerar Relatório");
     private static final AcessScreen viewReport = new AcessScreen(9, "Consultar Relatório");
     private static final AcessScreen viewAbout = new AcessScreen(10, "Visualizar Sobre");
@@ -58,6 +59,10 @@ public class InitializerDb {
             insertMeasureType();
         }
         
+        if (session.createQuery("from StatusRegister").list().size() <= 0) {
+            insertStatusRegister();
+        }
+        
         ContextFactory.commit();
     }
     
@@ -77,7 +82,7 @@ public class InitializerDb {
         listAcessScreen.add(viewProduct);
         listAcessScreen.add(viewMeasure);
         listAcessScreen.add(viewUser);
-        listAcessScreen.add(registerExit);
+        listAcessScreen.add(checkout);
         listAcessScreen.add(registerReport);
         listAcessScreen.add(viewReport);
         listAcessScreen.add(viewAbout);
@@ -106,7 +111,7 @@ public class InitializerDb {
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewProduct, true));
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewMeasure, true));
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewUser, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerExit, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), checkout, true));
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerReport, true));
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewReport, true));
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewAbout, true));
@@ -116,7 +121,7 @@ public class InitializerDb {
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewProduct, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewMeasure, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewUser, false));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerExit, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), checkout, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerReport, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewReport, false));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewAbout, true));
@@ -141,5 +146,13 @@ public class InitializerDb {
         listMeasureType.add(new MeasureType("Grama", "g", calcWeight));        
         
         listMeasureType.stream().forEach(measure -> session.save(measure));
+    }
+    
+    private static void insertStatusRegister() {
+        List<StatusRegister> listStatusRegister = new ArrayList<>();
+        listStatusRegister.add(new StatusRegister("Pendente"));
+        listStatusRegister.add(new StatusRegister("Totalizado"));
+        
+        listStatusRegister.stream().forEach(status -> session.save(status));
     }
 }

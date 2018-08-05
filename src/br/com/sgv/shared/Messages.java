@@ -9,15 +9,15 @@ public class Messages {
     public static String title_presentation = "Sitema de Gerenciamento de Vendas";
     public static String fail_save = "Falha ao salvar os dados!";
     public static String fail_find = "Falha ao buscar os dados!";
-    public static String fail_remove = "Falha ao excluir produto!";
+    public static String fail_remove = "Falha ao excluir os dados!";
     public static String save_success = "Salvo com sucesso!";
-    public static String fail_update = "Falha ao atualizar produto!";
+    public static String fail_update = "Falha ao atualizar!";
     public static String remove_sucess = "Excluido com sucesso!";
     public static String update_sucess = "Atualizado com sucesso!";
     public static String data_inconsistent = "Dados inconsistentes, \nnão foi possível fazer o login.";
     public static String negative_acess = "Usuário não possui permissão de acesso à tela.";
-    public static String select_row = "Selecione um produto para executar está ação.";
-    public static String remove_modal = "Deseja excluir o produto selecionado?";
+    public static String select_row = "Selecione um item para executar está ação.";
+    public static String remove_modal = "Deseja excluir o item selecionado?";
     
     /* Login */
     public static String user = "Usuário..:";
@@ -62,4 +62,13 @@ public class Messages {
     public static String name_register_measure = "Nome da Unidade obrigatório.";
     public static String calc_register_measure = "Tipo de Calculo obrigatório.";
     public static String initials_register_measure = "Sigla não pode conter mais de 2 caracteres.";
+    
+    /* Status Register */
+    public static String status_register = "Registro de saída não pode ser excluida.\nTotalização já realizada.";
+    
+    /* Checkout */
+    public static String checkout_name = "Descrição de saída obrigatório.";
+    public static String checkout_value = "Total de saída obrigatório.";
+    public static String checkout_date = "Data da saída obrigatório.";
+    public static String checkout_no_remove = "Registro de saída não pode ser removido!\nRegistro já contabilizado no fechamento.";
 }

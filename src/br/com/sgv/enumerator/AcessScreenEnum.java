@@ -11,7 +11,7 @@ public enum AcessScreenEnum {
     VIEW_PRODUCT(4),
     VIEW_MEASURE(5),
     VIEW_USER(6),
-    REGISTER_EXIT(7),
+    CHECK_OUT(7),
     REGISTER_REPORT(8),
     VIEW_REPORT(9),
     VIEW_ABOUT(10);

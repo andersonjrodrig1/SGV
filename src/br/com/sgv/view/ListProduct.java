@@ -69,6 +69,7 @@ public class ListProduct extends javax.swing.JDialog {
             if (option == OptionEnum.YES.value) {
                 Object objColumn = tblProducts.getValueAt(row, 0);
                 int idProduct = Integer.valueOf(objColumn.toString());
+                
                 Product productSelect = this.listProduct
                         .stream()
                         .filter(x -> x.getId() == idProduct)
