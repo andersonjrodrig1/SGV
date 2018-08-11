@@ -46,4 +46,16 @@ public class ProductRepository extends PersistenceRepository {
         
         return products;
     }
+    
+    public Product getProductByKey(String productKey) {
+        String hql = "from Product where product_key = :productKey";
+        
+        this.session = ContextFactory.initContextDb();
+        Object query = this.session.createQuery(hql)
+                .setParameter("productKey", productKey)
+                .uniqueResult();
+        ContextFactory.commit();
+        
+        return (Product)query;
+    }
 }

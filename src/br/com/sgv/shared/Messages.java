@@ -18,6 +18,8 @@ public class Messages {
     public static String negative_acess = "Usuário não possui permissão de acesso à tela.";
     public static String select_row = "Selecione um item para executar está ação.";
     public static String remove_modal = "Deseja excluir o item selecionado?";
+    public static String not_found = "Item não encontrado!";
+    public static String select_product = "Favor selecione um item na lista de produtos.";
     
     /* Login */
     public static String user = "Usuário..:";

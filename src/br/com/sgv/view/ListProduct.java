@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.view;
 
 import br.com.sgv.enumerator.OptionEnum;
@@ -10,14 +5,14 @@ import br.com.sgv.model.Product;
 import br.com.sgv.service.ProductService;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class ListProduct extends javax.swing.JDialog {
 
@@ -25,9 +20,11 @@ public class ListProduct extends javax.swing.JDialog {
      * Creates new form ListProduct
      */
     
+    private DecimalFormat df = new DecimalFormat("#.00");
     private RegisterProduct registerProduct = null;
     private ResponseModel<List<Product>> listResponse = null;
     private List<Product> listProduct = null;
+    private SGV jframe = null;
     
     public ListProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -41,6 +38,10 @@ public class ListProduct extends javax.swing.JDialog {
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
+    }
+    
+    public void setFrame(SGV frame) {
+        this.jframe = frame;
     }
     
     private void getProducts() {
@@ -70,11 +71,7 @@ public class ListProduct extends javax.swing.JDialog {
                 Object objColumn = tblProducts.getValueAt(row, 0);
                 int idProduct = Integer.valueOf(objColumn.toString());
                 
-                Product productSelect = this.listProduct
-                        .stream()
-                        .filter(x -> x.getId() == idProduct)
-                        .findAny()
-                        .orElse(null);
+                Product productSelect = this.getProductInMemory(idProduct);
                 
                 //TODO: verify if product has send
 
@@ -104,14 +101,28 @@ public class ListProduct extends javax.swing.JDialog {
         if (row >= 0) {
             Object objColumn = tblProducts.getValueAt(row, 0);
             int idProduct = Integer.valueOf(objColumn.toString());
-            Product productSelect = this.listProduct
-                        .stream()
-                        .filter(x -> x.getId() == idProduct)
-                        .findAny()
-                        .orElse(null);
+            
+            Product productSelect = this.getProductInMemory(idProduct);
+            
             this.dispose();
             this.registerProduct = new RegisterProduct(new SGV(), true);
             this.registerProduct.initScreenUpdate(productSelect, true, new ListProduct(null, true));
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.select_row);
+        }
+    }
+    
+    private void selectProduct() {
+        int row = tblProducts.getSelectedRow();
+        
+        if (row >= 0){
+            Object objColumn = tblProducts.getValueAt(row, 0);
+            int idProduct = Integer.valueOf(objColumn.toString());
+            
+            Product productSelect = this.getProductInMemory(idProduct);
+            
+            this.dispose();
+            this.jframe.setItemSale(productSelect);            
         } else {
             JOptionPane.showMessageDialog(null, Messages.select_row);
         }
@@ -123,15 +134,27 @@ public class ListProduct extends javax.swing.JDialog {
             table.setNumRows(0);
             
             this.listProduct.stream().forEach(product -> {
+                String valueProduct = this.df.format(product.getProductValue());
+                
                 table.addRow(new Object[] {
                     product.getId(),
                     product.getProductKey(),
                     product.getProductName(),
-                    "R$ " + product.getProductValue(),
+                    "R$ " + valueProduct,
                     product.getMeasureType().getMeasureType()
                 });
             });            
         }
+    }
+    
+    private Product getProductInMemory(int idProduct) {
+        Product productSelect = this.listProduct
+                        .stream()
+                        .filter(x -> x.getId() == idProduct)
+                        .findAny()
+                        .orElse(null);
+        
+        return productSelect;
     }
     
     private void closeScreen() {
@@ -187,6 +210,11 @@ public class ListProduct extends javax.swing.JDialog {
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
+            }
+        });
+        tblProducts.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblProductsMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(tblProducts);
@@ -253,6 +281,11 @@ public class ListProduct extends javax.swing.JDialog {
 
         btnSelect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Green pin.png"))); // NOI18N
         btnSelect.setText("Selecionar");
+        btnSelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSelectActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -337,6 +370,16 @@ public class ListProduct extends javax.swing.JDialog {
     private void btnChangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChangeActionPerformed
         this.updateProduct();
     }//GEN-LAST:event_btnChangeActionPerformed
+
+    private void btnSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectActionPerformed
+        this.selectProduct();
+    }//GEN-LAST:event_btnSelectActionPerformed
+
+    private void tblProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProductsMouseClicked
+        if (evt.getClickCount() > 1) {
+            this.selectProduct();
+        }
+    }//GEN-LAST:event_tblProductsMouseClicked
 
     /**
      * @param args the command line arguments

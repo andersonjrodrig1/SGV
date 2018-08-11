@@ -24,5 +24,6 @@
     <mapping class="br.com.sgv.model.Product" />
     <mapping class="br.com.sgv.model.StatusRegister" />
     <mapping class="br.com.sgv.model.Checkout" />
+    <mapping class="br.com.sgv.model.Sale" />
   </session-factory>
 </hibernate-configuration>

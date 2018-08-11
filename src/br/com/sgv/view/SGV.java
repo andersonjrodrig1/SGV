@@ -1,16 +1,22 @@
 package br.com.sgv.view;
 
 import br.com.sgv.enumerator.AcessScreenEnum;
+import br.com.sgv.enumerator.CalcTypeEnum;
 import br.com.sgv.enumerator.OptionEnum;
 import br.com.sgv.model.AcessPermission;
+import br.com.sgv.model.Product;
+import br.com.sgv.model.Sale;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
 import br.com.sgv.service.AcessPermissionService;
+import br.com.sgv.service.ProductService;
 import br.com.sgv.service.UserTypeService;
+import br.com.sgv.shared.FormatMoney;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.text.DecimalFormat;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -19,6 +25,7 @@ import javax.swing.JOptionPane;
  */
 public class SGV extends javax.swing.JFrame {
 
+    private DecimalFormat df = new DecimalFormat("#.00");
     private int screenType;
     
     private Login login = null;
@@ -30,6 +37,7 @@ public class SGV extends javax.swing.JFrame {
     private RegisterProduct registerProduct = null;
     private RegisterMeasure registerMeasure = null;
     private Checkout checkout = null;
+    private Sale itemSale = null;
     
     private User user = null;
     private UserType userType = null;
@@ -169,10 +177,17 @@ public class SGV extends javax.swing.JFrame {
         
         if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
             this.listProduct = new ListProduct(this, true);
+            this.listProduct.setFrame(this);
             this.listProduct.initScreen();
         } else {
             JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    private void initListProduct(SGV frame) {
+        this.listProduct = new ListProduct(frame, true);
+        this.listProduct.setFrame(frame);
+        this.listProduct.initScreen();
     }
     
     private void initCheckout() {
@@ -197,6 +212,59 @@ public class SGV extends javax.swing.JFrame {
         return acessPermission;
     }
     
+    private void getProductByKey() {
+        String productKey = txtProductKey.getText().trim();        
+        ResponseModel<Product> response = new ProductService().getProductByKey(productKey);
+        Product item = response.getModel();
+        
+        this.setItemSale(item);
+    }
+    
+    public void setItemSale(Product item) {
+        if (item != null) {
+            this.itemSale = new Sale();
+            this.itemSale.setProduct(item);
+            this.itemSale.setSaleTotal(item.getProductValue());
+            
+            String valueItem = this.df.format(itemSale.getProduct().getProductValue());
+            valueItem = FormatMoney.formatMoney(valueItem);
+            
+            txtProductKey.setText(itemSale.getProduct().getProductKey());
+            txtProductName.setText(itemSale.getProduct().getProductName());
+            txtNetValue.setText("R$ " + valueItem);
+            txtAmount.grabFocus();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.not_found);
+            
+            txtProductKey.setText("");
+            txtProductName.setText("");
+            txtNetValue.setText("");
+            txtAmount.setText("");
+            txtGrossValue.setText("");            
+            txtProductKey.grabFocus();
+        }
+    }
+    
+    private void setGrossValue(String value) {
+        if (this.itemSale != null && !txtProductKey.getText().isEmpty()) {
+            String grossValueString;
+            double grossValue = 0;
+            
+            if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
+                int amount = Integer.valueOf(value);
+                grossValue = this.itemSale.getProduct().getProductValue() * amount;
+                grossValueString = df.format(grossValue);
+                txtGrossValue.setText("R$ " + grossValueString);
+            } else {
+                //TODO: implementar para calculo do valor no peso
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.select_product);
+            txtAmount.setText("");
+            txtProductKey.grabFocus();
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -205,6 +273,7 @@ public class SGV extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         jMenuItem1 = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
@@ -259,6 +328,7 @@ public class SGV extends javax.swing.JFrame {
         setBackground(new java.awt.Color(153, 153, 255));
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setResizable(false);
+        getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Item Venda", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 12))); // NOI18N
 
@@ -306,9 +376,37 @@ public class SGV extends javax.swing.JFrame {
 
         lblProductKey.setText("Código Produto..:");
 
+        txtProductKey.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtProductKey.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtProductKeyFocusLost(evt);
+            }
+        });
+        txtProductKey.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtProductKeyKeyReleased(evt);
+            }
+        });
+
         lblProductName.setText("Produto..:");
 
+        txtProductName.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtProductName.setEnabled(false);
+
         lblNetValue.setText("Valor Líquido..:");
+
+        txtNetValue.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtNetValue.setEnabled(false);
+
+        txtAmount.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtAmount.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtAmountKeyReleased(evt);
+            }
+        });
+
+        txtGrossValue.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtGrossValue.setEnabled(false);
 
         lblAmont.setText("Quantidade..:");
 
@@ -319,6 +417,11 @@ public class SGV extends javax.swing.JFrame {
 
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/View.png"))); // NOI18N
         btnSearch.setText("Pesquisar");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         btnExclude.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Delete.png"))); // NOI18N
         btnExclude.setText("Excluir");
@@ -353,7 +456,7 @@ public class SGV extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(lblGrossValue)
-                                .addGap(0, 0, Short.MAX_VALUE))
+                                .addGap(0, 185, Short.MAX_VALUE))
                             .addComponent(txtGrossValue))))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -373,28 +476,36 @@ public class SGV extends javax.swing.JFrame {
                     .addComponent(lblProductKey)
                     .addComponent(lblProductName))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtProductKey, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtProductName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtProductKey, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
+                    .addComponent(txtProductName))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblNetValue)
                     .addComponent(lblAmont)
                     .addComponent(lblGrossValue))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNetValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtGrossValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(txtNetValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtGrossValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(11, 11, 11)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSearch)
                     .addComponent(btnExclude)
                     .addComponent(btnAdd))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 343, Short.MAX_VALUE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 185;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(11, 283, 0, 283);
+        getContentPane().add(jPanel1, gridBagConstraints);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Dados Venda", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 12))); // NOI18N
 
@@ -404,6 +515,7 @@ public class SGV extends javax.swing.JFrame {
         txtDiscountValue.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
 
         txtTotalValue.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        txtTotalValue.setEnabled(false);
 
         lblTotalValue.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         lblTotalValue.setText("Valor Total..:");
@@ -417,6 +529,7 @@ public class SGV extends javax.swing.JFrame {
         lblValueChange.setText("Valor Troco..:");
 
         txtValueChange.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        txtValueChange.setEnabled(false);
 
         btnFinalizeSale.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
         btnFinalizeSale.setText("Finalizar Venda");
@@ -445,7 +558,7 @@ public class SGV extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(lblValueChange)
-                        .addGap(0, 106, Short.MAX_VALUE))
+                        .addGap(0, 108, Short.MAX_VALUE))
                     .addComponent(txtValueChange))
                 .addContainerGap())
             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -484,6 +597,14 @@ public class SGV extends javax.swing.JFrame {
                     .addComponent(btnCancel))
                 .addContainerGap())
         );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.ipadx = 108;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 283, 44, 283);
+        getContentPane().add(jPanel2, gridBagConstraints);
 
         nmRegister.setText("Cadastro");
 
@@ -578,27 +699,6 @@ public class SGV extends javax.swing.JFrame {
 
         setJMenuBar(jMenuBar1);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(283, 283, 283)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(285, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
@@ -638,6 +738,33 @@ public class SGV extends javax.swing.JFrame {
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         this.initCheckout();
     }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void txtProductKeyFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProductKeyFocusLost
+        if (!txtProductKey.getText().trim().isEmpty()) {
+            this.getProductByKey();
+        }
+    }//GEN-LAST:event_txtProductKeyFocusLost
+
+    private void txtProductKeyKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtProductKeyKeyReleased
+        if (!txtProductKey.getText().trim().isEmpty()) {
+            String text = txtProductKey.getText().toUpperCase();
+            txtProductKey.setText(text);
+        }
+    }//GEN-LAST:event_txtProductKeyKeyReleased
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        this.initListProduct(this);
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void txtAmountKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAmountKeyReleased
+        if (!FormatMoney.verifyCodeChar(evt.getKeyChar()) || txtAmount.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+            String text = txtAmount.getText().substring(0, txtAmount.getText().length() -1);
+            txtAmount.setText(text);
+        } else {
+            this.setGrossValue(txtAmount.getText());
+        }
+    }//GEN-LAST:event_txtAmountKeyReleased
 
     /**
      * @param args the command line arguments

@@ -83,6 +83,23 @@ public class ProductService {
         return response;
     }
     
+    public ResponseModel<Product> getProductByKey(String productKey) {
+        ResponseModel<Product> response = new ResponseModel<>();
+        
+        try {
+            Product product = this.productRepository.getProductByKey(productKey);
+            response.setModel(product);
+        } catch(Exception ex) {
+            System.out.println("Error: " + ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setMensage(Messages.fail_find);
+            response.setModel(null);
+        }
+        
+        return response;
+    }
+    
     public ResponseModel<Boolean> removeProduct(Product product) {
         ResponseModel<Boolean> response = new ResponseModel<>();
         

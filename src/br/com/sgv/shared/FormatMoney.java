@@ -83,7 +83,8 @@ public class FormatMoney {
             case KeyEvent.VK_F9:
             case KeyEvent.VK_F10:
             case KeyEvent.VK_F11:                     
-            case KeyEvent.VK_F12:  
+            case KeyEvent.VK_F12:
+            case KeyEvent.VK_SPACE:
                 isVerify = true;
         }
         
