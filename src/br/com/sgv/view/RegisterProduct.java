@@ -1,5 +1,6 @@
 package br.com.sgv.view;
 
+import br.com.sgv.enumerator.CalcTypeEnum;
 import br.com.sgv.model.MeasureType;
 import br.com.sgv.model.Product;
 import br.com.sgv.service.MeasureTypeService;
@@ -46,7 +47,7 @@ public class RegisterProduct extends javax.swing.JDialog {
     }
     
     public void initScreenUpdate(Product product, boolean isUpdate, ListProduct jDialog) {
-        String value = FormatMoney.verifyDecimalMoney(String.valueOf(product.getProductValue()));
+        String value = FormatMoney.verifyDecimal(String.valueOf(product.getProductValue()), CalcTypeEnum.UNITY.value);
         value = FormatMoney.formatMoney(value);
         
         int index = this.listMeasureType.indexOf(product.getMeasureType());

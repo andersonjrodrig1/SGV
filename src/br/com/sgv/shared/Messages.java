@@ -20,6 +20,7 @@ public class Messages {
     public static String remove_modal = "Deseja excluir o item selecionado?";
     public static String not_found = "Item não encontrado!";
     public static String select_product = "Favor selecione um item na lista de produtos.";
+    public static String required_product_key = "Necessário informar código do produto.";
     
     /* Login */
     public static String user = "Usuário..:";
@@ -50,7 +51,7 @@ public class Messages {
     public static String title_list_user = "Lista de Usuários Cadastrados";
     
     /* Register Product */
-    public static String key_register_product = "Código de Produto obrigatório.";
+    public static String key_register_product = "Código Produto obrigatório.";
     public static String name_register_product = "Nome do Produto obrigatório.";
     public static String value_register_product = "Valor do Produto obrigatório.";
     public static String measure_register_product = "Volume do Produto obrigatório.";
@@ -59,6 +60,7 @@ public class Messages {
     public static String title_update_product = "Atualizar Produto";
     public static String btn_register_product = "Cadastrar";
     public static String btn_update_product = "Atualizar";
+    public static String amount_required = "Quantidade obrigatório.";
     
     /* Register Measure */
     public static String name_register_measure = "Nome da Unidade obrigatório.";

@@ -14,19 +14,29 @@ import br.com.sgv.service.UserTypeService;
 import br.com.sgv.shared.FormatMoney;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
+import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * @author Anderson Junior Rodrigues
  */
 public class SGV extends javax.swing.JFrame {
 
-    private DecimalFormat df = new DecimalFormat("#.00");
+    private DefaultTableModel table = null;
+    private DecimalFormat df = new DecimalFormat("#0.00");
+    private List<Sale> listItemsSale = null;
     private int screenType;
+    
+    private double discountValue = 0d;
+    private double totalValue = 0d;
+    private double paidValue = 0d;
+    private double changeValue = 0d;
     
     private Login login = null;
     private About about = null;
@@ -53,6 +63,8 @@ public class SGV extends javax.swing.JFrame {
         this.getAcessUserLogin();
         
         initComponents();
+        initFieldsScreen();
+        initTableItems();
     }
     
     public void initScreen() {     
@@ -62,6 +74,25 @@ public class SGV extends javax.swing.JFrame {
         //this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+    
+    private void initFieldsScreen() {
+        txtProductKey.setBackground(Color.WHITE);
+        txtProductName.setBackground(Color.WHITE);
+        txtNetValue.setBackground(Color.WHITE);
+        txtAmount.setBackground(Color.WHITE);
+        txtGrossValue.setBackground(Color.WHITE);
+        txtDiscountValue.setBackground(Color.WHITE);
+        txtTotalValue.setBackground(Color.WHITE);
+        txtAmountPaid.setBackground(Color.WHITE);
+        txtValueChange.setBackground(Color.WHITE);
+    }
+    
+    private void initTableItems() {
+        this.listItemsSale = new ArrayList<>();
+        
+        this.table = (DefaultTableModel)tableItems.getModel();
+        this.table.setRowCount(0);
     }
     
     private void getAcessUserLogin() {
@@ -235,14 +266,17 @@ public class SGV extends javax.swing.JFrame {
             txtAmount.grabFocus();
         } else {
             JOptionPane.showMessageDialog(null, Messages.not_found);
-            
-            txtProductKey.setText("");
-            txtProductName.setText("");
-            txtNetValue.setText("");
-            txtAmount.setText("");
-            txtGrossValue.setText("");            
-            txtProductKey.grabFocus();
+            this.clearFields();            
         }
+    }
+    
+    private void clearFields() {
+        txtProductKey.setText("");
+        txtProductName.setText("");
+        txtNetValue.setText("");
+        txtAmount.setText("");
+        txtGrossValue.setText("");            
+        txtProductKey.grabFocus();
     }
     
     private void setGrossValue(String value) {
@@ -252,17 +286,75 @@ public class SGV extends javax.swing.JFrame {
             
             if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
                 int amount = Integer.valueOf(value);
+                this.itemSale.setAmount(amount);
                 grossValue = this.itemSale.getProduct().getProductValue() * amount;
                 grossValueString = df.format(grossValue);
-                txtGrossValue.setText("R$ " + grossValueString);
             } else {
-                //TODO: implementar para calculo do valor no peso
+                value = FormatMoney.verifyAmountDecimal(value);
+                txtAmount.setText(value);
+                
+                value = value.replace(",", ".");
+                double amount = Double.valueOf(value);
+                this.itemSale.setAmount(amount);
+                grossValue = this.itemSale.getProduct().getProductValue() * amount;
+                grossValueString = this.df.format(grossValue);                
             }
+            
+            this.itemSale.setSaleTotal(grossValue);
+            txtGrossValue.setText("R$ " + grossValueString);
         } else {
             JOptionPane.showMessageDialog(null, Messages.select_product);
             txtAmount.setText("");
             txtProductKey.grabFocus();
         }
+    }
+    
+    private void reserveProductList() {
+        if (verifyFieldsRequired()) {
+            String amountString = "";
+            this.totalValue = 0d;
+            
+            if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
+                amountString = String.valueOf(this.itemSale.getAmount());
+            } else {
+                amountString = String.valueOf(this.itemSale.getAmount());
+                amountString = FormatMoney.verifyDecimal(amountString, this.itemSale.getProduct().getMeasureType().getCalcType().getId());
+            }
+            
+            this.table.addRow(new Object[] {
+                this.itemSale.getProduct().getId(),
+                this.itemSale.getProduct().getProductName(),
+                "R$ " + this.df.format(this.itemSale.getProduct().getProductValue()),
+                amountString,
+                "R$ " + this.df.format(this.itemSale.getSaleTotal())
+            });
+            
+            this.listItemsSale.add(this.itemSale);            
+            this.listItemsSale.stream().forEach(item -> this.totalValue += item.getSaleTotal());
+            
+            txtTotalValue.setText(this.df.format(this.totalValue));
+            this.clearFields();
+        }
+    }
+    
+    private boolean verifyFieldsRequired() {
+        boolean isVerify = true;
+        String message = "";
+        
+        if (txtProductKey.getText().isEmpty()) {
+            message += Messages.key_register_product + "\n";
+        }
+        
+        if (txtAmount.getText().isEmpty()) {
+            message += Messages.amount_required + "\n";
+        }
+        
+        if (!message.isEmpty()) {
+            JOptionPane.showMessageDialog(null, message);
+            isVerify = false;
+        }
+        
+        return isVerify;
     }
     
     /**
@@ -302,6 +394,9 @@ public class SGV extends javax.swing.JFrame {
         txtAmountPaid = new javax.swing.JTextField();
         lblValueChange = new javax.swing.JLabel();
         txtValueChange = new javax.swing.JTextField();
+        jPanel3 = new javax.swing.JPanel();
+        rdbMoney = new javax.swing.JRadioButton();
+        rdbCard = new javax.swing.JRadioButton();
         btnFinalizeSale = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -410,10 +505,15 @@ public class SGV extends javax.swing.JFrame {
 
         lblAmont.setText("Quantidade..:");
 
-        lblGrossValue.setText("Valor Bruto..:");
+        lblGrossValue.setText("Valor Total..:");
 
         btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Add.png"))); // NOI18N
         btnAdd.setText("Adicionar");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
 
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/View.png"))); // NOI18N
         btnSearch.setText("Pesquisar");
@@ -485,15 +585,17 @@ public class SGV extends javax.swing.JFrame {
                     .addComponent(lblAmont)
                     .addComponent(lblGrossValue))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNetValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtGrossValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtNetValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtGrossValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(11, 11, 11)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnSearch)
-                    .addComponent(btnExclude)
-                    .addComponent(btnAdd))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnExclude)
+                        .addComponent(btnAdd)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -502,9 +604,10 @@ public class SGV extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.ipadx = 185;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(11, 283, 0, 283);
+        gridBagConstraints.insets = new java.awt.Insets(17, 284, 0, 284);
         getContentPane().add(jPanel1, gridBagConstraints);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Dados Venda", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 12))); // NOI18N
@@ -513,8 +616,10 @@ public class SGV extends javax.swing.JFrame {
         lblDiscountValue.setText("Valor Desconto..:");
 
         txtDiscountValue.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        txtDiscountValue.setText("0,00");
 
         txtTotalValue.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        txtTotalValue.setText("0,00");
         txtTotalValue.setEnabled(false);
 
         lblTotalValue.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -524,54 +629,42 @@ public class SGV extends javax.swing.JFrame {
         lblAmountPaid.setText("Valor Pago..:");
 
         txtAmountPaid.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        txtAmountPaid.setText("0,00");
 
         lblValueChange.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         lblValueChange.setText("Valor Troco..:");
 
         txtValueChange.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        txtValueChange.setText("0,00");
         txtValueChange.setEnabled(false);
-
-        btnFinalizeSale.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
-        btnFinalizeSale.setText("Finalizar Venda");
-
-        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Erase.png"))); // NOI18N
-        btnCancel.setText("Cancelar");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(37, 37, 37)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblDiscountValue)
-                    .addComponent(txtDiscountValue, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(txtDiscountValue, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblTotalValue)
-                    .addComponent(txtTotalValue, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(txtTotalValue, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblAmountPaid)
-                    .addComponent(txtAmountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(lblValueChange)
-                        .addGap(0, 108, Short.MAX_VALUE))
-                    .addComponent(txtValueChange))
-                .addContainerGap())
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(270, 270, 270)
-                .addComponent(btnFinalizeSale)
+                    .addComponent(txtAmountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnCancel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblValueChange))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addGroup(jPanel2Layout.createSequentialGroup()
@@ -587,24 +680,76 @@ public class SGV extends javax.swing.JFrame {
                             .addComponent(lblAmountPaid)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(txtAmountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createSequentialGroup()
                             .addComponent(lblValueChange)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnFinalizeSale)
-                    .addComponent(btnCancel))
-                .addContainerGap())
+                .addContainerGap(18, Short.MAX_VALUE))
+        );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipadx = 28;
+        gridBagConstraints.ipady = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 284);
+        getContentPane().add(jPanel2, gridBagConstraints);
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Tipo de Pagamento", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 12))); // NOI18N
+
+        rdbMoney.setText("Pagamento Dinheiro");
+
+        rdbCard.setText("Pagamento Cartão");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbMoney)
+                    .addComponent(rdbCard))
+                .addContainerGap(39, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(rdbMoney)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(rdbCard)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 108;
+        gridBagConstraints.ipadx = 33;
+        gridBagConstraints.ipady = 24;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 283, 44, 283);
-        getContentPane().add(jPanel2, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(6, 284, 0, 0);
+        getContentPane().add(jPanel3, gridBagConstraints);
+
+        btnFinalizeSale.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
+        btnFinalizeSale.setText("Finalizar Venda");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(11, 87, 61, 0);
+        getContentPane().add(btnFinalizeSale, gridBagConstraints);
+
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Erase.png"))); // NOI18N
+        btnCancel.setText("Cancelar");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(11, 10, 61, 0);
+        getContentPane().add(btnCancel, gridBagConstraints);
 
         nmRegister.setText("Cadastro");
 
@@ -757,7 +902,10 @@ public class SGV extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void txtAmountKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAmountKeyReleased
-        if (!FormatMoney.verifyCodeChar(evt.getKeyChar()) || txtAmount.getText().isEmpty()) {
+        if (txtProductKey.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, Messages.required_product_key);
+            txtAmount.setText("");
+        } else if (!FormatMoney.verifyCodeChar(evt.getKeyChar()) || txtAmount.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, Messages.verif_value_field);
             String text = txtAmount.getText().substring(0, txtAmount.getText().length() -1);
             txtAmount.setText(text);
@@ -765,6 +913,10 @@ public class SGV extends javax.swing.JFrame {
             this.setGrossValue(txtAmount.getText());
         }
     }//GEN-LAST:event_txtAmountKeyReleased
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        this.reserveProductList();
+    }//GEN-LAST:event_btnAddActionPerformed
 
     /**
      * @param args the command line arguments
@@ -816,6 +968,7 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
@@ -837,6 +990,8 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JMenu nmRegister;
     private javax.swing.JMenuItem nmRegisterProduct;
     private javax.swing.JMenuItem nmRegisterUser;
+    private javax.swing.JRadioButton rdbCard;
+    private javax.swing.JRadioButton rdbMoney;
     private javax.swing.JTable tableItems;
     private javax.swing.JTextField txtAmount;
     private javax.swing.JTextField txtAmountPaid;

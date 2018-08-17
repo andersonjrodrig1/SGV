@@ -20,7 +20,7 @@ public class ListProduct extends javax.swing.JDialog {
      * Creates new form ListProduct
      */
     
-    private DecimalFormat df = new DecimalFormat("#.00");
+    private DecimalFormat df = new DecimalFormat("#0.00");
     private RegisterProduct registerProduct = null;
     private ResponseModel<List<Product>> listResponse = null;
     private List<Product> listProduct = null;

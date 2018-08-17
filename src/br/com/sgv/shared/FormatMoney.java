@@ -5,6 +5,7 @@
  */
 package br.com.sgv.shared;
 
+import br.com.sgv.enumerator.CalcTypeEnum;
 import java.awt.event.KeyEvent;
 
 /**
@@ -43,16 +44,50 @@ public class FormatMoney {
         return moneyFormat;
     }
     
-    public static String verifyDecimalMoney(String money) {
+    public static String verifyDecimal(String money, int typeCalc) {
         String[] splitMoney = money.split("\\.");
         
-        if (splitMoney.length == 1) {
-            money = money.concat(".00");
-        } else if (splitMoney[splitMoney.length -1].length() == 1) {
-            money = money.concat("0");
+        if (typeCalc == CalcTypeEnum.UNITY.value) {
+            if (splitMoney.length == 1) {
+                money = money.concat(".00");
+            } else if (splitMoney[splitMoney.length -1].length() == 1) {
+                money = money.concat("0");
+            }
+        } else {
+            if (splitMoney.length == 1) {
+                money = money.concat(".000");
+            } else if (splitMoney[1].length() == 1) {
+                money = money.concat("00");
+            } else if (splitMoney[1].length() == 2) {
+                money = money.concat("0");
+            } 
         }
         
         return money;
+    }
+    
+    public static String verifyAmountDecimal(String amount) {
+        if (!amount.isEmpty()) {
+            amount = amount.replaceAll(",", "").replaceAll("\\.", "");
+            int convertValue = Integer.valueOf(amount);
+            amount = String.valueOf(convertValue);
+
+            if (amount.length() == 1) {
+                amount = "0,00".concat(amount);
+            } else if (amount.length() == 2) {
+                amount = "0,0".concat(amount);
+            } else if (amount.length() == 3) {
+                amount = "0,".concat(amount);
+            } else {
+                String g = amount.substring(amount.length() -3, amount.length());
+                String kg = amount.substring(0, amount.length() -3);
+                amount = kg.concat(",").concat(g);
+            }
+        } else {
+            return "0,000";
+        }
+        
+        return amount;
     }
     
     public static boolean verifyCodeChar(char letter) {
