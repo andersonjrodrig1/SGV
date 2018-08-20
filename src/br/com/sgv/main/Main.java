@@ -22,7 +22,7 @@ public class Main {
     private static Login login;
     private static JDialog dialog;
 
-    public static void main(String[] args) {        
+    public static void main(String[] args) {  
         initializerApp();
     }
     

@@ -23,7 +23,7 @@ public class UserRepository extends PersistenceRepository {
         session = ContextFactory.initContextDb();
         Query query = session.createQuery("from User");
         List<User> users = query.list();
-        ContextFactory.commit();
+        ContextFactory.close();
 
         return users;
     }
@@ -36,7 +36,7 @@ public class UserRepository extends PersistenceRepository {
                 .setParameter("login", user.getUserName())
                 .setParameter("password", user.getUserPassword())
                 .uniqueResult();
-        ContextFactory.commit();
+        ContextFactory.close();
         
         return (User)query;
     }

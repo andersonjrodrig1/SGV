@@ -19,7 +19,7 @@ public class AcessPermissionRepository extends PersistenceRepository{
         session = ContextFactory.initContextDb();
         Query query = session.createQuery(hql).setParameter("usertypeid", userTypeId);        
         List<AcessPermission> listAcessPermission = query.list();
-        ContextFactory.commit();
+        ContextFactory.close();
         
         return listAcessPermission;
     }

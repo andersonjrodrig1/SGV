@@ -17,7 +17,7 @@ public class CalcTypeRepository extends PersistenceRepository {
         session = ContextFactory.initContextDb();
         Query query = session.createQuery("from CalcType");
         List<CalcType> listCalcType = query.list();
-        ContextFactory.commit();
+        ContextFactory.close();
         
         return listCalcType;
     }

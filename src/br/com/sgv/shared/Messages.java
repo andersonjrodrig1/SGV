@@ -3,6 +3,7 @@ package br.com.sgv.shared;
 /**
  * @author Anderson Junior Rodrigues
  */
+
 public class Messages {
     
     /* General */
@@ -75,4 +76,9 @@ public class Messages {
     public static String checkout_value = "Total de saída obrigatório.";
     public static String checkout_date = "Data da saída obrigatório.";
     public static String checkout_no_remove = "Registro de saída não pode ser removido!\nRegistro já contabilizado no fechamento.";
+    
+    /* SGV */
+    public static String selected_item = "Falha ao registrar a venda. \nVerifique se os itens foram selecionados corretamente.";
+    public static String text_weight = "Peso..:";
+    public static String text_amount = "Quantidade..:";
 }

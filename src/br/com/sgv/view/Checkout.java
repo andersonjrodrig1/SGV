@@ -392,11 +392,13 @@ public class Checkout extends javax.swing.JDialog {
     }//GEN-LAST:event_btnRegisterActionPerformed
 
     private void txtCheckoutValueKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCheckoutValueKeyReleased
-        if (!FormatMoney.verifyCodeChar(evt.getKeyChar()) || txtCheckoutValue.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, Messages.verif_value_field);
-            txtCheckoutValue.setText("0,00");
-        } else {
-            this.setMaskMoney();
+        if (!txtCheckoutValue.getText().isEmpty()) {
+            if (!FormatMoney.verifyCodeChar(evt)) {
+                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                txtCheckoutValue.setText("0,00");
+            } else {
+                this.setMaskMoney();
+            }
         }
     }//GEN-LAST:event_txtCheckoutValueKeyReleased
 

@@ -27,14 +27,21 @@ public class ContextFactory {
         return ss;
     }
     
+    public static void beginTransaction() {
+        ts.begin();
+    }
+    
     public static void commit() {
         ts.commit();
-        ss.flush();
-        ss.close();
+        close();
     }
     
     public static void rollback() {
         ts.rollback();
+        close();
+    }
+    
+    public static void close() {
         ss.flush();
         ss.close();
     }

@@ -90,10 +90,20 @@ public class FormatMoney {
         return amount;
     }
     
-    public static boolean verifyCodeChar(char letter) {
-        boolean isVerify = false;
+    public static boolean verifyCodeChar(KeyEvent event) {
+        Object objKeyChar = event.getKeyChar();        
+        char letterChar = 0;
         
-        switch(letter) {
+        if (event.getKeyChar() != '\uffff') {            
+            if (event.getKeyChar() != '\b') {
+                if (objKeyChar instanceof String)
+                    return false;
+                else
+                    letterChar = (char)objKeyChar;
+            }
+        }
+        
+        switch(letterChar) {
             case '1':
             case '2':
             case '3':
@@ -104,9 +114,10 @@ public class FormatMoney {
             case '8':
             case '9':
             case '0':
-            case KeyEvent.VK_ENTER:
-            case KeyEvent.VK_BACK_SPACE:
-            case KeyEvent.VK_ESCAPE:
+                return true;
+        }
+        
+        switch(event.getKeyCode()) {
             case KeyEvent.VK_F1:
             case KeyEvent.VK_F2:
             case KeyEvent.VK_F3:
@@ -119,10 +130,27 @@ public class FormatMoney {
             case KeyEvent.VK_F10:
             case KeyEvent.VK_F11:                     
             case KeyEvent.VK_F12:
+            case KeyEvent.VK_ENTER:
+            case KeyEvent.VK_ESCAPE:
+            case KeyEvent.VK_BACK_SPACE:
             case KeyEvent.VK_SPACE:
-                isVerify = true;
+            case KeyEvent.VK_CONTROL:
+            case KeyEvent.VK_WINDOWS:
+            case KeyEvent.VK_AT:
+            case KeyEvent.VK_PRINTSCREEN:
+            case KeyEvent.VK_DELETE:
+            case KeyEvent.VK_PAGE_UP:
+            case KeyEvent.VK_PAGE_DOWN:
+            case KeyEvent.VK_HOME:
+            case KeyEvent.VK_END:
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_SHIFT:
+                return true;
         }
         
-        return isVerify;
+        return false;
     }
 }

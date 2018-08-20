@@ -4,6 +4,7 @@ import br.com.sgv.model.AcessPermission;
 import br.com.sgv.model.AcessScreen;
 import br.com.sgv.model.CalcType;
 import br.com.sgv.model.MeasureType;
+import br.com.sgv.model.PayType;
 import br.com.sgv.model.StatusRegister;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
@@ -61,6 +62,10 @@ public class InitializerDb {
         
         if (session.createQuery("from StatusRegister").list().size() <= 0) {
             insertStatusRegister();
+        }
+        
+        if (session.createQuery("from PayType").list().size() <= 0) {
+            insertPayType();
         }
         
         ContextFactory.commit();
@@ -154,5 +159,13 @@ public class InitializerDb {
         listStatusRegister.add(new StatusRegister("Totalizado"));
         
         listStatusRegister.stream().forEach(status -> session.save(status));
+    }
+    
+    private static void insertPayType() {
+        List<PayType> listPayType = new ArrayList<>();
+        listPayType.add(new PayType("Dinheiro"));
+        listPayType.add(new PayType("Cartão"));
+        
+        listPayType.stream().forEach(payType -> session.save(payType));
     }
 }

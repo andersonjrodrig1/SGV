@@ -35,6 +35,7 @@ public class SGV extends javax.swing.JFrame {
     
     private double discountValue = 0d;
     private double totalValue = 0d;
+    private double valueWithDiscount = 0d;
     private double paidValue = 0d;
     private double changeValue = 0d;
     
@@ -257,12 +258,26 @@ public class SGV extends javax.swing.JFrame {
             this.itemSale.setProduct(item);
             this.itemSale.setSaleTotal(item.getProductValue());
             
-            String valueItem = this.df.format(itemSale.getProduct().getProductValue());
+            String valueItem = this.df.format(this.itemSale.getProduct().getProductValue());
             valueItem = FormatMoney.formatMoney(valueItem);
             
-            txtProductKey.setText(itemSale.getProduct().getProductKey());
-            txtProductName.setText(itemSale.getProduct().getProductName());
+            txtProductKey.setText(this.itemSale.getProduct().getProductKey());
+            txtProductName.setText(this.itemSale.getProduct().getProductName());
             txtNetValue.setText("R$ " + valueItem);
+            
+            if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.WEIGHT.value) {
+                txtAmount.setText("0,000");
+                txtGrossValue.setText("R$ 0,00");
+                lblAmont.setText(Messages.text_weight);
+            } else {
+                this.itemSale.setAmount(1);
+                double productValue = this.itemSale.getProduct().getProductValue() * this.itemSale.getAmount();
+                this.itemSale.setSaleTotal(productValue);
+                txtGrossValue.setText("R$ " + this.df.format(productValue));
+                txtAmount.setText("1");
+                lblAmont.setText(Messages.text_amount);
+            }
+            
             txtAmount.grabFocus();
         } else {
             JOptionPane.showMessageDialog(null, Messages.not_found);
@@ -309,13 +324,56 @@ public class SGV extends javax.swing.JFrame {
         }
     }
     
+    private void setDiscountValue(String value) {
+        this.changeValue = 0d;
+        this.discountValue = 0d;
+        
+        value = FormatMoney.formatMoney(value);
+        txtDiscountValue.setText(value);
+        value = value.replace(",", ".");        
+        this.discountValue = Double.valueOf(value);
+        
+        if (this.discountValue > 0d){
+            this.valueWithDiscount = this.totalValue - this.discountValue;
+            
+            if (this.paidValue > 0d) {
+                this.changeValue = this.paidValue - this.valueWithDiscount;
+                txtValueChange.setText(this.df.format(this.changeValue));
+            }
+        } else {
+            this.valueWithDiscount = this.totalValue;
+        }        
+        
+        String discount = this.df.format(this.valueWithDiscount);
+        txtTotalValue.setText(discount);
+    }
+    
+    private void setChangeValue(String value) {
+        this.changeValue = 0d;
+        
+        value = FormatMoney.formatMoney(value);
+        txtAmountPaid.setText(value);
+        value = value.replace(",", ".");
+        
+        if (this.discountValue > 0d) {
+            this.valueWithDiscount = this.totalValue - this.discountValue;
+        } else {
+            this.valueWithDiscount = this.totalValue;
+        }
+        
+        this.paidValue = Double.valueOf(value);
+        this.changeValue = this.paidValue - this.valueWithDiscount;
+        txtValueChange.setText(this.df.format(this.changeValue));
+    }
+    
     private void reserveProductList() {
         if (verifyFieldsRequired()) {
             String amountString = "";
             this.totalValue = 0d;
             
             if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
-                amountString = String.valueOf(this.itemSale.getAmount());
+                int amount = (int)this.itemSale.getAmount();
+                amountString = String.valueOf(amount);
             } else {
                 amountString = String.valueOf(this.itemSale.getAmount());
                 amountString = FormatMoney.verifyDecimal(amountString, this.itemSale.getProduct().getMeasureType().getCalcType().getId());
@@ -345,7 +403,7 @@ public class SGV extends javax.swing.JFrame {
             message += Messages.key_register_product + "\n";
         }
         
-        if (txtAmount.getText().isEmpty()) {
+        if (txtAmount.getText().isEmpty() || txtAmount.getText().equals("0,000")) {
             message += Messages.amount_required + "\n";
         }
         
@@ -617,6 +675,11 @@ public class SGV extends javax.swing.JFrame {
 
         txtDiscountValue.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         txtDiscountValue.setText("0,00");
+        txtDiscountValue.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtDiscountValueKeyReleased(evt);
+            }
+        });
 
         txtTotalValue.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         txtTotalValue.setText("0,00");
@@ -630,6 +693,11 @@ public class SGV extends javax.swing.JFrame {
 
         txtAmountPaid.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         txtAmountPaid.setText("0,00");
+        txtAmountPaid.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtAmountPaidKeyReleased(evt);
+            }
+        });
 
         lblValueChange.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         lblValueChange.setText("Valor Troco..:");
@@ -700,8 +768,18 @@ public class SGV extends javax.swing.JFrame {
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Tipo de Pagamento", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 12))); // NOI18N
 
         rdbMoney.setText("Pagamento Dinheiro");
+        rdbMoney.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdbMoneyActionPerformed(evt);
+            }
+        });
 
         rdbCard.setText("Pagamento Cartão");
+        rdbCard.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdbCardActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -905,18 +983,56 @@ public class SGV extends javax.swing.JFrame {
         if (txtProductKey.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, Messages.required_product_key);
             txtAmount.setText("");
-        } else if (!FormatMoney.verifyCodeChar(evt.getKeyChar()) || txtAmount.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, Messages.verif_value_field);
-            String text = txtAmount.getText().substring(0, txtAmount.getText().length() -1);
-            txtAmount.setText(text);
-        } else {
-            this.setGrossValue(txtAmount.getText());
+        } else if (!txtAmount.getText().isEmpty()) {        
+            if (!FormatMoney.verifyCodeChar(evt)) {
+                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                String text = txtAmount.getText().substring(0, txtAmount.getText().length() -1);
+                txtAmount.setText(text);
+            } else {
+                this.setGrossValue(txtAmount.getText());
+            }
         }
     }//GEN-LAST:event_txtAmountKeyReleased
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         this.reserveProductList();
     }//GEN-LAST:event_btnAddActionPerformed
+
+    private void rdbMoneyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdbMoneyActionPerformed
+        if (rdbCard.isSelected()) {
+            rdbCard.setSelected(false);
+        }
+    }//GEN-LAST:event_rdbMoneyActionPerformed
+
+    private void rdbCardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdbCardActionPerformed
+        if (rdbMoney.isSelected()) {
+            rdbMoney.setSelected(false);
+        }
+    }//GEN-LAST:event_rdbCardActionPerformed
+
+    private void txtDiscountValueKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtDiscountValueKeyReleased
+        if (!txtDiscountValue.getText().isEmpty()) {
+            if (!FormatMoney.verifyCodeChar(evt)) {
+                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                String text = txtDiscountValue.getText().substring(0, txtDiscountValue.getText().length() -1);
+                txtAmount.setText(text);
+            } else {
+                this.setDiscountValue(txtDiscountValue.getText());
+            }
+        }
+    }//GEN-LAST:event_txtDiscountValueKeyReleased
+
+    private void txtAmountPaidKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAmountPaidKeyReleased
+        if (!txtAmountPaid.getText().isEmpty()) {
+            if (!FormatMoney.verifyCodeChar(evt)) {
+                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                String text = txtAmountPaid.getText().substring(0, txtAmountPaid.getText().length() -1);
+                txtAmountPaid.setText(text);
+            } else {
+                this.setChangeValue(txtAmountPaid.getText());
+            }
+        }
+    }//GEN-LAST:event_txtAmountPaidKeyReleased
 
     /**
      * @param args the command line arguments

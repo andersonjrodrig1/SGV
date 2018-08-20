@@ -1,21 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.shared;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
+
 public class CriptoText {
     
     public static String encryptionText(String text) {
-        return "";
+        return text;
     }
     
     public static String decryptText(String text) {
-        return "";
+        return text;
+    }
+    
+    public static String convertHexadecimal(long number) {
+        String hexadecimal = Long.toHexString(number);
+        
+        return hexadecimal;
     }
 }
