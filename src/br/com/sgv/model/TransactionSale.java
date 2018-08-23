@@ -39,8 +39,11 @@ public class TransactionSale implements Serializable {
     @Column(name = "total_value", nullable = false)
     private double totalValue;
     
-    @Column(name = "value_with_discount", nullable = true)
+    @Column(name = "value_with_discount", nullable = false)
     private double valueWithDiscount;
+    
+    @Column(name = "paid_value", nullable = false)
+    private double paidValue;
     
     @ManyToOne
     @JoinColumn(name = "pay_type_id", nullable = false)
@@ -120,5 +123,13 @@ public class TransactionSale implements Serializable {
 
     public void setRegisterDate(Date registerDate) {
         this.registerDate = registerDate;
+    }
+    
+    public double getPaidValue() {
+        return paidValue;
+    }
+
+    public void setPaidValue(double paidValue) {
+        this.paidValue = paidValue;
     }
 }

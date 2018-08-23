@@ -8,6 +8,8 @@ import br.com.sgv.repository.TransactionSaleRepository;
 import br.com.sgv.shared.CriptoText;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import org.hibernate.Session;
 
@@ -32,10 +34,10 @@ public class TransactionSaleService {
         
         if (transactionSale != null && itemsSale != null && itemsSale.size() > 0){
             try {
-                ContextFactory.beginTransaction();
-                
                 long transactionMaxId = 0L;
+                
                 Object obj = this.transactionSaleRepository.getMaxTransaction();
+                Date now = Date.from(Instant.now());
                 
                 if (obj != null) {
                     String id = String.valueOf(obj);
@@ -44,11 +46,17 @@ public class TransactionSaleService {
                     transactionMaxId = 1;
                 }
                 
-                String transactionId = CriptoText.convertHexadecimal(transactionMaxId);
-                transactionSale.setTransactionId(transactionId);                
-                itemsSale.stream().forEach(item -> item.setTransactionId(transactionId));
+                String transactionId = "T".concat(CriptoText.convertHexadecimal(transactionMaxId));
+                transactionSale.setTransactionId(transactionId);
+                transactionSale.setRegisterDate(now);
                 
                 this.transactionSaleRepository.saveTransactionSale(transactionSale);
+                
+                itemsSale.stream().forEach(item -> {
+                    item.setTransactionId(transactionId);
+                    item.setSaleDate(now);
+                });
+                
                 this.saleRepository.saveSaleList(itemsSale);
                 
                 ContextFactory.commit();

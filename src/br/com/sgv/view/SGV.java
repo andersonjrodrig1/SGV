@@ -3,13 +3,17 @@ package br.com.sgv.view;
 import br.com.sgv.enumerator.AcessScreenEnum;
 import br.com.sgv.enumerator.CalcTypeEnum;
 import br.com.sgv.enumerator.OptionEnum;
+import br.com.sgv.enumerator.PayTypeEnum;
 import br.com.sgv.model.AcessPermission;
+import br.com.sgv.model.PayType;
 import br.com.sgv.model.Product;
 import br.com.sgv.model.Sale;
+import br.com.sgv.model.TransactionSale;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
 import br.com.sgv.service.AcessPermissionService;
 import br.com.sgv.service.ProductService;
+import br.com.sgv.service.TransactionSaleService;
 import br.com.sgv.service.UserTypeService;
 import br.com.sgv.shared.FormatMoney;
 import br.com.sgv.shared.Messages;
@@ -20,6 +24,7 @@ import java.awt.Rectangle;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -30,6 +35,7 @@ public class SGV extends javax.swing.JFrame {
 
     private DefaultTableModel table = null;
     private DecimalFormat df = new DecimalFormat("#0.00");
+    private TransactionSale transactionSale = null;
     private List<Sale> listItemsSale = null;
     private int screenType;
     
@@ -38,6 +44,8 @@ public class SGV extends javax.swing.JFrame {
     private double valueWithDiscount = 0d;
     private double paidValue = 0d;
     private double changeValue = 0d;
+    private int amountSale = 0;
+    private double weightSale = 0d;
     
     private Login login = null;
     private About about = null;
@@ -266,7 +274,6 @@ public class SGV extends javax.swing.JFrame {
             txtNetValue.setText("R$ " + valueItem);
             
             if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.WEIGHT.value) {
-                txtAmount.setText("0,000");
                 txtGrossValue.setText("R$ 0,00");
                 lblAmont.setText(Messages.text_weight);
             } else {
@@ -390,9 +397,160 @@ public class SGV extends javax.swing.JFrame {
             this.listItemsSale.add(this.itemSale);            
             this.listItemsSale.stream().forEach(item -> this.totalValue += item.getSaleTotal());
             
+            if (this.paidValue > 0d || this.changeValue > 0d) {
+                this.changeValue -= this.itemSale.getSaleTotal();
+                txtValueChange.setText(this.df.format(this.changeValue));
+            }
+            
             txtTotalValue.setText(this.df.format(this.totalValue));
             this.clearFields();
         }
+    }
+    
+    private void removeItem() {
+        if (tableItems.getRowCount() > 0) {
+            if (tableItems.getSelectedRow() >= 0) {
+                int option = JOptionPane.showConfirmDialog(null, Messages.remove_modal);
+                
+                if (option == OptionEnum.YES.value) {
+                    int row = tableItems.getSelectedRow();
+                    Object object = tableItems.getValueAt(row, 0);
+                    long id = (long)object;
+                    
+                    Sale item = this.listItemsSale
+                            .stream()
+                            .filter(x -> x.getProduct().getId() == id)
+                            .findAny()
+                            .orElse(null);
+                    
+                    this.listItemsSale = this.listItemsSale
+                            .stream()
+                            .filter(x -> x.getProduct().getId() != id)
+                            .collect(Collectors.toList());
+                    
+                    double valueItem = item.getProduct().getProductValue() * item.getAmount();
+                    this.totalValue = this.totalValue - valueItem;
+                    
+                    if (this.valueWithDiscount > 0d) {
+                        this.valueWithDiscount = this.valueWithDiscount - valueItem;
+                        txtTotalValue.setText(this.df.format(this.valueWithDiscount));
+                    } else
+                        txtTotalValue.setText(this.df.format(this.totalValue));
+                    
+                    if (this.paidValue > 0d) {
+                        this.changeValue = this.paidValue - this.valueWithDiscount;
+                        txtValueChange.setText(this.df.format(this.changeValue));
+                    }
+                    
+                    if (this.listItemsSale.size() <= 0) {
+                        this.paidValue = 0d;
+                        this.changeValue = 0d;
+                        txtAmountPaid.setText("0,00");
+                        txtValueChange.setText("0,00");
+                    }
+                    
+                    this.setTableList();
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, Messages.table_item_no_select);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.table_void);
+        }
+    }
+    
+    private void setTableList() {
+        this.table.setNumRows(0);
+        
+        listItemsSale.stream().forEach(item -> {
+            String amountString = "";
+            
+            if (item.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
+            int amount = (int)item.getAmount();
+            amountString = String.valueOf(amount);
+            } else {
+                amountString = String.valueOf(item.getAmount());
+                amountString = FormatMoney.verifyDecimal(amountString, item.getProduct().getMeasureType().getCalcType().getId());
+            }
+            
+            this.table.addRow(new Object[] {
+                item.getProduct().getId(),
+                item.getProduct().getProductName(),
+                "R$ " + this.df.format(item.getProduct().getProductValue()),
+                amountString,
+                "R$ " + this.df.format(item.getSaleTotal())
+            });
+        });
+    }
+    
+    private void finallySale() {
+        if (verifyFieldsRequiredSale()) {
+            int option = JOptionPane.showConfirmDialog(null, Messages.confirm_sale);
+            
+            if (option == OptionEnum.YES.value) {
+                PayType payType = new PayType();
+                this.amountSale = 0;
+                this.weightSale = 0;
+                
+                this.listItemsSale.stream().forEach(item -> {
+                    if (item.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
+                        this.amountSale += (int)item.getAmount();
+                    } else {
+                        this.weightSale += item.getAmount();
+                    }
+                });
+                
+                if (rdbMoney.isSelected()) {
+                    payType.setId(PayTypeEnum.MONEY.value);
+                    payType.setPayType("Dinheiro");
+                } else {
+                    payType.setId(PayTypeEnum.CARD.value);
+                    payType.setPayType("Cartão");
+                }
+                
+                this.transactionSale = new TransactionSale();
+                this.transactionSale.setAmount(this.amountSale);
+                this.transactionSale.setWeight(this.weightSale);
+                this.transactionSale.setPaidValue(this.paidValue);
+                this.transactionSale.setTotalValue(this.totalValue);
+                this.transactionSale.setValueWithDiscount(this.valueWithDiscount);
+                this.transactionSale.setDiscountValue(this.discountValue);
+                this.transactionSale.setPayType(payType);
+                
+                ResponseModel<Boolean> response = new TransactionSaleService().saveTransactionSale(transactionSale, listItemsSale);
+                
+                if (response.getModel()) {
+                    JOptionPane.showMessageDialog(null, Messages.success_sale);
+                    this.finalizerTransactionScreen();
+                } else {
+                    JOptionPane.showMessageDialog(null, response.getMensage());
+                }
+            }
+        }
+    }
+    
+    private boolean verifyFieldsRequiredSale() {
+        boolean isVerify = true;
+        String message = "";
+        
+        if (this.table.getRowCount() <= 0) {
+            message += Messages.select_product + "\n";
+        }
+        
+        if (!rdbMoney.isSelected() && !rdbCard.isSelected()) {
+            message += Messages.select_option_paid + "\n";
+        }
+        
+        if (this.paidValue <= 0) {
+            message += Messages.value_paid_client;
+        }
+        
+        if (!message.isEmpty()) {
+            JOptionPane.showMessageDialog(null, message);
+            isVerify = false;
+        }
+        
+        return isVerify;
     }
     
     private boolean verifyFieldsRequired() {
@@ -413,6 +571,47 @@ public class SGV extends javax.swing.JFrame {
         }
         
         return isVerify;
+    }
+    
+    private void cancelSale() {
+        if (table.getRowCount() > 0) {
+            int option = JOptionPane.showConfirmDialog(null, Messages.cancel_sale);
+
+            if (option == OptionEnum.YES.value) {
+                this.finalizerTransactionScreen();
+            }
+        }
+    }
+    
+    private void finalizerTransactionScreen() {
+        this.clearFields();
+        this.clearTableSale();
+        this.clearTypePaid();
+        this.clearDataPaySale();
+    }
+    
+    private void clearTableSale() {
+        this.table.setNumRows(0);
+    }
+    
+    private void clearTypePaid() {
+       this.rdbMoney.setSelected(false);
+       this.rdbCard.setSelected(false); 
+    }
+    
+    private void clearDataPaySale() {
+        this.totalValue = 0d;
+        this.paidValue = 0d;
+        this.changeValue = 0d;
+        this.discountValue = 0d;
+        this.valueWithDiscount = 0d;
+        this.amountSale = 0;
+        this.weightSale = 0d;
+        
+        txtDiscountValue.setText("0,00");
+        txtTotalValue.setText("0,00");
+        txtAmountPaid.setText("0,00");
+        txtValueChange.setText("0,00");
     }
     
     /**
@@ -443,6 +642,7 @@ public class SGV extends javax.swing.JFrame {
         btnAdd = new javax.swing.JButton();
         btnSearch = new javax.swing.JButton();
         btnExclude = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         lblDiscountValue = new javax.swing.JLabel();
         txtDiscountValue = new javax.swing.JTextField();
@@ -583,6 +783,19 @@ public class SGV extends javax.swing.JFrame {
 
         btnExclude.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Delete.png"))); // NOI18N
         btnExclude.setText("Excluir");
+        btnExclude.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcludeActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Trash.png"))); // NOI18N
+        btnClear.setText("Limpar");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -614,17 +827,19 @@ public class SGV extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(lblGrossValue)
-                                .addGap(0, 185, Short.MAX_VALUE))
-                            .addComponent(txtGrossValue))))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtGrossValue)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(178, 178, 178)
+                        .addComponent(btnAdd)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSearch)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnClear)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnExclude)
+                        .addGap(0, 178, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(233, 233, 233)
-                .addComponent(btnAdd)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnSearch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnExclude)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -649,11 +864,11 @@ public class SGV extends javax.swing.JFrame {
                         .addComponent(txtNetValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtGrossValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(11, 11, 11)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnExclude)
+                    .addComponent(btnAdd)
                     .addComponent(btnSearch)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnExclude)
-                        .addComponent(btnAdd)))
+                    .addComponent(btnClear))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -663,9 +878,9 @@ public class SGV extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.ipadx = 185;
+        gridBagConstraints.ipadx = 178;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(17, 284, 0, 284);
+        gridBagConstraints.insets = new java.awt.Insets(69, 284, 0, 284);
         getContentPane().add(jPanel1, gridBagConstraints);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Dados Venda", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 12))); // NOI18N
@@ -752,7 +967,7 @@ public class SGV extends javax.swing.JFrame {
                             .addComponent(lblValueChange)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -760,7 +975,7 @@ public class SGV extends javax.swing.JFrame {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.ipadx = 28;
-        gridBagConstraints.ipady = 7;
+        gridBagConstraints.ipady = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 284);
         getContentPane().add(jPanel2, gridBagConstraints);
@@ -806,27 +1021,37 @@ public class SGV extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.ipadx = 33;
-        gridBagConstraints.ipady = 24;
+        gridBagConstraints.ipady = 27;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(6, 284, 0, 0);
         getContentPane().add(jPanel3, gridBagConstraints);
 
         btnFinalizeSale.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
         btnFinalizeSale.setText("Finalizar Venda");
+        btnFinalizeSale.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnFinalizeSaleMouseClicked(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(11, 87, 61, 0);
+        gridBagConstraints.insets = new java.awt.Insets(18, 85, 87, 0);
         getContentPane().add(btnFinalizeSale, gridBagConstraints);
 
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Erase.png"))); // NOI18N
         btnCancel.setText("Cancelar");
+        btnCancel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnCancelMouseClicked(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(11, 10, 61, 0);
+        gridBagConstraints.insets = new java.awt.Insets(18, 10, 87, 0);
         getContentPane().add(btnCancel, gridBagConstraints);
 
         nmRegister.setText("Cadastro");
@@ -1034,6 +1259,22 @@ public class SGV extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_txtAmountPaidKeyReleased
 
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        this.clearFields();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnExcludeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcludeActionPerformed
+        this.removeItem();
+    }//GEN-LAST:event_btnExcludeActionPerformed
+
+    private void btnFinalizeSaleMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizeSaleMouseClicked
+        this.finallySale();
+    }//GEN-LAST:event_btnFinalizeSaleMouseClicked
+
+    private void btnCancelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCancelMouseClicked
+        this.cancelSale();
+    }//GEN-LAST:event_btnCancelMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -1072,6 +1313,7 @@ public class SGV extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnClear;
     private javax.swing.JButton btnExclude;
     private javax.swing.JButton btnFinalizeSale;
     private javax.swing.JButton btnSearch;

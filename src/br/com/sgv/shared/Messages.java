@@ -81,4 +81,11 @@ public class Messages {
     public static String selected_item = "Falha ao registrar a venda. \nVerifique se os itens foram selecionados corretamente.";
     public static String text_weight = "Peso..:";
     public static String text_amount = "Quantidade..:";
+    public static String table_void = "Não existe itens na cesta de produtos.";
+    public static String table_item_no_select = "Selecione um item da lista de produtos para executar está ação.";
+    public static String select_option_paid = "Selecione uma opção para pagamento.";
+    public static String value_paid_client = "Informe o valor pago pelo cliente.";
+    public static String cancel_sale = "Deseja cancelar a(s) venda(s) em aberto?";
+    public static String confirm_sale = "Deseja confirmar a venda?";
+    public static String success_sale = "Venda realizada com sucesso!";
 }
