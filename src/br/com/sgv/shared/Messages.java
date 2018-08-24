@@ -87,5 +87,5 @@ public class Messages {
     public static String value_paid_client = "Informe o valor pago pelo cliente.";
     public static String cancel_sale = "Deseja cancelar a(s) venda(s) em aberto?";
     public static String confirm_sale = "Deseja confirmar a venda?";
-    public static String success_sale = "Venda realizada com sucesso!";
+    public static String success_sale = "Venda registrada com sucesso!";
 }

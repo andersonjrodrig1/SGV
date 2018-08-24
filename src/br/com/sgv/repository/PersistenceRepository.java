@@ -13,13 +13,13 @@ public class PersistenceRepository {
     public <T> void save(T t) {        
         session = ContextFactory.initContextDb();
         session.save(t);
-        ContextFactory.close();
+        ContextFactory.commit();
     }
 
     public <T> T find(T t, long id) {
         session = ContextFactory.initContextDb();
         T response = (T) session.get(t.getClass(), id);
-        ContextFactory.close();
+        ContextFactory.commit();
 
         return response;
     }
@@ -27,13 +27,13 @@ public class PersistenceRepository {
     public <T> void update(T t) {
         session = ContextFactory.initContextDb();
         session.update(t);
-        ContextFactory.close();
+        ContextFactory.commit();
     }
 
     public <T> boolean remove(T t) {
         session = ContextFactory.initContextDb();
         session.delete(t);
-        ContextFactory.close();
+        ContextFactory.commit();
 
         return true;
     }

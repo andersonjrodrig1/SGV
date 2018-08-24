@@ -2,9 +2,11 @@ package br.com.sgv.view;
 
 import br.com.sgv.enumerator.AcessScreenEnum;
 import br.com.sgv.enumerator.CalcTypeEnum;
+import br.com.sgv.enumerator.MeasureTypeEnum;
 import br.com.sgv.enumerator.OptionEnum;
 import br.com.sgv.enumerator.PayTypeEnum;
 import br.com.sgv.model.AcessPermission;
+import br.com.sgv.model.MeasureType;
 import br.com.sgv.model.PayType;
 import br.com.sgv.model.Product;
 import br.com.sgv.model.Sale;
@@ -303,7 +305,7 @@ public class SGV extends javax.swing.JFrame {
     
     private void setGrossValue(String value) {
         if (this.itemSale != null && !txtProductKey.getText().isEmpty()) {
-            String grossValueString;
+            String grossValueString = "";
             double grossValue = 0;
             
             if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
@@ -313,15 +315,19 @@ public class SGV extends javax.swing.JFrame {
                 grossValueString = df.format(grossValue);
             } else {
                 value = FormatMoney.verifyAmountDecimal(value);
-                txtAmount.setText(value);
-                
+                txtAmount.setText(value);                
                 value = value.replace(",", ".");
                 double amount = Double.valueOf(value);
                 this.itemSale.setAmount(amount);
-                grossValue = this.itemSale.getProduct().getProductValue() * amount;
-                grossValueString = this.df.format(grossValue);                
+                
+                if (this.itemSale.getProduct().getMeasureType().getId() == MeasureTypeEnum.KILOGRAM.value || this.itemSale.getProduct().getMeasureType().getId() == MeasureTypeEnum.LITER.value) {
+                    grossValue = this.itemSale.getProduct().getProductValue() * amount;
+                } else if (this.itemSale.getProduct().getMeasureType().getId() == MeasureTypeEnum.GRASS.value || this.itemSale.getProduct().getMeasureType().getId() == MeasureTypeEnum.MILLILITER.value) {
+                    grossValue = this.itemSale.getProduct().getProductValue() * (amount * 10);
+                }
             }
             
+            grossValueString = this.df.format(grossValue);
             this.itemSale.setSaleTotal(grossValue);
             txtGrossValue.setText("R$ " + grossValueString);
         } else {

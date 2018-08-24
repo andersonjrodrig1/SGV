@@ -18,7 +18,7 @@ public class UserTypeRepository extends PersistenceRepository {
         session = ContextFactory.initContextDb();
         Query query = session.createQuery("from UserType");
         List<UserType> usersType = query.list();
-        ContextFactory.close();
+        ContextFactory.commit();
         
         return usersType;
     }

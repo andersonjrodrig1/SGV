@@ -23,7 +23,7 @@ public class CheckoutRepository extends PersistenceRepository {
         this.session = ContextFactory.initContextDb();
         Query query = this.session.createQuery("from Checkout");
         List<Checkout> listCheckout = query.list();
-        ContextFactory.close();
+        ContextFactory.commit();
         
         return listCheckout;
     }
@@ -36,7 +36,7 @@ public class CheckoutRepository extends PersistenceRepository {
                 .setParameter("initial", initial)
                 .setParameter("finally", finaly);
         List<Checkout> listCheckout = query.list();
-        ContextFactory.close();
+        ContextFactory.commit();
         
         return listCheckout;
     }

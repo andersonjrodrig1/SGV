@@ -147,8 +147,10 @@ public class InitializerDb {
         listMeasureType.add(new MeasureType("Unidade", null, calcUnity));
         listMeasureType.add(new MeasureType("Pedaço", null, calcUnity));
         listMeasureType.add(new MeasureType("Quilograma", "kg", calcWeight));
-        listMeasureType.add(new MeasureType("Miligrama", "ml", calcWeight));
-        listMeasureType.add(new MeasureType("Grama", "g", calcWeight));        
+        listMeasureType.add(new MeasureType("Mililitro", "ml", calcWeight));
+        listMeasureType.add(new MeasureType("Grama", "g", calcWeight));
+        listMeasureType.add(new MeasureType("Litro", "l", calcWeight));
+        listMeasureType.add(new MeasureType("Copo", null, calcUnity));
         
         listMeasureType.stream().forEach(measure -> session.save(measure));
     }

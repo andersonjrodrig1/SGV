@@ -1,7 +1,6 @@
 package br.com.sgv.repository;
 
 import br.com.sgv.database.ContextFactory;
-import br.com.sgv.model.Product;
 import br.com.sgv.model.TransactionSale;
 import org.hibernate.Criteria;
 import org.hibernate.Session;

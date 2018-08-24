@@ -17,7 +17,7 @@ public class MeasureTypeRepository extends PersistenceRepository {
         session = ContextFactory.initContextDb();
         Query query = session.createQuery("from MeasureType");
         List<MeasureType> listMeasureType = query.list();
-        ContextFactory.close();
+        ContextFactory.commit();
         
         return listMeasureType;
     }

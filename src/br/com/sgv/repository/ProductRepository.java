@@ -23,7 +23,7 @@ public class ProductRepository extends PersistenceRepository {
         this.session = ContextFactory.initContextDb();
         Query query = this.session.createQuery("from Product");
         List<Product> products = query.list();
-        ContextFactory.close();
+        ContextFactory.commit();
         
         return products;
     }
@@ -42,7 +42,7 @@ public class ProductRepository extends PersistenceRepository {
         this.session = ContextFactory.initContextDb();
         Query query = this.session.createQuery(hql);        
         List<Product> products = query.list();
-        ContextFactory.close();
+        ContextFactory.commit();
         
         return products;
     }
@@ -54,7 +54,7 @@ public class ProductRepository extends PersistenceRepository {
         Object query = this.session.createQuery(hql)
                 .setParameter("productKey", productKey)
                 .uniqueResult();
-        ContextFactory.close();
+        ContextFactory.commit();
         
         return (Product)query;
     }
