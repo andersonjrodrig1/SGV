@@ -6,7 +6,6 @@ import br.com.sgv.enumerator.MeasureTypeEnum;
 import br.com.sgv.enumerator.OptionEnum;
 import br.com.sgv.enumerator.PayTypeEnum;
 import br.com.sgv.model.AcessPermission;
-import br.com.sgv.model.MeasureType;
 import br.com.sgv.model.PayType;
 import br.com.sgv.model.Product;
 import br.com.sgv.model.Sale;
@@ -59,6 +58,9 @@ public class SGV extends javax.swing.JFrame {
     private RegisterMeasure registerMeasure = null;
     private Checkout checkout = null;
     private Sale itemSale = null;
+    private ListSaleDay listSaleDay = null;
+    private RegisterTotalisation registerTotalisation = null;
+    private ListTotalisation listTotalisation = null;
     
     private User user = null;
     private UserType userType = null;
@@ -239,6 +241,42 @@ public class SGV extends javax.swing.JFrame {
         if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
             this.checkout = new Checkout(this, true);
             this.checkout.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void initSaleDay() {
+        this.screenType = AcessScreenEnum.VIEW_SALE_DAY.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.listSaleDay = new ListSaleDay(this, true);
+            this.listSaleDay.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void initRegisterTotalization() {
+        this.screenType = AcessScreenEnum.REGISTER_REPORT.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.registerTotalisation = new RegisterTotalisation(this, true);
+            this.registerTotalisation.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void initListTotalization() {
+        this.screenType = AcessScreenEnum.VIEW_REPORT.value;
+        this.acessPermission = this.verifyPermissionAcess(this.screenType);
+        
+        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+            this.listTotalisation = new ListTotalisation(this, true);
+            this.listTotalisation.initScreen();
         } else {
             JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
         }
@@ -674,9 +712,11 @@ public class SGV extends javax.swing.JFrame {
         nmListUser = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         jMenuItem2 = new javax.swing.JMenuItem();
-        jMenu3 = new javax.swing.JMenu();
+        mnSaleDay = new javax.swing.JMenu();
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        jMenuItem5 = new javax.swing.JMenuItem();
         nmAbout = new javax.swing.JMenu();
         nmExit = new javax.swing.JMenu();
 
@@ -870,11 +910,12 @@ public class SGV extends javax.swing.JFrame {
                         .addComponent(txtNetValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtGrossValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(11, 11, 11)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnExclude)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnAdd)
-                    .addComponent(btnSearch)
-                    .addComponent(btnClear))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnExclude)
+                        .addComponent(btnSearch)
+                        .addComponent(btnClear)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1020,7 +1061,7 @@ public class SGV extends javax.swing.JFrame {
                 .addComponent(rdbMoney)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(rdbCard)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1125,15 +1166,34 @@ public class SGV extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu2);
 
-        jMenu3.setText("Relatório");
+        mnSaleDay.setText("Relatório");
 
         jMenuItem3.setText("Gerar Relatório");
-        jMenu3.add(jMenuItem3);
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        mnSaleDay.add(jMenuItem3);
 
         jMenuItem4.setText("Consultar Relatórios");
-        jMenu3.add(jMenuItem4);
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        mnSaleDay.add(jMenuItem4);
+        mnSaleDay.add(jSeparator3);
 
-        jMenuBar1.add(jMenu3);
+        jMenuItem5.setText("Consultar Venda Dia");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        mnSaleDay.add(jMenuItem5);
+
+        jMenuBar1.add(mnSaleDay);
 
         nmAbout.setText("Sobre");
         nmAbout.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -1281,6 +1341,18 @@ public class SGV extends javax.swing.JFrame {
         this.cancelSale();
     }//GEN-LAST:event_btnCancelMouseClicked
 
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        this.initSaleDay();
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        this.initRegisterTotalization();
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        this.initListTotalization();
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1324,18 +1396,19 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JButton btnFinalizeSale;
     private javax.swing.JButton btnSearch;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JLabel lblAmont;
     private javax.swing.JLabel lblAmountPaid;
     private javax.swing.JLabel lblDiscountValue;
@@ -1347,6 +1420,7 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JLabel lblValueChange;
     private javax.swing.JMenuItem mnMeasure;
     private javax.swing.JMenuItem mnRegisterMeasure;
+    private javax.swing.JMenu mnSaleDay;
     private javax.swing.JMenu nmAbout;
     private javax.swing.JMenu nmExit;
     private javax.swing.JMenuItem nmListProduct;

@@ -32,6 +32,7 @@ public class InitializerDb {
     private static final AcessScreen registerReport = new AcessScreen(8, "Gerar Relatório");
     private static final AcessScreen viewReport = new AcessScreen(9, "Consultar Relatório");
     private static final AcessScreen viewAbout = new AcessScreen(10, "Visualizar Sobre");
+    private static final AcessScreen viewSaleDay = new AcessScreen(11, "Visualizar Venda Dia");
     
     public static void initializerDatabase() {
         session = ContextFactory.initContextDb();
@@ -91,6 +92,7 @@ public class InitializerDb {
         listAcessScreen.add(registerReport);
         listAcessScreen.add(viewReport);
         listAcessScreen.add(viewAbout);
+        listAcessScreen.add(viewSaleDay);
         
         listAcessScreen.stream().forEach(screen -> session.save(screen));
     }
@@ -120,6 +122,7 @@ public class InitializerDb {
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerReport, true));
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewReport, true));
         listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewAbout, true));
+        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewSaleDay, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerProduct, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerMeasure, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerUser, false));
@@ -130,6 +133,7 @@ public class InitializerDb {
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerReport, true));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewReport, false));
         listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewAbout, true));
+        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewSaleDay, true));
         
         listAcess.stream().forEach(acess -> session.save(acess));
     }

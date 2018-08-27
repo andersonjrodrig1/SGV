@@ -14,7 +14,8 @@ public enum AcessScreenEnum {
     CHECK_OUT(7),
     REGISTER_REPORT(8),
     VIEW_REPORT(9),
-    VIEW_ABOUT(10);
+    VIEW_ABOUT(10),
+    VIEW_SALE_DAY(11);
     
     public int value;
     

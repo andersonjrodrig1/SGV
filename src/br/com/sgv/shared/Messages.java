@@ -88,4 +88,8 @@ public class Messages {
     public static String cancel_sale = "Deseja cancelar a(s) venda(s) em aberto?";
     public static String confirm_sale = "Deseja confirmar a venda?";
     public static String success_sale = "Venda registrada com sucesso!";
+    
+    /* ListSaleDay */
+    public static String date_required = "Data de consulta obrigatória!";
+    public static String date_invalid = "Data de consulta não pode ser maior que a data atual.";
 }

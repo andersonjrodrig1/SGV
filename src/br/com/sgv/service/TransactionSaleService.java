@@ -1,7 +1,9 @@
 package br.com.sgv.service;
 
 import br.com.sgv.database.ContextFactory;
+import br.com.sgv.enumerator.StatusRegisterEnum;
 import br.com.sgv.model.Sale;
+import br.com.sgv.model.StatusRegister;
 import br.com.sgv.model.TransactionSale;
 import br.com.sgv.repository.SaleRepository;
 import br.com.sgv.repository.TransactionSaleRepository;
@@ -47,7 +49,13 @@ public class TransactionSaleService {
                 }
                 
                 String transactionId = "T".concat(CriptoText.convertHexadecimal(transactionMaxId));
+                
+                StatusRegister statusRegister = new StatusRegister();
+                statusRegister.setId(StatusRegisterEnum.PENDING.value);
+                statusRegister.setStatusRegister("Pendente");
+                
                 transactionSale.setTransactionId(transactionId);
+                transactionSale.setStatusRegister(statusRegister);
                 transactionSale.setRegisterDate(now);
                 
                 this.transactionSaleRepository.saveTransactionSale(transactionSale);
@@ -69,7 +77,9 @@ public class TransactionSaleService {
                 response.setMensage(Messages.fail_save);
                 response.setException(ex);
             }
-        } else {
+        } else {            
+            ContextFactory.rollback();
+            
             response.setModel(false);
             response.setMensage(Messages.selected_item);
             response.setException(null);

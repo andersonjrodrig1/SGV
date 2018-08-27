@@ -52,6 +52,10 @@ public class TransactionSale implements Serializable {
     @Column(name = "register_date", nullable = false)
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date registerDate;
+    
+    @ManyToOne
+    @JoinColumn(name = "status_register_id", nullable = false)
+    private StatusRegister statusRegister;
 
     public long getId() {
         return id;
@@ -131,5 +135,13 @@ public class TransactionSale implements Serializable {
 
     public void setPaidValue(double paidValue) {
         this.paidValue = paidValue;
+    }
+
+    public StatusRegister getStatusRegister() {
+        return statusRegister;
+    }
+
+    public void setStatusRegister(StatusRegister statusRegister) {
+        this.statusRegister = statusRegister;
     }
 }

@@ -156,7 +156,7 @@ public class RegisterProduct extends javax.swing.JDialog {
     private void clearFields() {
         txtKey.setText("");
         txtName.setText("");
-        frmValue.setText("");
+        frmValue.setText("0,00");
         cbxMeasureType.setSelectedIndex(0);
         
         txtKey.grabFocus();
