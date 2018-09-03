@@ -3,10 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/ListSaleDay.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/service/TransactionSaleService.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/RegisterTotalization.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/Checkout.java</file>
             <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/SGV.java</file>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/service/SaleService.java</file>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/repository/SaleRepository.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/repository/TransactionSaleRepository.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/service/TotalizationSaleService.java</file>
         </group>
     </open-files>
 </project-private>

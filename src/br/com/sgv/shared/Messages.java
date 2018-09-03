@@ -76,6 +76,7 @@ public class Messages {
     public static String checkout_value = "Total de saída obrigatório.";
     public static String checkout_date = "Data da saída obrigatório.";
     public static String checkout_no_remove = "Registro de saída não pode ser removido!\nRegistro já contabilizado no fechamento.";
+    public static String verif_date = "Data de registro não pode ser maior que data de hoje.";
     
     /* SGV */
     public static String selected_item = "Falha ao registrar a venda. \nVerifique se os itens foram selecionados corretamente.";
@@ -90,6 +91,10 @@ public class Messages {
     public static String success_sale = "Venda registrada com sucesso!";
     
     /* ListSaleDay */
-    public static String date_required = "Data de consulta obrigatória!";
-    public static String date_invalid = "Data de consulta não pode ser maior que a data atual.";
-}
+    public static String date_required = "Data obrigatória!";
+    public static String date_invalid = "Data informada não pode ser maior que a data atual.";
+    
+    /* RegisterTotalization */
+    public static String fail_totalization = "Falha ao executar a totalização da vendas.";
+    public static String not_found_sale = "Nenhuma venda encontrada para totalizar.";
+;}

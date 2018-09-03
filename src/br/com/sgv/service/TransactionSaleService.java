@@ -10,6 +10,7 @@ import br.com.sgv.repository.TransactionSaleRepository;
 import br.com.sgv.shared.CriptoText;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -73,6 +74,7 @@ public class TransactionSaleService {
             } catch(Exception ex) {
                 ContextFactory.rollback();
                 
+                System.out.printf("Error: ", ex);
                 response.setModel(false);
                 response.setMensage(Messages.fail_save);
                 response.setException(ex);
@@ -88,4 +90,25 @@ public class TransactionSaleService {
         
         return response;
     } 
+    
+    public ResponseModel<List<TransactionSale>> getTransactionSaleByDay(Date dateSearch) {
+        ResponseModel<List<TransactionSale>> response = new ResponseModel<>();
+        
+        try {
+            String dateSearchString = new SimpleDateFormat("yyyy-MM-dd").format(dateSearch);
+            List<TransactionSale> list = this.transactionSaleRepository.getTransactionSaleList(dateSearchString);
+            response.setModel(list);
+            ContextFactory.commit();
+        } catch(Exception ex) {
+            ContextFactory.rollback();
+            
+            System.out.printf("Error: ", ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setMensage(Messages.fail_find);
+            response.setModel(null);
+        }
+        
+        return response;
+    }
 }

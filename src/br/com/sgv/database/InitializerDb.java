@@ -5,6 +5,7 @@ import br.com.sgv.model.AcessScreen;
 import br.com.sgv.model.CalcType;
 import br.com.sgv.model.MeasureType;
 import br.com.sgv.model.PayType;
+import br.com.sgv.model.ReportType;
 import br.com.sgv.model.StatusRegister;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
@@ -67,6 +68,10 @@ public class InitializerDb {
         
         if (session.createQuery("from PayType").list().size() <= 0) {
             insertPayType();
+        }
+        
+        if (session.createQuery("from ReportType").list().size() <= 0) {
+            insertReportType();
         }
         
         ContextFactory.commit();
@@ -173,5 +178,13 @@ public class InitializerDb {
         listPayType.add(new PayType("Cartão"));
         
         listPayType.stream().forEach(payType -> session.save(payType));
+    }
+    
+    private static void insertReportType() {
+        List<ReportType> listReportType = new ArrayList<>();
+        listReportType.add(new ReportType("Por Venda"));
+        listReportType.add(new ReportType("Por Pagamento"));
+        
+        listReportType.stream().forEach(report -> session.save(report));
     }
 }

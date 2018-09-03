@@ -26,6 +26,10 @@ public class SaleRepository {
         itemsSale.stream().forEach(item -> this.session.save(item));
     }
     
+    public void updateSaleList(List<Sale> itemsSale) {
+        itemsSale.stream().forEach(item -> this.session.update(item));
+    }
+    
     public List<Sale> getAll() {
         ContextFactory.initContextDb();
         Query query = this.session.createQuery("from Sale");

@@ -1,23 +1,91 @@
 package br.com.sgv.view;
 
+import br.com.sgv.model.TransactionSale;
+import br.com.sgv.service.TotalizationSaleService;
+import br.com.sgv.service.TransactionSaleService;
+import br.com.sgv.shared.Messages;
+import br.com.sgv.shared.ResponseModel;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  * @author Anderson Junior Rodrigues
  */
-public class RegisterTotalisation extends javax.swing.JDialog {
+public class RegisterTotalization extends javax.swing.JDialog {
 
     /**
      * Creates new form RegisterTotalisation
      */
-    public RegisterTotalisation(java.awt.Frame parent, boolean modal) {
+    
+    private DefaultTableModel table = null;
+    
+    public RegisterTotalization(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
     
     public void initScreen() {
+        this.initDatePicker();
+        
         this.setSize(600, 500);
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
+    }
+    
+    private void initDatePicker() {
+        dpkCloseDate.setFormats(new String[] {"dd/MM/yyyy"});
+        dpkCloseDate.setDate(Date.from(Instant.now()));
+        dpkCloseDate.setLinkDate(System.currentTimeMillis(), "Hoje é {0}");
+    }
+    
+    private void totalizeSale() {
+        if (validateFields()) {
+            Date dateSearch = dpkCloseDate.getDate();
+            
+            this.table = (DefaultTableModel)tableTotalize.getModel();
+            this.table.setNumRows(0);
+            
+            ResponseModel<Boolean> response = new TotalizationSaleService().totalizerSaleDay(dateSearch);
+            
+            if (response.getModel()) {
+                ResponseModel<List<TransactionSale>> list = new TransactionSaleService().getTransactionSaleByDay(dateSearch);
+                List<TransactionSale> listTransactionSale = list.getModel();               
+                
+                listTransactionSale.stream().forEach(transaction -> {
+                    this.table.addRow(new Object[]{
+                        transaction.getTransactionId(),
+                        transaction.getRegisterDate(),
+                        transaction.getPayType().getPayType(),
+                        transaction.getTotalValue()
+                    });
+                });
+            } else {
+                JOptionPane.showMessageDialog(null, response.getMensage());
+            }
+        }
+    }
+    
+    private boolean validateFields() {
+        boolean isValid = true;
+        Date now = Date.from(Instant.now());
+        String message = "";
+        
+        if (dpkCloseDate.getDate().toString().isEmpty()) {
+            message += Messages.date_required;
+        } else if (dpkCloseDate.getDate().after(now)) {
+            message += Messages.date_invalid;
+        }
+        
+        if (!message.isEmpty()) {
+            JOptionPane.showMessageDialog(null, message);
+            isValid = false;
+        }
+        
+        return isValid;
     }
 
     /**
@@ -48,6 +116,11 @@ public class RegisterTotalisation extends javax.swing.JDialog {
 
         btnTotalize.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Report.png"))); // NOI18N
         btnTotalize.setText("Totalizar");
+        btnTotalize.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTotalizeActionPerformed(evt);
+            }
+        });
 
         tableTotalize.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -72,22 +145,21 @@ public class RegisterTotalisation extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(lblCloseDate))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(207, 207, 207)
                                 .addComponent(lblTitle))
                             .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(dpkCloseDate, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblCloseDate)
+                                    .addComponent(dpkCloseDate, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnTotalize)))
-                        .addGap(0, 197, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
@@ -120,6 +192,10 @@ public class RegisterTotalisation extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnTotalizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTotalizeActionPerformed
+        this.totalizeSale();
+    }//GEN-LAST:event_btnTotalizeActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -137,20 +213,21 @@ public class RegisterTotalisation extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(RegisterTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(RegisterTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(RegisterTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(RegisterTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(RegisterTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(RegisterTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(RegisterTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(RegisterTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                RegisterTotalisation dialog = new RegisterTotalisation(new javax.swing.JFrame(), true);
+                RegisterTotalization dialog = new RegisterTotalization(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

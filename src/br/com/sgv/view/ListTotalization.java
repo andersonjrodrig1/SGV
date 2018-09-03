@@ -1,23 +1,58 @@
 package br.com.sgv.view;
 
+import br.com.sgv.model.ReportType;
+import br.com.sgv.service.ReportTypeService;
+import br.com.sgv.shared.ResponseModel;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import javax.swing.JOptionPane;
+
 /**
  * @author Anderson Junior Rodrigues
  */
-public class ListTotalisation extends javax.swing.JDialog {
+public class ListTotalization extends javax.swing.JDialog {
 
     /**
      * Creates new form ListTotalisation
      */
-    public ListTotalisation(java.awt.Frame parent, boolean modal) {
+    public ListTotalization(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
     
     public void initScreen() {
+        this.initDatePicker();
+        this.initComboBoxReportType();
+        
         this.setSize(600, 500);
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
+    }
+    
+    private void initDatePicker() {
+        dpkDateInit.setFormats(new String[] {"dd/MM/yyyy"});
+        dpkDateInit.setDate(Date.from(Instant.now()));
+        dpkDateInit.setLinkDate(System.currentTimeMillis(), "Hoje é {0}");
+        
+        dpkDateFinal.setFormats(new String[] {"dd/MM/yyyy"});
+        dpkDateFinal.setDate(Date.from(Instant.now()));
+        dpkDateFinal.setLinkDate(System.currentTimeMillis(), "Hoje é {0}");
+    }
+    
+    private void initComboBoxReportType() {
+        ResponseModel<List<ReportType>> response = new ReportTypeService().getReportTypes();
+        
+        if (response.getModel() != null && response.getModel().size() > 0) {
+            List<ReportType> listReport = response.getModel();
+            
+            listReport.stream().forEach(report -> {
+                cbxCloseType.addItem(report);
+            });
+        } else {
+            JOptionPane.showMessageDialog(null, response.getMensage());
+        }
     }
 
     /**
@@ -35,7 +70,7 @@ public class ListTotalisation extends javax.swing.JDialog {
         lblDateInit = new javax.swing.JLabel();
         dpkDateInit = new org.jdesktop.swingx.JXDatePicker();
         lblDateFinal = new javax.swing.JLabel();
-        jXDatePicker1 = new org.jdesktop.swingx.JXDatePicker();
+        dpkDateFinal = new org.jdesktop.swingx.JXDatePicker();
         lblCloseType = new javax.swing.JLabel();
         cbxCloseType = new javax.swing.JComboBox();
         btnCheckReport = new javax.swing.JButton();
@@ -62,7 +97,7 @@ public class ListTotalisation extends javax.swing.JDialog {
 
         lblCloseType.setText("Tipo de Fechamento");
 
-        cbxCloseType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbxCloseType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Selecione" }));
 
         btnCheckReport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Report.png"))); // NOI18N
         btnCheckReport.setText("Consultar");
@@ -85,7 +120,7 @@ public class ListTotalisation extends javax.swing.JDialog {
                             .addComponent(lblDateInit))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jXDatePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dpkDateFinal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblDateFinal))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -93,7 +128,7 @@ public class ListTotalisation extends javax.swing.JDialog {
                             .addComponent(cbxCloseType, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCheckReport)
-                        .addGap(0, 18, Short.MAX_VALUE)))
+                        .addGap(0, 22, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -104,21 +139,22 @@ public class ListTotalisation extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblTitle)
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(lblDateInit)
-                            .addComponent(lblDateFinal)
-                            .addComponent(lblCloseType))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblDateFinal, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(lblDateInit)
+                                .addComponent(lblCloseType)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jXDatePicker1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dpkDateFinal, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(dpkDateInit, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cbxCloseType, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnCheckReport)
                         .addGap(2, 2, 2)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(90, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(82, Short.MAX_VALUE))
         );
 
         pack();
@@ -141,20 +177,21 @@ public class ListTotalisation extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ListTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ListTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ListTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ListTotalisation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ListTotalization.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ListTotalisation dialog = new ListTotalisation(new javax.swing.JFrame(), true);
+                ListTotalization dialog = new ListTotalization(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -169,9 +206,9 @@ public class ListTotalisation extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCheckReport;
     private javax.swing.JComboBox cbxCloseType;
+    private org.jdesktop.swingx.JXDatePicker dpkDateFinal;
     private org.jdesktop.swingx.JXDatePicker dpkDateInit;
     private javax.swing.JScrollPane jScrollPane1;
-    private org.jdesktop.swingx.JXDatePicker jXDatePicker1;
     private javax.swing.JLabel lblCloseType;
     private javax.swing.JLabel lblDateFinal;
     private javax.swing.JLabel lblDateInit;

@@ -28,5 +28,7 @@
     <mapping class="br.com.sgv.model.Sale" />
     <mapping class="br.com.sgv.model.PayType" />
     <mapping class="br.com.sgv.model.TransactionSale" />
+    <mapping class="br.com.sgv.model.ReportType" />
+    <mapping class="br.com.sgv.model.TotalizeSale" />
   </session-factory>
 </hibernate-configuration>
