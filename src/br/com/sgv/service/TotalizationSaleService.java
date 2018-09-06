@@ -138,4 +138,24 @@ public class TotalizationSaleService {
         
         return response;
     }
+    
+    public ResponseModel<List<TotalizeSale>> getTotalizationSaleByPeriodic(Date dateInitial, Date dateFinal){
+        ResponseModel<List<TotalizeSale>> response = new ResponseModel<>();
+        
+        try {
+            String dtInitial = new SimpleDateFormat("yyyy-MM-dd").format(dateInitial);
+            String dtFinal = new SimpleDateFormat("yyyy-MM-dd").format(dateFinal);
+            
+            List<TotalizeSale> list = new TotalizationSaleRepository().getTotalizationByPeriodic(dtInitial, dtFinal);
+            response.setModel(list);            
+        } catch(Exception ex) {            
+            System.out.printf("Error: ", ex);
+            response.setError(ex.getMessage());
+            response.setException(ex);
+            response.setMensage(Messages.fail_find);
+            response.setModel(null);
+        }
+        
+        return response;
+    }
 }

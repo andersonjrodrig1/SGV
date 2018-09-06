@@ -34,8 +34,20 @@ public class TotalizationSaleRepository {
         listTotalization.stream().forEach(totalization -> this.session.update(totalization));
     }
     
+    public List<TotalizeSale> getTotalizationByPeriodic(String dateInit, String dateFinal) {
+        String hql = "from TotalizeSale where sale_date between :dateInit and :dateFinal";
+        
+        Query query = this.session.createQuery(hql)
+                .setParameter("dateInit", dateInit)
+                .setParameter("dateFinal", dateFinal);
+        List<TotalizeSale> listTotalizeSale = query.list();
+        ContextFactory.commit();
+        
+        return listTotalizeSale;
+    }
+    
     public List<TotalizeSale> getTotalizationDayList(String dateTotalization) {
-        String hql = "from TotalizeSale where register_date = :date";
+        String hql = "from TotalizeSale where sale_date = :date";
         
         Query query = this.session.createQuery(hql)
                 .setParameter("date", dateTotalization);

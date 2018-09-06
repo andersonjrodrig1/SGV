@@ -79,6 +79,10 @@ public class ListSaleDay extends javax.swing.JDialog {
             this.totalValue += sale.getSaleTotal();
         });
         
+        if (this.listSales == null || this.listSales.size() == 0) {
+            JOptionPane.showMessageDialog(null, Messages.not_found_list);
+        }
+        
         String totalValueString = this.df.format(this.totalValue);
         lblTotalSale.setText("R$ " + totalValueString);
     }

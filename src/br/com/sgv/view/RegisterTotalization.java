@@ -5,6 +5,8 @@ import br.com.sgv.service.TotalizationSaleService;
 import br.com.sgv.service.TransactionSaleService;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -16,11 +18,8 @@ import javax.swing.table.DefaultTableModel;
  */
 public class RegisterTotalization extends javax.swing.JDialog {
 
-    /**
-     * Creates new form RegisterTotalisation
-     */
-    
     private DefaultTableModel table = null;
+    private double valueTotal;
     
     public RegisterTotalization(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -45,7 +44,10 @@ public class RegisterTotalization extends javax.swing.JDialog {
     private void totalizeSale() {
         if (validateFields()) {
             Date dateSearch = dpkCloseDate.getDate();
+            this.valueTotal = 0;
+            String message = "";
             
+            this.table = null;
             this.table = (DefaultTableModel)tableTotalize.getModel();
             this.table.setNumRows(0);
             
@@ -56,16 +58,24 @@ public class RegisterTotalization extends javax.swing.JDialog {
                 List<TransactionSale> listTransactionSale = list.getModel();               
                 
                 listTransactionSale.stream().forEach(transaction -> {
+                    this.valueTotal += transaction.getTotalValue();
+                    
                     this.table.addRow(new Object[]{
                         transaction.getTransactionId(),
-                        transaction.getRegisterDate(),
+                        new SimpleDateFormat("dd/MM/yyyy").format(transaction.getRegisterDate()),
                         transaction.getPayType().getPayType(),
-                        transaction.getTotalValue()
+                        "R$ " + new DecimalFormat("#0.00").format(transaction.getTotalValue())
                     });
                 });
+                
+                message = Messages.totalization_sucess;
             } else {
-                JOptionPane.showMessageDialog(null, response.getMensage());
+                message = response.getMensage();
             }
+            
+            String value = new DecimalFormat("#0.00").format(this.valueTotal);
+            lblValeuTotalize.setText(value);
+            JOptionPane.showMessageDialog(null, message);
         }
     }
     
@@ -127,13 +137,42 @@ public class RegisterTotalization extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Código Transação", "Data Venda", "Tipo Pagamento", "Valor"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(tableTotalize);
+        if (tableTotalize.getColumnModel().getColumnCount() > 0) {
+            tableTotalize.getColumnModel().getColumn(0).setMinWidth(180);
+            tableTotalize.getColumnModel().getColumn(0).setPreferredWidth(180);
+            tableTotalize.getColumnModel().getColumn(0).setMaxWidth(180);
+            tableTotalize.getColumnModel().getColumn(1).setMinWidth(150);
+            tableTotalize.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tableTotalize.getColumnModel().getColumn(1).setMaxWidth(150);
+            tableTotalize.getColumnModel().getColumn(2).setMinWidth(150);
+            tableTotalize.getColumnModel().getColumn(2).setPreferredWidth(150);
+            tableTotalize.getColumnModel().getColumn(2).setMaxWidth(150);
+            tableTotalize.getColumnModel().getColumn(3).setMinWidth(100);
+            tableTotalize.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tableTotalize.getColumnModel().getColumn(3).setMaxWidth(100);
+        }
 
         lblTotalTotalize.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblTotalTotalize.setText("Valor Total..:");
+        lblTotalTotalize.setText("Valor Total..: R$");
 
         lblValeuTotalize.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblValeuTotalize.setText("0,00");
@@ -164,9 +203,9 @@ public class RegisterTotalization extends javax.swing.JDialog {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(lblTotalTotalize)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblValeuTotalize)
-                .addGap(96, 96, 96))
+                .addGap(100, 100, 100))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

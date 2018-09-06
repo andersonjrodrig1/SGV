@@ -3,7 +3,6 @@ package br.com.sgv.shared;
 /**
  * @author Anderson Junior Rodrigues
  */
-
 public class Messages {
     
     /* General */
@@ -93,8 +92,17 @@ public class Messages {
     /* ListSaleDay */
     public static String date_required = "Data obrigatória!";
     public static String date_invalid = "Data informada não pode ser maior que a data atual.";
+    public static String not_found_list = "Nenhuma venda encontrada";
     
     /* RegisterTotalization */
     public static String fail_totalization = "Falha ao executar a totalização da vendas.";
     public static String not_found_sale = "Nenhuma venda encontrada para totalizar.";
+    public static String totalization_sucess = "Totalização Realizada com sucesso!";
+    
+    /* ListTotalization */
+    public static String init_date_required = "Data inicial obrigatória.";
+    public static String final_date_required = "Data final obrigatória.";
+    public static String validate_date = "Data final não pode ser menor que data inicial.";
+    public static String report_required = "Informe o tipo de relatório.";
+    public static String report_found = "Nenhuma venda totalizada encontrada.";
 ;}
