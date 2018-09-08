@@ -618,12 +618,45 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void cancelSale() {
-        if (table.getRowCount() > 0) {
+        if (this.table.getRowCount() > 0) {
             int option = JOptionPane.showConfirmDialog(null, Messages.cancel_sale);
 
             if (option == OptionEnum.YES.value) {
                 this.finalizerTransactionScreen();
             }
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.not_item);
+        }
+    }
+    
+    private void selectMoney() {
+        if (this.table.getRowCount() > 0) {
+            if (rdbCard.isSelected()) {
+                rdbCard.setSelected(false);
+            }
+
+            txtAmountPaid.setText("0,00");
+            txtAmountPaid.grabFocus();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.table_void);
+            this.rdbMoney.setSelected(false);
+            txtProductKey.grabFocus();
+        }
+    }
+    
+    private void selectCard() {
+        if (this.table.getRowCount() > 0) {
+            if (rdbMoney.isSelected()) {
+                rdbMoney.setSelected(false);
+            }
+
+            String value = txtTotalValue.getText();
+            this.setChangeValue(value);
+            btnFinalizeSale.grabFocus();
+        } else {
+            JOptionPane.showMessageDialog(null, Messages.table_void);
+            this.rdbCard.setSelected(false); 
+            txtProductKey.grabFocus();
         }
     }
     
@@ -644,6 +677,8 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void clearDataPaySale() {
+        this.table.setRowCount(0);
+        this.listItemsSale = new ArrayList<>();
         this.totalValue = 0d;
         this.paidValue = 0d;
         this.changeValue = 0d;
@@ -986,9 +1021,9 @@ public class SGV extends javax.swing.JFrame {
 
         btnFinalizeSale.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
         btnFinalizeSale.setText("Finalizar Venda");
-        btnFinalizeSale.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnFinalizeSaleMouseClicked(evt);
+        btnFinalizeSale.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFinalizeSaleActionPerformed(evt);
             }
         });
 
@@ -1293,10 +1328,6 @@ public class SGV extends javax.swing.JFrame {
         this.cancelSale();
     }//GEN-LAST:event_btnCancelMouseClicked
 
-    private void btnFinalizeSaleMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizeSaleMouseClicked
-        this.finallySale();
-    }//GEN-LAST:event_btnFinalizeSaleMouseClicked
-
     private void txtAmountPaidKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAmountPaidKeyReleased
         if (!txtAmountPaid.getText().isEmpty()) {
             if (!FormatMoney.verifyCodeChar(evt)) {
@@ -1322,16 +1353,16 @@ public class SGV extends javax.swing.JFrame {
     }//GEN-LAST:event_txtDiscountValueKeyReleased
 
     private void rdbCardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdbCardActionPerformed
-        if (rdbMoney.isSelected()) {
-            rdbMoney.setSelected(false);
-        }
+        this.selectCard();
     }//GEN-LAST:event_rdbCardActionPerformed
 
     private void rdbMoneyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdbMoneyActionPerformed
-        if (rdbCard.isSelected()) {
-            rdbCard.setSelected(false);
-        }
+        this.selectMoney();
     }//GEN-LAST:event_rdbMoneyActionPerformed
+
+    private void btnFinalizeSaleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFinalizeSaleActionPerformed
+        this.finallySale();
+    }//GEN-LAST:event_btnFinalizeSaleActionPerformed
 
     /**
      * @param args the command line arguments

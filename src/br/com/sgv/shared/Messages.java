@@ -88,6 +88,7 @@ public class Messages {
     public static String cancel_sale = "Deseja cancelar a(s) venda(s) em aberto?";
     public static String confirm_sale = "Deseja confirmar a venda?";
     public static String success_sale = "Venda registrada com sucesso!";
+    public static String not_item = "Não existe itens na cesta para serem cancelados.";
     
     /* ListSaleDay */
     public static String date_required = "Data obrigatória!";
@@ -104,5 +105,6 @@ public class Messages {
     public static String final_date_required = "Data final obrigatória.";
     public static String validate_date = "Data final não pode ser menor que data inicial.";
     public static String report_required = "Informe o tipo de relatório.";
-    public static String report_found = "Nenhuma venda totalizada encontrada.";
+    public static String report_found = "Nenhuma venda totalizada para o período.";
+    public static String peridic_invalid = "Periodo de consulta não pode ser maior que 30 dias.";
 ;}

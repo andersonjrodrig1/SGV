@@ -122,6 +122,12 @@ public class ListTotalization extends javax.swing.JDialog {
             message += Messages.validate_date + "\n";
         }
         
+        long days = ((dpkDateFinal.getDate().getTime() - dpkDateInit.getDate().getTime()) + 3600000) / 86400000L;
+        
+        if ((int)days > 30) {
+            message += Messages.peridic_invalid + "\n";
+        }
+        
         if (cbxCloseType.getSelectedItem().equals("Selecione") || cbxCloseType.getSelectedIndex() == 0) {
             message += Messages.report_required + "\n";
         }

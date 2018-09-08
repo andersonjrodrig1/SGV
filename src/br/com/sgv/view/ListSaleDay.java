@@ -31,7 +31,7 @@ public class ListSaleDay extends javax.swing.JDialog {
     
     public void initScreen() {
         this.initDatePicker();
-        this.getSalesByDay();
+        this.getSalesByDay(true);
         
         this.setSize(600, 500);
         this.setLocationRelativeTo(null);
@@ -45,17 +45,17 @@ public class ListSaleDay extends javax.swing.JDialog {
         dpkSearchDay.setLinkDate(System.currentTimeMillis(), "Hoje é {0}");
     }
     
-    private void getSalesByDay() {
+    private void getSalesByDay(boolean isInit) {
         if (verifyFields()) {
             Date dateSearch = dpkSearchDay.getDate();
             ResponseModel<List<Sale>> response = new SaleService().getSalesByDay(dateSearch);
             this.listSales = response.getModel();
             
-            this.setSaleTable();
+            this.setSaleTable(isInit);
         }
     }
     
-    private void setSaleTable() {
+    private void setSaleTable(boolean isInit) {
         this.table = (DefaultTableModel)tableSale.getModel();
         this.table.setRowCount(0);
         this.totalValue = 0d;
@@ -79,7 +79,7 @@ public class ListSaleDay extends javax.swing.JDialog {
             this.totalValue += sale.getSaleTotal();
         });
         
-        if (this.listSales == null || this.listSales.size() == 0) {
+        if (this.listSales == null || this.listSales.size() <= 0 && !isInit) {
             JOptionPane.showMessageDialog(null, Messages.not_found_list);
         }
         
@@ -237,7 +237,7 @@ public class ListSaleDay extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchDayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchDayActionPerformed
-        this.getSalesByDay();
+        this.getSalesByDay(false);
     }//GEN-LAST:event_btnSearchDayActionPerformed
 
     /**
