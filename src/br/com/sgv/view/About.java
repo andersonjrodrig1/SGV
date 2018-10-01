@@ -5,8 +5,6 @@
  */
 package br.com.sgv.view;
 
-import br.com.sgv.shared.Messages;
-
 /**
  *
  * @author ander
@@ -22,11 +20,11 @@ public class About extends javax.swing.JDialog {
     }
     
     public void initScreen() {
-        this.lblTitleSobre.setText(Messages.title_sobre);
-        this.lblDev.setText(Messages.text_dev);
-        this.lblDb.setText(Messages.text_db);
-        this.lblCopyright.setText(Messages.text_copyright);
-        this.lblRight.setText(Messages.text_right);
+        this.lblTitleSobre.setText("Sistema de Gerenciamento de Vendas");
+        this.lblDev.setText("Desenvolvido em Java");
+        this.lblDb.setText("Banco de Dados: MySQL");
+        this.lblCopyright.setText("Copyright © 2018 Du Rei LTDA");
+        this.lblRight.setText("Todos os Direitos Reservados.");
         
         this.setSize(550, 320);
         this.setLocationRelativeTo(null);

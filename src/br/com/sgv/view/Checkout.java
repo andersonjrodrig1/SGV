@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.view;
 
 import br.com.sgv.enumerator.OptionEnum;
 import br.com.sgv.enumerator.StatusRegisterEnum;
 import br.com.sgv.service.CheckoutService;
+import br.com.sgv.service.LogService;
 import br.com.sgv.shared.FormatMoney;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
@@ -21,16 +17,12 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class Checkout extends javax.swing.JDialog {
-
-    /**
-     * Creates new form Checkout
-     */
     
     private List<br.com.sgv.model.Checkout> listCheckout = null;
+    private LogService logService = null;
     
     public Checkout(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -39,7 +31,9 @@ public class Checkout extends javax.swing.JDialog {
     
     public void initScreen() {
         this.initDatePicker();
-        this.getRegisterCheckoutMonths();
+        
+        this.logService = new LogService(Checkout.class.getName(), "Checkout");
+        this.getRegisterCheckoutMonths();        
         
         this.setSize(600, 500);
         this.setLocationRelativeTo(null);
@@ -48,70 +42,96 @@ public class Checkout extends javax.swing.JDialog {
     }
     
     private void registerCheckout() {
-        if (verifyFields()) {
-            String checkoutName = txtCheckoutName.getText();
-            String checkoutValue = txtCheckoutValue.getText().replaceAll("\\.", "").replace(",", ".");
-            Date checkoutDate = dpkCheckoutDate.getDate();
-            
-            ResponseModel<Boolean> response = new CheckoutService().saveCheckout(checkoutName, checkoutValue, checkoutDate);
-            
-            if (response.getModel()) {
-                JOptionPane.showMessageDialog(null, Messages.save_success);
-                this.getRegisterCheckoutMonths();
-                this.cleanFields();
-            } else {
-                JOptionPane.showMessageDialog(null, response.getMensage());
+        try {
+            if (verifyFields()) {
+                this.logService.logMessage("registrando checkout", "registerCheckout");
+                String checkoutName = txtCheckoutName.getText();
+                String checkoutValue = txtCheckoutValue.getText().replaceAll("\\.", "").replace(",", ".");
+                Date checkoutDate = dpkCheckoutDate.getDate();
+
+                ResponseModel<Boolean> response = new CheckoutService().saveCheckout(checkoutName, checkoutValue, checkoutDate);
+
+                if (response.getModel()) {
+                    this.logService.logMessage("checkout registrado", "registerCheckout");
+                    JOptionPane.showMessageDialog(null, "Salvo com sucesso!");
+                    this.getRegisterCheckoutMonths();
+                    this.cleanFields();
+                } else {
+                    this.logService.logMessage(response.getException().toString(), "registerCheckout");
+                    JOptionPane.showMessageDialog(null, response.getMensage());
+                }
             }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "registerCheckout");
+            JOptionPane.showMessageDialog(null, "Falha ao registrar checkout.");
         }
     }
     
     private void getRegisterCheckoutMonths() {
-        Calendar calendar = Calendar.getInstance();
-        
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-        Date initialDate = calendar.getTime();
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-        Date finalDate = calendar.getTime();
-        
-        ResponseModel<List<br.com.sgv.model.Checkout>> response = new CheckoutService().getCheckoutToMonth(initialDate, finalDate);
-        this.listCheckout = response.getModel();
-        
-        this.setTableCheckout();
+        try {
+            this.logService.logMessage("buscando checkouts", "registerCheckout");
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date initialDate = calendar.getTime();
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date finalDate = calendar.getTime();
+
+            ResponseModel<List<br.com.sgv.model.Checkout>> response = new CheckoutService().getCheckoutToMonth(initialDate, finalDate);
+            this.listCheckout = response.getModel();
+            this.logService.logMessage("busca realizada com sucesso", "registerCheckout");
+
+            this.setTableCheckout();
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "registerCheckout");
+            JOptionPane.showMessageDialog(null, "Falha ao buscar checkouts.");
+        }
     }
     
     private void removeCheckout() {
-        int row = tblCheckout.getSelectedRow();
-        
-        if (row >= 0) {
-            Object objColumn = tblCheckout.getValueAt(row, 0);
-            int idCheckout = Integer.valueOf(objColumn.toString());
-            
-            ResponseModel<br.com.sgv.model.Checkout> responseCheckout = new CheckoutService().getCheckoutById(idCheckout);
-            br.com.sgv.model.Checkout checkout = responseCheckout.getModel();
-            
-            if (checkout == null) {
-                JOptionPane.showMessageDialog(null, responseCheckout.getMensage());
-            } else {
-                if (checkout.getStatusRegister().getId() == StatusRegisterEnum.TOTALIZED.value) {
-                    JOptionPane.showMessageDialog(null, Messages.checkout_no_remove);
-                } else {
-                    int option = JOptionPane.showConfirmDialog(null, Messages.remove_modal);
-                    
-                    if (option == OptionEnum.YES.value) {
-                        ResponseModel<Boolean> responseStatus = new CheckoutService().removeCheckout(checkout);
-                        boolean status = responseStatus.getModel();
+        try {
+            int row = tblCheckout.getSelectedRow();
 
-                        if (status) {
-                            JOptionPane.showMessageDialog(null, Messages.remove_sucess);
-                            this.getRegisterCheckoutMonths();
-                        } else {
-                            JOptionPane.showMessageDialog(null, responseStatus.getMensage());
+            if (row >= 0) {
+                Object objColumn = tblCheckout.getValueAt(row, 0);
+                int idCheckout = Integer.valueOf(objColumn.toString());
+                this.logService.logMessage("removendo checkout. Id: " + idCheckout, "registerCheckout");
+
+                ResponseModel<br.com.sgv.model.Checkout> responseCheckout = new CheckoutService().getCheckoutById(idCheckout);
+                br.com.sgv.model.Checkout checkout = responseCheckout.getModel();
+
+                if (checkout == null) {
+                    this.logService.logMessage("checkout não encontrado", "registerCheckout");
+                    JOptionPane.showMessageDialog(null, responseCheckout.getMensage());
+                } else {
+                    this.logService.logMessage("checkout encontrado", "registerCheckout");
+                    if (checkout.getStatusRegister().getId() == StatusRegisterEnum.TOTALIZED.value) {
+                        this.logService.logMessage("checkout totalizado, não pode ser removido", "registerCheckout");
+                        JOptionPane.showMessageDialog(null, "Registro de saída não pode ser removido!\nRegistro já contabilizado no fechamento.");
+                    } else {
+                        int option = JOptionPane.showConfirmDialog(null, "Deseja excluir o item selecionado?");
+
+                        if (option == OptionEnum.YES.value) {
+                            ResponseModel<Boolean> responseStatus = new CheckoutService().removeCheckout(checkout);
+                            boolean status = responseStatus.getModel();
+
+                            if (status) {
+                                this.logService.logMessage("checkout removido com sucesso", "registerCheckout");
+                                JOptionPane.showMessageDialog(null, "Excluido com sucesso!");
+                                this.getRegisterCheckoutMonths();
+                            } else {
+                                this.logService.logMessage("falha ao excluir checkout", "registerCheckout");
+                                JOptionPane.showMessageDialog(null, responseStatus.getMensage());
+                            }
                         }
                     }
                 }
+            } else {
+                JOptionPane.showMessageDialog(null, "Selecione um item para executar está ação.");
             }
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.select_row);
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "registerCheckout");
+            JOptionPane.showMessageDialog(null, "Falha ao remover checkout.");
         }
     }
     

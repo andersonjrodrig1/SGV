@@ -1,8 +1,8 @@
 package br.com.sgv.view;
 
 import br.com.sgv.model.User;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.UserService;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import com.sun.glass.events.KeyEvent;
 import javax.swing.JOptionPane;
@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 public class Login extends javax.swing.JDialog {
 
     private static SGV sgv = null;
+    private LogService logService = null;
     private ResponseModel<User> userModel = null;
     private User user = null;
     
@@ -23,27 +24,37 @@ public class Login extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(Login.class.getName(), "Login");
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
     
     private void loginSystem() {
-        if (verifyFields()) {
-            String username = txtUser.getText().trim();
-            String password = txtPassword.getText().trim();
-            
-            this.userModel = new UserService().findUser(username, password);
-            this.user = this.userModel.getModel();
-            
-            if (this.userModel.getModel() != null) {
-                this.dispose();
-                sgv = new SGV(this.user);
-                sgv.initScreen();
-            } else if (!this.userModel.getMensage().isEmpty()) {
-                JOptionPane.showMessageDialog(null, this.userModel.getMensage());
-            } else if (!this.userModel.getError().isEmpty()) {
-                JOptionPane.showMessageDialog(null, this.userModel.getMensage());
+        try {            
+            if (verifyFields()) {
+                String username = txtUser.getText().trim();
+                String password = txtPassword.getText().trim();
+                
+                this.logService.logMessage("Iniciando login sistema. User: " + username, "loginSystem");
+
+                this.userModel = new UserService().findUser(username, password);
+                this.user = this.userModel.getModel();
+
+                if (this.userModel.getModel() != null) {
+                    this.dispose();
+                    sgv = new SGV(this.user);
+                    sgv.initScreen();
+                } else if (!this.userModel.getMensage().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, this.userModel.getMensage());
+                } else if (!this.userModel.getError().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, this.userModel.getMensage());
+                }
+                
+                this.logService.logMessage("Login realizado com sucesso", "loginSystem");
             }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "loginSystem");
+            JOptionPane.showMessageDialog(null, "Falha ao realizar o login");
         }
     }
     
@@ -52,13 +63,13 @@ public class Login extends javax.swing.JDialog {
         boolean isValid = true;
         
         if (txtUser.getText().trim().isEmpty()) {
-            messages += Messages.user_required + "\n";
+            messages += "Usuário obrigatório!\n";
         }
         
         if (txtPassword.getText().trim().isEmpty()) {
-            messages += Messages.password_required + "\n";
+            messages += "Senha obrigatória!\n";
         } else if (txtPassword.getText().trim().length() < 4 || txtPassword.getText().trim().length() > 10) {
-            messages += Messages.password_format + "\n";
+            messages += "Senha deve ter entre 4 e 10 caracteres!\n";
         }
         
         if (!messages.isEmpty()){
@@ -72,7 +83,9 @@ public class Login extends javax.swing.JDialog {
     private void closeSystem() {
         this.user = null;
         this.userModel = null;
+        this.logService = null;
         this.dispose();
+        
         System.exit(0);
     }
 
@@ -94,8 +107,9 @@ public class Login extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sistema de Gerenciamento de Vendas");
+        setBackground(new java.awt.Color(102, 102, 255));
 
         jLabel1.setText("Usuário..:");
 

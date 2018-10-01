@@ -4,7 +4,6 @@ import br.com.sgv.enumerator.StatusRegisterEnum;
 import br.com.sgv.model.Checkout;
 import br.com.sgv.model.StatusRegister;
 import br.com.sgv.repository.CheckoutRepository;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,9 +14,11 @@ import java.util.List;
  */
 public class CheckoutService {
     
+    private LogService logService = null;
     private CheckoutRepository checkoutRepository = null;
     
     public CheckoutService() {
+        this.logService = new LogService(Checkout.class.getName(), "Checkout");
         this.checkoutRepository = new CheckoutRepository();
     }
     
@@ -25,16 +26,17 @@ public class CheckoutService {
         ResponseModel<Checkout> response = new ResponseModel<>();
         
         try {
+            this.logService.logMessage("buscar de checkout id: " + checkoutId, "getCheckoutById");
             Checkout checkout = new Checkout();
             checkout.setId(checkoutId);
             
             checkout = this.checkoutRepository.find(checkout, checkout.getId());
             response.setModel(checkout);
         } catch (Exception ex) {
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "getCheckoutById");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_find);
+            response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }        
         
@@ -45,13 +47,14 @@ public class CheckoutService {
         ResponseModel<List<Checkout>> response = new ResponseModel<>();
         
         try {
+            this.logService.logMessage("buscar de todos checkouts", "getCheckoutById");
             List<Checkout> listCheckout = this.checkoutRepository.getAll();
             response.setModel(listCheckout);
         } catch (Exception ex) {
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "getAll");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_find);
+            response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }
         
@@ -63,16 +66,17 @@ public class CheckoutService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         
         try {
+            this.logService.logMessage("periodo de busca " + initial + " à " + finaly, "getCheckoutToMonth");
             String initialDate = sdf.format(initial);
             String finalDate = sdf.format(finaly);
             
             List<Checkout> listCheckout = this.checkoutRepository.getCheckoutToMonth(initialDate, finalDate);
             response.setModel(listCheckout);
         } catch (Exception ex) {
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "getCheckoutToMonth");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_find);
+            response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }        
         
@@ -83,6 +87,7 @@ public class CheckoutService {
         ResponseModel<Boolean> response = new ResponseModel<>();
         
         try {
+            this.logService.logMessage("preparando dados para salvar", "saveCheckout");
             int status = StatusRegisterEnum.PENDING.value;
             double value = Double.valueOf(checkoutValue);
             
@@ -98,10 +103,10 @@ public class CheckoutService {
             this.checkoutRepository.save(checkout);
             response.setModel(true);
         } catch (Exception ex) {
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "saveCheckout");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_save);
+            response.setMensage("Falha ao salvar os dados!");
             response.setModel(false);
         }
         
@@ -112,20 +117,21 @@ public class CheckoutService {
         ResponseModel<Boolean> response = new ResponseModel<>();
         
         try {
+            this.logService.logMessage("busca de checkout na base de dados", "removeCheckout");
             checkout = this.checkoutRepository.find(new Checkout(), checkout.getId());
             
             if (checkout.getStatusRegister().getId() == StatusRegisterEnum.TOTALIZED.value){
-                response.setMensage(Messages.fail_remove);
+                response.setMensage("Falha ao excluir os dados!");
                 response.setModel(false);
             } else {
                 boolean status = this.checkoutRepository.remove(checkout);
                 response.setModel(status);
             }
         } catch (Exception ex) {
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "removeCheckout");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.status_register);
+            response.setMensage("Registro de saída não pode ser excluida.\nTotalização já realizada.");
             response.setModel(false);
         }
         

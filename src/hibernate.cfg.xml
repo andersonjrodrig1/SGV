@@ -30,5 +30,6 @@
     <mapping class="br.com.sgv.model.TransactionSale" />
     <mapping class="br.com.sgv.model.ReportType" />
     <mapping class="br.com.sgv.model.TotalizeSale" />
+    <mapping class="br.com.sgv.model.Log" />
   </session-factory>
 </hibernate-configuration>
