@@ -93,7 +93,7 @@ public class Messages {
     /* ListSaleDay */
     public static String date_required = "Data obrigatória!";
     public static String date_invalid = "Data informada não pode ser maior que a data atual.";
-    public static String not_found_list = "Nenhuma venda encontrada";
+    public static String not_found_list = "Nenhuma venda encontrada.";
     
     /* RegisterTotalization */
     public static String fail_totalization = "Falha ao executar a totalização da vendas.";

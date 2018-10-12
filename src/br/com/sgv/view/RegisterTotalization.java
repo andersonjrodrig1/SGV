@@ -1,6 +1,8 @@
 package br.com.sgv.view;
 
+import br.com.sgv.model.TotalizeSale;
 import br.com.sgv.model.TransactionSale;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.TotalizationSaleService;
 import br.com.sgv.service.TransactionSaleService;
 import br.com.sgv.shared.Messages;
@@ -18,6 +20,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class RegisterTotalization extends javax.swing.JDialog {
 
+    private LogService logService = null;
     private DefaultTableModel table = null;
     private double valueTotal;
     
@@ -27,6 +30,7 @@ public class RegisterTotalization extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(TotalizeSale.class.getName(), "RegisterTotalization");
         this.initDatePicker();
         
         this.setSize(600, 500);
@@ -43,6 +47,7 @@ public class RegisterTotalization extends javax.swing.JDialog {
     
     private void totalizeSale() {
         if (validateFields()) {
+            this.logService.logMessage("inicio do processo de totalizacao", "totalizeSale");
             Date dateSearch = dpkCloseDate.getDate();
             this.valueTotal = 0;
             String message = "";
@@ -51,7 +56,7 @@ public class RegisterTotalization extends javax.swing.JDialog {
             this.table = (DefaultTableModel)tableTotalize.getModel();
             this.table.setNumRows(0);
             
-            ResponseModel<Boolean> response = new TotalizationSaleService().totalizerSaleDay(dateSearch);
+            ResponseModel<Boolean> response = new TotalizationSaleService(true).totalizerSaleDay(dateSearch);
             
             if (response.getModel()) {
                 ResponseModel<List<TransactionSale>> list = new TransactionSaleService().getTransactionSaleByDay(dateSearch);
@@ -68,7 +73,7 @@ public class RegisterTotalization extends javax.swing.JDialog {
                     });
                 });
                 
-                message = Messages.totalization_sucess;
+                message = "Totalização Realizada com sucesso!";
             } else {
                 message = response.getMensage();
             }
@@ -85,9 +90,9 @@ public class RegisterTotalization extends javax.swing.JDialog {
         String message = "";
         
         if (dpkCloseDate.getDate().toString().isEmpty()) {
-            message += Messages.date_required;
+            message += "Data obrigatória!";
         } else if (dpkCloseDate.getDate().after(now)) {
-            message += Messages.date_invalid;
+            message += "Data informada não pode ser maior que a data atual.";
         }
         
         if (!message.isEmpty()) {

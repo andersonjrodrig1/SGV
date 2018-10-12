@@ -1,25 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.view;
 
+import br.com.sgv.service.LogService;
+
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class About extends javax.swing.JDialog {
-
-    /**
-     * Creates new form About
-     */
+    
     public About(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
     
     public void initScreen() {
+        new LogService("About", "About").logMessage("Exibindo informaçoes do sistema", "initScreen");
+        
         this.lblTitleSobre.setText("Sistema de Gerenciamento de Vendas");
         this.lblDev.setText("Desenvolvido em Java");
         this.lblDb.setText("Banco de Dados: MySQL");

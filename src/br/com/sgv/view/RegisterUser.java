@@ -1,33 +1,27 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.view;
 
+import br.com.sgv.model.User;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.UserService;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class RegisterUser extends javax.swing.JDialog {
     
+    private LogService logService = null;
     private UserService userservice = null;
 
-    /**
-     * Creates new form RegisterUser
-     */
     public RegisterUser(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
     
     public void initScreen() {
+        this.logService = new LogService(User.class.getName(), "RegisterUser");
         this.setSize(600, 350);
         this.setLocationRelativeTo(null);
         this.pack();
@@ -40,16 +34,17 @@ public class RegisterUser extends javax.swing.JDialog {
     
     private void insertNewUser() {
         if (verifyFields()) {
-            userservice = new UserService();
+            this.logService.logMessage("inserindo novo usuário", "insertNewUser");
+            this.userservice = new UserService();
             
             String name = txtName.getText();
             String login = txtUser.getText();
             String password = txtPassword.getText();
             
-            ResponseModel<Boolean> response = userservice.saveUser(name, login, password);
+            ResponseModel<Boolean> response = this.userservice.saveUser(name, login, password);
             
             if (response.getModel() == true) {
-                JOptionPane.showMessageDialog(null, Messages.save_success);
+                JOptionPane.showMessageDialog(null, "Salvo com sucesso!");
                 this.cleanFields();
             } else {
                 JOptionPane.showMessageDialog(null, response.getMensage());
@@ -62,23 +57,23 @@ public class RegisterUser extends javax.swing.JDialog {
         boolean isVerify = true;
         
         if (txtName.getText().trim().isEmpty()) {
-            message += Messages.name_required + "\n";
+            message += "Nome obrigatório!\n";
         } else if (!verifyNameUser(txtName.getText())) {
-            message += Messages.name_complete + "\n";
+            message += "Nome inválido!\n";
         }
         
         if (txtUser.getText().trim().isEmpty()) {
-            message += Messages.user_required + "\n";
+            message += "Usuário obrigatório!\n";
         }
         
         if (txtPassword.getText().trim().isEmpty()) {
-            message += Messages.password_required + "\n";
+            message += "Senha obrigatória!\n";
         } else if (txtPassword.getText().trim().length() < 4 || txtPassword.getText().trim().length() > 10) {
-            message += Messages.password_format + "\n";
+            message += "Senha deve ter entre 4 e 10 caracteres!\n";
         }
         
         if (!txtConfirmPassword.getText().equals(txtPassword.getText())) {
-            message += Messages.password_equals + "\n";
+            message += "Confirmação senha e senha informada devem ser iguais!\n";
         }
         
         if (!message.isEmpty()){

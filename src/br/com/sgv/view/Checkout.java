@@ -7,6 +7,7 @@ import br.com.sgv.service.LogService;
 import br.com.sgv.shared.FormatMoney;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
+import java.awt.HeadlessException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -129,7 +130,7 @@ public class Checkout extends javax.swing.JDialog {
             } else {
                 JOptionPane.showMessageDialog(null, "Selecione um item para executar está ação.");
             }
-        } catch (Exception ex){
+        } catch (NumberFormatException | HeadlessException ex){
             this.logService.logMessage(ex.toString(), "registerCheckout");
             JOptionPane.showMessageDialog(null, "Falha ao remover checkout.");
         }
@@ -172,15 +173,15 @@ public class Checkout extends javax.swing.JDialog {
         String message = "";
         
         if (txtCheckoutName.getText().isEmpty()) {
-            message += Messages.checkout_name + "\n";
+            message += "Descrição de saída obrigatório.\n";
         }
         
         if (txtCheckoutValue.getText().isEmpty() || txtCheckoutValue.getText().equals("0,00")) {
-            message += Messages.checkout_value + "\n";
+            message += "Total de saída obrigatório.\n";
         }
         
         if (dpkCheckoutDate.getDate().after(Date.from(Instant.now()))) {
-            message += Messages.verif_date + "\n";
+            message += "Data de registro não pode ser maior que data de hoje.\n";
         }
         
         if (!message.isEmpty()) {

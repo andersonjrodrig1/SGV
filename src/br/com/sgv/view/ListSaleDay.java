@@ -2,9 +2,9 @@ package br.com.sgv.view;
 
 import br.com.sgv.enumerator.CalcTypeEnum;
 import br.com.sgv.model.Sale;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.SaleService;
 import br.com.sgv.shared.FormatMoney;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.text.DecimalFormat;
 import java.time.Instant;
@@ -19,6 +19,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class ListSaleDay extends javax.swing.JDialog {
 
+    private LogService logService = null;
     private DecimalFormat df = new DecimalFormat("#0.00");
     private DefaultTableModel table = null;
     private List<Sale> listSales = null;
@@ -30,6 +31,8 @@ public class ListSaleDay extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(Sale.class.getName(), "ListSaleDay");
+        
         this.initDatePicker();
         this.getSalesByDay(true);
         
@@ -46,12 +49,18 @@ public class ListSaleDay extends javax.swing.JDialog {
     }
     
     private void getSalesByDay(boolean isInit) {
-        if (verifyFields()) {
-            Date dateSearch = dpkSearchDay.getDate();
-            ResponseModel<List<Sale>> response = new SaleService().getSalesByDay(dateSearch);
-            this.listSales = response.getModel();
-            
-            this.setSaleTable(isInit);
+        try {
+            if (verifyFields()) {
+                this.logService.logMessage("inicio de busca de vendas por dia", "getSalesByDay");
+                Date dateSearch = dpkSearchDay.getDate();
+                ResponseModel<List<Sale>> response = new SaleService().getSalesByDay(dateSearch);
+                this.listSales = response.getModel();
+
+                this.setSaleTable(isInit);
+            }
+        } catch(Exception ex){
+            this.logService.logMessage(ex.toString(), "getSalesByDay");
+            JOptionPane.showConfirmDialog(null, "Falha ao buscar os dados.");
         }
     }
     
@@ -59,6 +68,7 @@ public class ListSaleDay extends javax.swing.JDialog {
         this.table = (DefaultTableModel)tableSale.getModel();
         this.table.setRowCount(0);
         this.totalValue = 0d;
+        this.logService.logMessage("atualizando tabela de vendas", "setSaleTable");
         
         this.listSales.stream().forEach(sale -> {
             String amount;
@@ -80,9 +90,11 @@ public class ListSaleDay extends javax.swing.JDialog {
         });
         
         if (this.listSales == null || this.listSales.size() <= 0 && !isInit) {
-            JOptionPane.showMessageDialog(null, Messages.not_found_list);
+            this.logService.logMessage("nenhuma venda encontrada", "setSaleTable");
+            JOptionPane.showMessageDialog(null, "Nenhuma venda encontrada.");
         }
         
+        this.logService.logMessage("calculando total de vendas", "setSaleTable");
         String totalValueString = this.df.format(this.totalValue);
         lblTotalSale.setText("R$ " + totalValueString);
     }
@@ -92,11 +104,11 @@ public class ListSaleDay extends javax.swing.JDialog {
         String message = "";
         
         if (dpkSearchDay.getDate().toString().isEmpty()) {
-            message += Messages.date_required + "\n";
+            message += "Data obrigatória!\n";
         }
         
         if (dpkSearchDay.getDate().after(Date.from(Instant.now()))) {
-            message += Messages.date_invalid + "\n";
+            message += "Data informada não pode ser maior que a data atual.\n";
         }
         
         if (!message.isEmpty()) {

@@ -3,9 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/Checkout.java</file>
-            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/service/CheckoutService.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/service/LogService.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/shared/Messages.java</file>
             <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/main/Main.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/service/TotalizationSaleService.java</file>
+            <file>file:/E:/Desenvolvimento/NetBeans%20Projects/SGV/src/br/com/sgv/view/ListTotalization.java</file>
         </group>
     </open-files>
 </project-private>

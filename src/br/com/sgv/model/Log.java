@@ -35,8 +35,10 @@ public class Log implements Serializable {
     private String logMessage;
     
     @Column(name = "date_log", nullable = false)
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date dateLog;
+    
+    public Log() { }
     
     public Log(String className, String screenName) {
         this.className = className;

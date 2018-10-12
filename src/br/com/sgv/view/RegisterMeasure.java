@@ -2,8 +2,8 @@ package br.com.sgv.view;
 
 import br.com.sgv.model.CalcType;
 import br.com.sgv.service.CalcTypeService;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.MeasureTypeService;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -13,10 +13,7 @@ import javax.swing.JOptionPane;
  */
 public class RegisterMeasure extends javax.swing.JDialog {
 
-    /**
-     * Creates new form RegisterMeasure
-     */
-    
+    private LogService logService = null;
     private ResponseModel<List<CalcType>> response = null;
     private List<CalcType> listCalcType = null;
     
@@ -26,6 +23,7 @@ public class RegisterMeasure extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(CalcType.class.getName(), "RegisterMeasure");
         this.getCalcType();
         
         this.setSize(600, 300);
@@ -36,14 +34,18 @@ public class RegisterMeasure extends javax.swing.JDialog {
     
     private void resgisterMeasureType() {
         if (verifyFields()) {
+            this.logService.logMessage("registrando novo tipo de medida", "resgisterMeasureType");
             String measureName = txtMeasureName.getText();
             String initials = txtInitials.getText();
+            
+            this.logService.logMessage("verificando tipo de calculo para medida", "resgisterMeasureType");
             CalcType calcType = (CalcType)cbxCalc.getSelectedItem();
             
             ResponseModel<Boolean> response = new MeasureTypeService().saveMeasureType(measureName, initials, calcType);
+            this.logService.logMessage("nova medida registrada", "resgisterMeasureType");
             
             if (response.getModel() == true) {
-                JOptionPane.showMessageDialog(null, Messages.save_success);
+                JOptionPane.showMessageDialog(null, "Salvo com sucesso!");
                 this.clearFields();
             } else {
                 JOptionPane.showMessageDialog(null, response.getMensage());
@@ -56,17 +58,17 @@ public class RegisterMeasure extends javax.swing.JDialog {
         boolean isVerify = true;
         
         if (txtMeasureName.getText().isEmpty()) {
-            message += Messages.name_register_measure + "\n";
+            message += "Nome da Unidade obrigatório.\n";
         }
         
         if (!txtInitials.getText().trim().isEmpty()) {
             if (txtInitials.getText().trim().length() > 2) {
-                message += Messages.initials_register_measure += "\n";
+                message += "Sigla não pode conter mais de 2 caracteres.\n";
             }
         }
         
         if (cbxCalc.getSelectedIndex() == 0 || cbxCalc.getSelectedItem().equals("Selecione")) {
-            message += Messages.calc_register_measure + "\n";
+            message += "Tipo de Calculo obrigatório.\n";
         }
         
         if (!message.isEmpty()) {

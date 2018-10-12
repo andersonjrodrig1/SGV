@@ -2,9 +2,11 @@ package br.com.sgv.view;
 
 import br.com.sgv.enumerator.OptionEnum;
 import br.com.sgv.model.Product;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.ProductService;
 import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
+import java.awt.HeadlessException;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,10 +18,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class ListProduct extends javax.swing.JDialog {
 
-    /**
-     * Creates new form ListProduct
-     */
-    
+    private LogService logService = null;
     private DecimalFormat df = new DecimalFormat("#0.00");
     private RegisterProduct registerProduct = null;
     private ResponseModel<List<Product>> listResponse = null;
@@ -32,6 +31,7 @@ public class ListProduct extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(Product.class.getName(), "ListProduct");
         this.getProducts();
                 
         this.setSize(600, 500);
@@ -45,6 +45,7 @@ public class ListProduct extends javax.swing.JDialog {
     }
     
     private void getProducts() {
+        this.logService.logMessage("busca de produtos", "getProducts");
         this.listResponse = new ProductService().getProducts();
         this.listProduct = this.listResponse.getModel();
         
@@ -52,79 +53,110 @@ public class ListProduct extends javax.swing.JDialog {
     }
     
     private void getProductByNameOrKey() {
-        String productKey = txtProductKey.getText().trim();
-        String productName = txtProductName.getText();
-        
-        listResponse = new ProductService().getProductByNameOrKey(productKey, productName);
-        this.listProduct = this.listResponse.getModel();
-        
-        this.setTableProduct();
+        try {
+            String productKey = txtProductKey.getText().trim();
+            String productName = txtProductName.getText();
+
+            this.logService.logMessage("realizando busca de produtos", "getProductByNameOrKey");
+            listResponse = new ProductService().getProductByNameOrKey(productKey, productName);
+            this.listProduct = this.listResponse.getModel();
+
+            this.setTableProduct();
+        } catch (Exception ex) {
+            this.logService.logMessage(ex.toString(), "getProductByNameOrKey");
+            JOptionPane.showMessageDialog(null, "Falha ao buscar os dados.");
+        }
     }
     
     private void removeProduct() {
-        int row = tblProducts.getSelectedRow();
-        
-        if (row >= 0) {
-            int option = JOptionPane.showConfirmDialog(null, Messages.remove_modal);
-            
-            if (option == OptionEnum.YES.value) {
-                Object objColumn = tblProducts.getValueAt(row, 0);
-                int idProduct = Integer.valueOf(objColumn.toString());
-                
-                Product productSelect = this.getProductInMemory(idProduct);
-                
-                //TODO: verify if product has send
+        try {
+            this.logService.logMessage("iniciando exclusao de produto", "removeProduct");
+            int row = tblProducts.getSelectedRow();
 
-                ResponseModel<Boolean> response = new ProductService().removeProduct(productSelect);
+            if (row >= 0) {
+                int option = JOptionPane.showConfirmDialog(null, Messages.remove_modal);
 
-                if (response.getModel() == true) {
-                    this.listProduct = this.listProduct
-                            .stream()
-                            .filter(x -> x.getId() != productSelect.getId())
-                            .collect(Collectors.toList());
+                if (option == OptionEnum.YES.value) {
+                    Object objColumn = tblProducts.getValueAt(row, 0);
+                    int idProduct = Integer.valueOf(objColumn.toString());
 
-                    this.setTableProduct();
+                    this.logService.logMessage("selecionando produto com id: " + idProduct, "removeProduct");
+                    Product productSelect = this.getProductInMemory(idProduct);
 
-                    JOptionPane.showMessageDialog(null, Messages.remove_sucess);
-                } else {
-                    JOptionPane.showMessageDialog(null, response.getMensage());
+                    //TODO: verify if product has send
+
+                    ResponseModel<Boolean> response = new ProductService().removeProduct(productSelect);
+
+                    if (response.getModel() == true) {
+                        this.logService.logMessage("atualizando lista de produtos na memória", "removeProduct");
+                        this.listProduct = this.listProduct
+                                .stream()
+                                .filter(x -> x.getId() != productSelect.getId())
+                                .collect(Collectors.toList());
+
+                        this.setTableProduct();
+
+                        JOptionPane.showMessageDialog(null, "Excluido com sucesso!");
+                    } else {
+                        JOptionPane.showMessageDialog(null, response.getMensage());
+                    }
                 }
+            } else {
+                this.logService.logMessage("exclusao de produto cancelada", "removeProduct");
+                JOptionPane.showMessageDialog(null, "Selecione um item para executar está ação.");
             }
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.select_row);
+        } catch (HeadlessException | NumberFormatException ex){
+            this.logService.logMessage(ex.toString(), "getProductByNameOrKey");
+            JOptionPane.showMessageDialog(null, "Falha ao remover os dados.");
         }
     }
     
     private void updateProduct() {
-        int row = tblProducts.getSelectedRow();
-        
-        if (row >= 0) {
-            Object objColumn = tblProducts.getValueAt(row, 0);
-            int idProduct = Integer.valueOf(objColumn.toString());
-            
-            Product productSelect = this.getProductInMemory(idProduct);
-            
-            this.dispose();
-            this.registerProduct = new RegisterProduct(new SGV(), true);
-            this.registerProduct.initScreenUpdate(productSelect, true, new ListProduct(null, true));
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.select_row);
+        try {
+            this.logService.logMessage("iniciando atualização do produto", "updateProduct");
+            int row = tblProducts.getSelectedRow();
+
+            if (row >= 0) {
+                Object objColumn = tblProducts.getValueAt(row, 0);
+                int idProduct = Integer.valueOf(objColumn.toString());
+                this.logService.logMessage("selecionado produto id: " + idProduct, "updateProduct");
+
+                Product productSelect = this.getProductInMemory(idProduct);
+
+                this.dispose();
+                this.registerProduct = new RegisterProduct(new SGV(), true);
+                this.registerProduct.initScreenUpdate(productSelect, true, new ListProduct(null, true));
+            } else {
+                this.logService.logMessage("atualização de produto cancelada", "updateProduct");
+                JOptionPane.showMessageDialog(null, "Selecione um item para executar está ação.");
+            }
+        } catch(NumberFormatException | HeadlessException ex){
+            this.logService.logMessage(ex.toString(), "updateProduct");
+            JOptionPane.showMessageDialog(null, "Falha ao atualizar os dados.");
         }
     }
     
     private void selectProduct() {
-        int row = tblProducts.getSelectedRow();
-        
-        if (row >= 0){
-            Object objColumn = tblProducts.getValueAt(row, 0);
-            int idProduct = Integer.valueOf(objColumn.toString());
-            
-            Product productSelect = this.getProductInMemory(idProduct);
-            
-            this.dispose();
-            this.jframe.setItemSale(productSelect);            
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.select_row);
+        try {
+            this.logService.logMessage("iniciando buscar de produto", "selectProduct");
+            int row = tblProducts.getSelectedRow();
+
+            if (row >= 0){
+                Object objColumn = tblProducts.getValueAt(row, 0);
+                int idProduct = Integer.valueOf(objColumn.toString());
+                this.logService.logMessage("selecionado produto id: " + idProduct, "selectProduct");
+
+                Product productSelect = this.getProductInMemory(idProduct);
+
+                this.dispose();
+                this.jframe.setItemSale(productSelect);            
+            } else {
+                this.logService.logMessage("produto não selecionado", "selectProduct");
+                JOptionPane.showMessageDialog(null, "Selecione um item para executar está ação.");
+            }
+        } catch(NumberFormatException | HeadlessException ex){
+            this.logService.logMessage(ex.toString(), "selectProduct");
+            JOptionPane.showMessageDialog(null, "Falha ao selecionar os dados.");
         }
     }
     
@@ -132,6 +164,7 @@ public class ListProduct extends javax.swing.JDialog {
         if (this.listProduct != null && this.listProduct.size() > 0) {
             DefaultTableModel table = (DefaultTableModel)tblProducts.getModel();
             table.setNumRows(0);
+            this.logService.logMessage("atualizando tabela de produtos", "setTableProduct");
             
             this.listProduct.stream().forEach(product -> {
                 String valueProduct = this.df.format(product.getProductValue());

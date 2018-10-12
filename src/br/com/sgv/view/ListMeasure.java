@@ -1,27 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.view;
 
 import br.com.sgv.model.MeasureType;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.MeasureTypeService;
 import br.com.sgv.shared.ResponseModel;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class ListMeasure extends javax.swing.JDialog {
 
-    /**
-     * Creates new form ListMeasure
-     */
-    
-    ResponseModel<List<MeasureType>> listResponse = null; 
+    private ResponseModel<List<MeasureType>> listResponse = null;
+    private LogService logService = null;
     
     public ListMeasure(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -29,6 +22,7 @@ public class ListMeasure extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(LogService.class.getName(), "ListMeasure");
         this.getMeasureType();
         
         this.setSize(600, 400);
@@ -38,19 +32,25 @@ public class ListMeasure extends javax.swing.JDialog {
     }
     
     private void getMeasureType() {
-        this.listResponse = new MeasureTypeService().getMeasureType();
-        List<MeasureType> listMeasureType = this.listResponse.getModel();
-        
-        if (listMeasureType != null && listMeasureType.size() > 0) {
-            DefaultTableModel table = (DefaultTableModel)tblMeasure.getModel();
-            
-            listMeasureType.stream().forEach(measure -> {
-                table.addRow(new Object[] {
-                    measure.getMeasureType(), 
-                    measure.getInitials(), 
-                    measure.getCalcType().getCalcType()
-                });
-            });            
+        try {
+            this.logService.logMessage("requesição de busca de volumes", "getMeasureType");
+            this.listResponse = new MeasureTypeService().getMeasureType();
+            List<MeasureType> listMeasureType = this.listResponse.getModel();
+
+            if (listMeasureType != null && listMeasureType.size() > 0) {
+                DefaultTableModel table = (DefaultTableModel)tblMeasure.getModel();
+
+                listMeasureType.stream().forEach(measure -> {
+                    table.addRow(new Object[] {
+                        measure.getMeasureType(), 
+                        measure.getInitials(), 
+                        measure.getCalcType().getCalcType()
+                    });
+                });            
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "getMeasureType");
+            JOptionPane.showMessageDialog(null, "Falha ao buscar os dados.");
         }
     }
 

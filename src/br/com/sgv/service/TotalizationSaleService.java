@@ -10,7 +10,6 @@ import br.com.sgv.model.TotalizeSale;
 import br.com.sgv.model.TransactionSale;
 import br.com.sgv.repository.TotalizationSaleRepository;
 import br.com.sgv.repository.TransactionSaleRepository;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -29,11 +28,18 @@ public class TotalizationSaleService {
     private double totalValueMoney = 0;
     private double totalValueCard = 0;
     
+    private LogService logService = null;
     private Session session = null;
     private TotalizationSaleRepository totalizationSaleRepository = null;
     private TransactionSaleRepository transactionSaleRepository = null;
     
-    public TotalizationSaleService() {
+    public TotalizationSaleService(boolean isTransaction) {
+        if (isTransaction){
+            this.logService = new LogService(TotalizeSale.class.getName(), "ListTotalization", "TotalizationSaleService");
+        } else {
+            this.logService = new LogService(TotalizeSale.class.getName(), "ListTotalization");
+        }
+        
         this.session = ContextFactory.initContextDb();
         this.totalizationSaleRepository = new TotalizationSaleRepository(this.session);
         this.transactionSaleRepository = new TransactionSaleRepository(this.session);
@@ -42,13 +48,15 @@ public class TotalizationSaleService {
     public ResponseModel<Boolean> totalizerSaleDay(Date dayTotalization) {
         ResponseModel<Boolean> response = new ResponseModel<>();
         
-        try {
+        try {            
             int typeStatus = StatusRegisterEnum.PENDING.value;            
             String dateSearch = new SimpleDateFormat("yyyy-MM-dd").format(dayTotalization);
+            this.logService.addLogMessage("verificando totalização do dia: " + dateSearch);
             
             List<TransactionSale> listTransactionSale = this.transactionSaleRepository.getTransactionSaleList(dateSearch, typeStatus);
             
-            if (listTransactionSale != null && listTransactionSale.size() > 0){                
+            if (listTransactionSale != null && listTransactionSale.size() > 0){ 
+                this.logService.addLogMessage("total de vendas não totalizadas: " + listTransactionSale.size());                
                 listTransactionSale.stream().forEach(transaction -> {
                     this.totalValueSale += transaction.getTotalValue();
                     
@@ -60,7 +68,7 @@ public class TotalizationSaleService {
                 });
                 
                 Date now = Date.from(Instant.now());
-                
+                this.logService.addLogMessage("verificando se possui vendas totalizadas");
                 List<TotalizeSale> listTotalizeSearch = this.totalizationSaleRepository.getTotalizationDayList(dateSearch);
                 
                 if (listTotalizeSearch != null && listTotalizeSearch.size() > 0) {
@@ -70,19 +78,19 @@ public class TotalizationSaleService {
                         if (totalization.getReportType().getId() == ReportTypeEnum.SALE.value){
                             this.totalValueSale += totalization.getTotalValue();
                             totalization.setTotalValue(this.totalValueSale);
-                        } else {
-                            if (totalization.getDescrition().equals("Venda Cartão")) {
-                                this.totalValueCard += totalization.getTotalValue();
-                                totalization.setTotalValue(this.totalValueCard);
-                            } else if (totalization.getDescrition().equals("Venda Dinheiro")) {
-                                this.totalValueMoney += totalization.getTotalValue();
-                                totalization.setTotalValue(this.totalValueMoney);
-                            }
+                        } else if (totalization.getDescrition().equals("Venda Cartão")) {
+                            this.totalValueCard += totalization.getTotalValue();
+                            totalization.setTotalValue(this.totalValueCard);
+                        } else if (totalization.getDescrition().equals("Venda Dinheiro")) {
+                            this.totalValueMoney += totalization.getTotalValue();
+                            totalization.setTotalValue(this.totalValueMoney);
                         }
                     });
                     
+                    this.logService.addLogMessage("atualizando totalização do dia");
                     this.totalizationSaleRepository.saveTotalizationSaleList(listTotalizeSearch);
                 } else {
+                    this.logService.addLogMessage("não existe totalização para data informada");
                     List<TotalizeSale> listtotalizeSale = new ArrayList<>();
                     
                     TotalizeSale totalizationBySale = new TotalizeSale();
@@ -109,6 +117,7 @@ public class TotalizationSaleService {
                     totalizationByCard.setReportType(new ReportType(ReportTypeEnum.PAID.value, "Por Pagamento"));
                     listtotalizeSale.add(totalizationByCard);
 
+                    this.logService.addLogMessage("registrando totalização das vendas do dia");
                     this.totalizationSaleRepository.saveTotalizationSaleList(listtotalizeSale);
                 }
                 
@@ -116,6 +125,7 @@ public class TotalizationSaleService {
                     transaction.setStatusRegister(new StatusRegister(StatusRegisterEnum.TOTALIZED.value, "Totalizado"));
                 });
 
+                this.logService.addLogMessage("atualizando status das vendas não totalizadas");
                 this.transactionSaleRepository.saveTransactionSaleList(listTransactionSale);
                 
                 ContextFactory.commit();
@@ -123,19 +133,21 @@ public class TotalizationSaleService {
             } else {
                 ContextFactory.rollback();
                 
-                response.setMensage(Messages.not_found_sale);
+                this.logService.addLogMessage("não existe vendas para totalizar para data informada");
+                response.setMensage("Nenhuma venda encontrada para totalizar.");
                 response.setModel(false);
             }
         } catch(Exception ex) {
             ContextFactory.rollback();
             
-            System.out.printf("Error: ", ex);
+            this.logService.addLogMessage(ex.toString());
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_totalization);
+            response.setMensage("Falha ao executar a totalização da vendas.");
             response.setModel(false);
         }
         
+        this.logService.saveListLog();
         return response;
     }
     
@@ -145,14 +157,16 @@ public class TotalizationSaleService {
         try {
             String dtInitial = new SimpleDateFormat("yyyy-MM-dd").format(dateInitial);
             String dtFinal = new SimpleDateFormat("yyyy-MM-dd").format(dateFinal);
+            this.logService.logMessage("Periodo da consulta -> inicio: " + dtInitial + " final: " + dtFinal, "getTotalizationSaleByPeriodic");
             
             List<TotalizeSale> list = new TotalizationSaleRepository().getTotalizationByPeriodic(dtInitial, dtFinal);
-            response.setModel(list);            
+            response.setModel(list);
+            this.logService.logMessage("buscar realizada", "getTotalizationSaleByPeriodic");
         } catch(Exception ex) {            
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "getTotalizationSaleByPeriodic");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_find);
+            response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }
         

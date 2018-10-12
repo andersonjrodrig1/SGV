@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.service;
 
 import br.com.sgv.repository.UserRepository;
@@ -14,7 +9,6 @@ import br.com.sgv.shared.ResponseModel;
 import java.util.List;
 
 /**
- *
  * @author Anderson Junior Rodrigues
  */
 public class UserService {
@@ -34,7 +28,7 @@ public class UserService {
         List<User> users = null;
         
         try {
-            this.logService.logMessage("Busca de Usuários", "getAll");
+            this.logService.logMessage("realizando requisição no banco de dados", "getAll");
             users = this.userRepository.getAll();
 
             users.stream().forEach(u -> {
@@ -42,7 +36,6 @@ public class UserService {
                 u.setUserPassword(password);
             });
             
-            this.logService.logMessage("Usuários encontrados", "getAll");
             response.setModel(users);
         } catch(Exception ex){
             System.out.printf("Error: ", ex);
@@ -89,7 +82,7 @@ public class UserService {
         ResponseModel<Boolean> response = new ResponseModel<>();
         
         try {
-            this.logService.logMessage("Salvar usuário", "saveUser");
+            this.logService.logMessage("Preparando dados para salvar usuário", "saveUser");
             long type = UserTypeEnum.SALESMAN.value;
             String passwordEncode = ArchiveBase64.encode(password);
             

@@ -1,23 +1,19 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.view;
 
 import br.com.sgv.model.User;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.UserService;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
  * @author Anderson Junior Rodrigues
  */
 public class ListUser extends javax.swing.JDialog {
 
+    private LogService logService = null;
     private static UserService userService = null;
     private ResponseModel<List<User>> response = null;
     private List<User> users = null;
@@ -28,9 +24,10 @@ public class ListUser extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(User.class.getName(), "ListUser");
         this.listUsers();
         
-        this.lblTitle.setText(Messages.title_list_user);
+        this.lblTitle.setText("Lista de Usuários Cadastrados");
         
         this.setSize(600, 400);
         this.setLocationRelativeTo(null);
@@ -39,16 +36,23 @@ public class ListUser extends javax.swing.JDialog {
     }
     
     private void listUsers() {
-        DefaultTableModel table = (DefaultTableModel) tblListUser.getModel();
-        userService = new UserService();
-        
-        this.response = userService.getAll();
-        this.users = response.getModel();
-        
-        if (users != null && users.size() > 0) {
-            users.stream().forEach(user -> {
-                table.addRow(new Object[] { user.getId(), user.getUserName(), user.getUserLogin() });
-            });
+        try {
+            this.logService.logMessage("buscar de usuários cadastrados", "listUsers");
+            DefaultTableModel table = (DefaultTableModel) tblListUser.getModel();
+            userService = new UserService();
+
+            this.response = userService.getAll();
+            this.users = response.getModel();
+            this.logService.logMessage("encontrado " + this.users.size() + " usuários", "listUsers");
+
+            if (users != null && users.size() > 0) {
+                users.stream().forEach(user -> {
+                    table.addRow(new Object[] { user.getId(), user.getUserName(), user.getUserLogin() });
+                });
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "listUsers");
+            JOptionPane.showMessageDialog(null, "Falha ao buscar os dados.");
         }
     }
     

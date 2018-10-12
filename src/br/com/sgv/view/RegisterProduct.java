@@ -3,6 +3,7 @@ package br.com.sgv.view;
 import br.com.sgv.enumerator.CalcTypeEnum;
 import br.com.sgv.model.MeasureType;
 import br.com.sgv.model.Product;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.MeasureTypeService;
 import br.com.sgv.service.ProductService;
 import br.com.sgv.shared.FormatMoney;
@@ -17,16 +18,13 @@ import javax.swing.JOptionPane;
  */
 public class RegisterProduct extends javax.swing.JDialog {
 
-    /**
-     * Creates new form RegisterProduct
-     */
-    
-    ListProduct jDialog = null;
-    ResponseModel<Boolean> responseProduct = null;
-    ResponseModel<List<MeasureType>> response = null;
-    List<MeasureType> listMeasureType = null;
-    boolean isUpdateProduct = false;
-    long idProductUpdate = 0;
+    private ListProduct jDialog = null;
+    private ResponseModel<Boolean> responseProduct = null;
+    private ResponseModel<List<MeasureType>> response = null;
+    private List<MeasureType> listMeasureType = null;
+    private boolean isUpdateProduct = false;
+    private long idProductUpdate = 0;
+    private LogService logService = null;
     
     public RegisterProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -36,6 +34,8 @@ public class RegisterProduct extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(Product.class.getName(), "RegisterProduct");
+        
         if (this.listMeasureType == null) {
             this.getMeasureType();
         }
@@ -47,6 +47,7 @@ public class RegisterProduct extends javax.swing.JDialog {
     }
     
     public void initScreenUpdate(Product product, boolean isUpdate, ListProduct jDialog) {
+        this.logService.logMessage("atualização de produto cancelada", "initScreenUpdate");
         String value = FormatMoney.verifyDecimal(String.valueOf(product.getProductValue()), CalcTypeEnum.UNITY.value);
         value = FormatMoney.formatMoney(value);
         

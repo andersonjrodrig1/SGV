@@ -3,9 +3,9 @@ package br.com.sgv.view;
 import br.com.sgv.enumerator.ReportTypeEnum;
 import br.com.sgv.model.ReportType;
 import br.com.sgv.model.TotalizeSale;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.ReportTypeService;
 import br.com.sgv.service.TotalizationSaleService;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class ListTotalization extends javax.swing.JDialog {
 
+    private LogService logService = null;
     private DefaultTableModel table = null;
     private double valeuTotal;
             
@@ -30,6 +31,7 @@ public class ListTotalization extends javax.swing.JDialog {
     }
     
     public void initScreen() {
+        this.logService = new LogService(TotalizeSale.class.getName(), "ListTotalization");
         this.initDatePicker();
         this.initComboBoxReportType();
         
@@ -65,10 +67,11 @@ public class ListTotalization extends javax.swing.JDialog {
     
     private void getTotalizationPeriodic() {
         if (validateFields()) {
+            this.logService.logMessage("inicio de busca de totalizacao por periodo", "getTotalizationPeriodic");
             Date dateInitial = dpkDateInit.getDate();
             Date dateFinal = dpkDateFinal.getDate();
             
-            ResponseModel<List<TotalizeSale>> response = new TotalizationSaleService().getTotalizationSaleByPeriodic(dateInitial, dateFinal);
+            ResponseModel<List<TotalizeSale>> response = new TotalizationSaleService(false).getTotalizationSaleByPeriodic(dateInitial, dateFinal);
             List<TotalizeSale> listTotalizeSales = response.getModel();
             
             this.valeuTotal = 0; 
@@ -77,6 +80,7 @@ public class ListTotalization extends javax.swing.JDialog {
             this.table.setRowCount(0);
             
             if (listTotalizeSales != null && listTotalizeSales.size() > 0) {
+                this.logService.logMessage("total de vendas totalizadas: " + listTotalizeSales.size(), "getTotalizationPeriodic");
                 ReportType reportType = (ReportType)cbxCloseType.getSelectedItem();
                 int reportTypeId = reportType.getId() == ReportTypeEnum.PAID.value ? ReportTypeEnum.PAID.value : ReportTypeEnum.SALE.value;
                 
@@ -85,6 +89,7 @@ public class ListTotalization extends javax.swing.JDialog {
                             .filter(totalization -> totalization.getReportType().getId() == reportTypeId)
                             .collect(Collectors.toList());
                 
+                this.logService.logMessage("calculando valor total das vendas", "getTotalizationPeriodic");
                 listTotalizeSales.stream().forEach(totalization -> {
                     this.valeuTotal += totalization.getTotalValue();
                     
@@ -99,9 +104,10 @@ public class ListTotalization extends javax.swing.JDialog {
                 String value = new DecimalFormat("#0.00").format(this.valeuTotal);
                 lblValueTotal.setText(value);
             } else {
+                this.logService.logMessage("não foi encontrado resultado para pesquisa", "getTotalizationPeriodic");
                 String value = new DecimalFormat("#0.00").format(this.valeuTotal);
                 lblValueTotal.setText(value);
-                JOptionPane.showMessageDialog(null, Messages.report_found);
+                JOptionPane.showMessageDialog(null, "Nenhuma venda totalizada para o período.");
             }
         }
     }
@@ -111,25 +117,25 @@ public class ListTotalization extends javax.swing.JDialog {
         String message = "";
         
         if (dpkDateInit.getDate().toString().isEmpty()) {
-            message += Messages.init_date_required + "\n";
+            message += "Data inicial obrigatória.\n";
         }
         
         if (dpkDateFinal.getDate().toString().isEmpty()) {
-            message += Messages.final_date_required + "\n";
+            message += "Data final obrigatória.\n";
         }
         
         if (dpkDateFinal.getDate().before(dpkDateInit.getDate())) {
-            message += Messages.validate_date + "\n";
+            message += "Data final não pode ser menor que data inicial.\n";
         }
         
         long days = ((dpkDateFinal.getDate().getTime() - dpkDateInit.getDate().getTime()) + 3600000) / 86400000L;
         
         if ((int)days > 30) {
-            message += Messages.peridic_invalid + "\n";
+            message += "Periodo de consulta não pode ser maior que 30 dias.\n";
         }
         
         if (cbxCloseType.getSelectedItem().equals("Selecione") || cbxCloseType.getSelectedIndex() == 0) {
-            message += Messages.report_required + "\n";
+            message += "Informe o tipo de relatório.\n";
         }
         
         if (!message.isEmpty()) {
