@@ -51,16 +51,25 @@ public class LogService {
         log.setClassName(this.className);
         log.setScreenName(this.screenName);
         log.setMethodName(this.methodName);
+        log.setDateLog(Date.from(Instant.now()));
         log.setLogMessage(logMessage);
         
         this.logs.add(log);
     }
     
     protected void saveListLog(){
-        this.logs.stream().forEach(log -> this.logRepository.save(log));
+        try {
+            this.logs.stream().forEach(log -> this.logRepository.save(log));
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
     
     private void saveLogSystem(){
-        this.logRepository.save(this.log);
+        try {
+            this.logRepository.save(this.log);
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 }

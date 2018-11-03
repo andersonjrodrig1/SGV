@@ -41,16 +41,17 @@ public class Login extends javax.swing.JDialog {
                 this.user = this.userModel.getModel();
 
                 if (this.userModel.getModel() != null) {
+                    this.logService.logMessage("Login realizado com sucesso", "loginSystem");
                     this.dispose();
                     sgv = new SGV(this.user);
                     sgv.initScreen();
                 } else if (!this.userModel.getMensage().isEmpty()) {
+                    this.logService.logMessage(this.userModel.getMensage(), "loginSystem");
                     JOptionPane.showMessageDialog(null, this.userModel.getMensage());
                 } else if (!this.userModel.getError().isEmpty()) {
+                    this.logService.logMessage(this.userModel.getError(), "loginSystem");
                     JOptionPane.showMessageDialog(null, this.userModel.getMensage());
                 }
-                
-                this.logService.logMessage("Login realizado com sucesso", "loginSystem");
             }
         } catch (Exception ex){
             this.logService.logMessage(ex.toString(), "loginSystem");

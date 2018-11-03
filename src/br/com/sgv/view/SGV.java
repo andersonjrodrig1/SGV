@@ -13,11 +13,11 @@ import br.com.sgv.model.TransactionSale;
 import br.com.sgv.model.User;
 import br.com.sgv.model.UserType;
 import br.com.sgv.service.AcessPermissionService;
+import br.com.sgv.service.LogService;
 import br.com.sgv.service.ProductService;
 import br.com.sgv.service.TransactionSaleService;
 import br.com.sgv.service.UserTypeService;
 import br.com.sgv.shared.FormatMoney;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
@@ -34,6 +34,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class SGV extends javax.swing.JFrame {
 
+    private LogService logService = null;
     private DefaultTableModel table = null;
     private DecimalFormat df = new DecimalFormat("#0.00");
     private TransactionSale transactionSale = null;
@@ -72,6 +73,7 @@ public class SGV extends javax.swing.JFrame {
     public SGV() { }
     
     public SGV(User user) {
+        this.logService = new LogService(Sale.class.getName(), "Login");
         this.user = user;
         this.getAcessUserLogin();
         
@@ -80,7 +82,8 @@ public class SGV extends javax.swing.JFrame {
         initTableItems();
     }
     
-    public void initScreen() {     
+    public void initScreen() {
+        this.logService = new LogService(Sale.class.getName(), "Login");
         Rectangle rect = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         this.setLocation(0, 0);
         this.setSize((int)rect.getWidth(), (int)rect.getHeight());       
@@ -102,6 +105,7 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void initTableItems() {
+        this.logService.logMessage("limpando dados da tabela", "initTableItems");
         this.listItemsSale = new ArrayList<>();
         
         this.table = (DefaultTableModel)tableItems.getModel();
@@ -109,21 +113,30 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void getAcessUserLogin() {
-        if (this.user.getUserType() != null && this.user.getUserType().getId() > 0) {
-            this.responseUserType = new UserTypeService().findUserTypeById(this.user.getUserType().getId());
-            this.userType = this.responseUserType.getModel();
-            this.responseAcessPermission = new AcessPermissionService().findListAcessPermissonByUserType(this.userType.getId());
-            this.listAcessPermission = this.responseAcessPermission.getModel();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.data_inconsistent);
-            return;
-        }        
+        try {
+            if (this.user.getUserType() != null && this.user.getUserType().getId() > 0) {
+                this.logService.logMessage("verificando permissões de acesso", "getAcessUserLogin");
+                this.responseUserType = new UserTypeService().findUserTypeById(this.user.getUserType().getId());
+                this.userType = this.responseUserType.getModel();
+                this.logService.logMessage("busca de lista de permissoes de acesso", "getAcessUserLogin");
+                this.responseAcessPermission = new AcessPermissionService().findListAcessPermissonByUserType(this.user.getUserType().getId());
+                this.listAcessPermission = this.responseAcessPermission.getModel();
+            } else {
+                this.logService.logMessage("Falha ao logar no sistema", "getAcessUserLogin");
+                JOptionPane.showMessageDialog(null, "Dados inconsistentes, \nnão foi possível fazer o login.");
+                return;
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "getAcessUserLogin");
+            JOptionPane.showMessageDialog(null, "Falha ao logar no sistema.");
+        }
     }
     
     private void exitSystem() {
-        int response = JOptionPane.showConfirmDialog(null, Messages.logout_system);
+        int response = JOptionPane.showConfirmDialog(null, "Deseja sair do sistema?");
         
         if (response == OptionEnum.YES.value) {
+            this.logService.logMessage("saindo do sistema", "exitSystem");
             this.about = null;
             this.listUser = null;
             this.listProduct = null;
@@ -135,6 +148,7 @@ public class SGV extends javax.swing.JFrame {
             this.registerMeasure = null;
             this.registerProduct = null;
             this.checkout = null;
+            this.logService = null;
             
             this.dispose();
             
@@ -144,141 +158,227 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void initRegisterUser() {
-        this.screenType = AcessScreenEnum.REGISTER_USER.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.registerUser = new RegisterUser(this, true);
-            this.registerUser.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.screenType = AcessScreenEnum.REGISTER_USER.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+            this.logService.logMessage("verificando acesso a tela " + this.acessPermission.getAcessScreen().getScreenName(), "initRegisterUser");
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.logService.logMessage("permissão de acesso a tela", "initRegisterUser");
+                this.registerUser = new RegisterUser(this, true);
+                this.registerUser.initScreen();
+            } else {
+                this.logService.logMessage("acesso negado", "initRegisterUser");
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initRegisterUser");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela.");
         }
     }
     
     private void initRegisterProduct() {
-        this.screenType = AcessScreenEnum.REGISTER_PRODUCT.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.registerProduct = new RegisterProduct(this, true);
-            this.registerProduct.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.screenType = AcessScreenEnum.REGISTER_PRODUCT.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+            this.logService.logMessage("verificando acesso a tela " + this.acessPermission.getAcessScreen().getScreenName(), "initRegisterProduct");
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.logService.logMessage("permissão de acesso a tela", "initRegisterProduct");
+                this.registerProduct = new RegisterProduct(this, true);
+                this.registerProduct.initScreen();
+            } else {
+                this.logService.logMessage("acesso negado", "initRegisterProduct");
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            this.logService.logMessage(ex.toString(), "initRegisterProduct");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initAbout() {
-        this.screenType = AcessScreenEnum.VIEW_ABOUT.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.about = new About(this, true);
-            this.about.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.screenType = AcessScreenEnum.VIEW_ABOUT.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+            this.logService.logMessage("verificando acesso a tela " + this.acessPermission.getAcessScreen().getScreenName(), "initAbout");
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.logService.logMessage("permissão de acesso a tela", "initAbout");
+                this.about = new About(this, true);
+                this.about.initScreen();
+            } else {
+                this.logService.logMessage("acesso negado", "initAbout");
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initAbout");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initListUser() {
-        this.screenType = AcessScreenEnum.VIEW_USER.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.listUser = new ListUser(this, true);
-            this.listUser.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.screenType = AcessScreenEnum.VIEW_USER.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+            this.logService.logMessage("verificando acesso a tela " + this.acessPermission.getAcessScreen().getScreenName(), "initListUser");
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.logService.logMessage("permissão de acesso a tela", "initListUser");
+                this.listUser = new ListUser(this, true);
+                this.listUser.initScreen();
+            } else {
+                this.logService.logMessage("acesso negado", "initListUser");
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initListUser");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initRegisterMeasure() {
-        this.screenType = AcessScreenEnum.REGISTER_MEASURE.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.registerMeasure = new RegisterMeasure(this, true);
-            this.registerMeasure.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.screenType = AcessScreenEnum.REGISTER_MEASURE.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+            this.logService.logMessage("verificando acesso a tela " + this.acessPermission.getAcessScreen().getScreenName(), "initRegisterMeasure");
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.logService.logMessage("permissão de acesso a tela", "initRegisterMeasure");
+                this.registerMeasure = new RegisterMeasure(this, true);
+                this.registerMeasure.initScreen();
+            } else {
+                this.logService.logMessage("acesso negado", "initRegisterMeasure");
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initRegisterMeasure");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initListMeasure() {
-        this.screenType = AcessScreenEnum.VIEW_MEASURE.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.listMeasure = new ListMeasure(this, true);
-            this.listMeasure.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.screenType = AcessScreenEnum.VIEW_MEASURE.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+            this.logService.logMessage("verificando acesso a tela " + this.acessPermission.getAcessScreen().getScreenName(), "initListMeasure");
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.logService.logMessage("permissão de acesso a tela", "initListMeasure");
+                this.listMeasure = new ListMeasure(this, true);
+                this.listMeasure.initScreen();
+            } else {
+                this.logService.logMessage("acesso negado", "initListMeasure");
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initListMeasure");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initListProduct() {
-        this.screenType = AcessScreenEnum.VIEW_PRODUCT.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.listProduct = new ListProduct(this, true);
-            this.listProduct.setFrame(this);
-            this.listProduct.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.screenType = AcessScreenEnum.VIEW_PRODUCT.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+            this.logService.logMessage("verificando acesso a tela " + this.acessPermission.getAcessScreen().getScreenName(), "initListProduct");
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.logService.logMessage("permissão de acesso a tela", "initListProduct");
+                this.listProduct = new ListProduct(this, true);
+                this.listProduct.setFrame(this);
+                this.listProduct.initScreen();
+            } else {
+                this.logService.logMessage("acesso negado", "initListProduct");
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initListProduct");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initListProduct(SGV frame) {
-        this.listProduct = new ListProduct(frame, true);
-        this.listProduct.setFrame(frame);
-        this.listProduct.initScreen();
+        try {
+            this.logService.logMessage("permissão de acesso a tela", "initListProduct");
+            this.listProduct = new ListProduct(frame, true);
+            this.listProduct.setFrame(frame);
+            this.listProduct.initScreen();
+        } catch (Exception ex) {
+            this.logService.logMessage(ex.toString(), "initListProduct");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
+        }
     }
     
     private void initCheckout() {
-        this.screenType = AcessScreenEnum.CHECK_OUT.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.checkout = new Checkout(this, true);
-            this.checkout.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.logService.logMessage("permissão de acesso a tela", "initCheckout");
+            this.screenType = AcessScreenEnum.CHECK_OUT.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.checkout = new Checkout(this, true);
+                this.checkout.initScreen();
+            } else {
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initCheckout");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initSaleDay() {
-        this.screenType = AcessScreenEnum.VIEW_SALE_DAY.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.listSaleDay = new ListSaleDay(this, true);
-            this.listSaleDay.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.logService.logMessage("permissão de acesso a tela", "initSaleDay");
+            this.screenType = AcessScreenEnum.VIEW_SALE_DAY.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.listSaleDay = new ListSaleDay(this, true);
+                this.listSaleDay.initScreen();
+            } else {
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initSaleDay");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initRegisterTotalization() {
-        this.screenType = AcessScreenEnum.REGISTER_REPORT.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.registerTotalisation = new RegisterTotalization(this, true);
-            this.registerTotalisation.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.logService.logMessage("permissão de acesso a tela", "initRegisterTotalization");
+            this.screenType = AcessScreenEnum.REGISTER_REPORT.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.registerTotalisation = new RegisterTotalization(this, true);
+                this.registerTotalisation.initScreen();
+            } else {
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela.", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initRegisterTotalization");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
     private void initListTotalization() {
-        this.screenType = AcessScreenEnum.VIEW_REPORT.value;
-        this.acessPermission = this.verifyPermissionAcess(this.screenType);
-        
-        if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
-            this.listTotalisation = new ListTotalization(this, true);
-            this.listTotalisation.initScreen();
-        } else {
-            JOptionPane.showMessageDialog(null, Messages.negative_acess, "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+        try {
+            this.logService.logMessage("permissão de acesso a tela", "initListTotalization");
+            this.screenType = AcessScreenEnum.VIEW_REPORT.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.listTotalisation = new ListTotalization(this, true);
+                this.listTotalisation.initScreen();
+            } else {
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initListTotalization");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
     
@@ -293,15 +393,22 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void getProductByKey() {
-        String productKey = txtProductKey.getText().trim();        
-        ResponseModel<Product> response = new ProductService().getProductByKey(productKey);
-        Product item = response.getModel();
-        
-        this.setItemSale(item);
+        try {
+            this.logService.logMessage("inicio da busca de produto", "getProductByKey");
+            String productKey = txtProductKey.getText().trim();        
+            ResponseModel<Product> response = new ProductService().getProductByKey(productKey);
+            Product item = response.getModel();
+
+            this.setItemSale(item);
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "getProductByKey");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
+        }
     }
     
     public void setItemSale(Product item) {
         if (item != null) {
+            this.logService.logMessage("atualizando tabela de produtos", "setItemSale");
             this.itemSale = new Sale();
             this.itemSale.setProduct(item);
             this.itemSale.setSaleTotal(item.getProductValue());
@@ -315,19 +422,20 @@ public class SGV extends javax.swing.JFrame {
             
             if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.WEIGHT.value) {
                 txtGrossValue.setText("R$ 0,00");
-                lblAmont.setText(Messages.text_weight);
+                lblAmont.setText("Peso..:");
             } else {
                 this.itemSale.setAmount(1);
                 double productValue = this.itemSale.getProduct().getProductValue() * this.itemSale.getAmount();
                 this.itemSale.setSaleTotal(productValue);
                 txtGrossValue.setText("R$ " + this.df.format(productValue));
                 txtAmount.setText("1");
-                lblAmont.setText(Messages.text_amount);
+                lblAmont.setText("Quantidade..:");
             }
             
             txtAmount.grabFocus();
         } else {
-            JOptionPane.showMessageDialog(null, Messages.not_found);
+            this.logService.logMessage("produto não encontrado", "setItemSale");
+            JOptionPane.showMessageDialog(null, "Item não encontrado!");
             this.clearFields();            
         }
     }
@@ -343,6 +451,7 @@ public class SGV extends javax.swing.JFrame {
     
     private void setGrossValue(String value) {
         if (this.itemSale != null && !txtProductKey.getText().isEmpty()) {
+            this.logService.logMessage("calculando valor de compra do produto", "setGrossValue");
             String grossValueString = "";
             double grossValue = 0;
             
@@ -369,13 +478,14 @@ public class SGV extends javax.swing.JFrame {
             this.itemSale.setSaleTotal(grossValue);
             txtGrossValue.setText("R$ " + grossValueString);
         } else {
-            JOptionPane.showMessageDialog(null, Messages.select_product);
+            JOptionPane.showMessageDialog(null, "Favor selecione um item na lista de produtos.");
             txtAmount.setText("");
             txtProductKey.grabFocus();
         }
     }
     
     private void setDiscountValue(String value) {
+        this.logService.logMessage("calculando valor de compra com desconto informado", "setDiscountValue");
         this.changeValue = 0d;
         this.discountValue = 0d;
         
@@ -400,6 +510,7 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void setChangeValue(String value) {
+        this.logService.logMessage("calculando valor total da compra", "setChangeValue");
         this.changeValue = 0d;
         
         value = FormatMoney.formatMoney(value);
@@ -419,6 +530,7 @@ public class SGV extends javax.swing.JFrame {
     
     private void reserveProductList() {
         if (verifyFieldsRequired()) {
+            this.logService.logMessage("adicionando produto na cesta de compra", "reserveProductList");
             String amountString = "";
             this.totalValue = 0d;
             
@@ -429,7 +541,7 @@ public class SGV extends javax.swing.JFrame {
                 amountString = String.valueOf(this.itemSale.getAmount());
                 amountString = FormatMoney.verifyDecimal(amountString, this.itemSale.getProduct().getMeasureType().getCalcType().getId());
             }
-            
+            this.logService.logMessage("atualizando cesta de compra", "reserveProductList");
             this.table.addRow(new Object[] {
                 this.itemSale.getProduct().getId(),
                 this.itemSale.getProduct().getProductName(),
@@ -440,6 +552,8 @@ public class SGV extends javax.swing.JFrame {
             
             this.listItemsSale.add(this.itemSale);            
             this.listItemsSale.stream().forEach(item -> this.totalValue += item.getSaleTotal());
+            
+            this.logService.logMessage("atualizando valor da compra", "reserveProductList");
             
             if (this.paidValue > 0d || this.changeValue > 0d) {
                 this.changeValue -= this.itemSale.getSaleTotal();
@@ -454,24 +568,27 @@ public class SGV extends javax.swing.JFrame {
     private void removeItem() {
         if (tableItems.getRowCount() > 0) {
             if (tableItems.getSelectedRow() >= 0) {
-                int option = JOptionPane.showConfirmDialog(null, Messages.remove_modal);
+                int option = JOptionPane.showConfirmDialog(null, "Deseja excluir o item selecionado?");
                 
                 if (option == OptionEnum.YES.value) {
                     int row = tableItems.getSelectedRow();
                     Object object = tableItems.getValueAt(row, 0);
                     long id = (long)object;
                     
+                    this.logService.logMessage("verificando dados do produto", "removeItem");
                     Sale item = this.listItemsSale
                             .stream()
                             .filter(x -> x.getProduct().getId() == id)
                             .findAny()
                             .orElse(null);
                     
+                    this.logService.logMessage("removendo produto da cesta de compra", "removeItem");
                     this.listItemsSale = this.listItemsSale
                             .stream()
                             .filter(x -> x.getProduct().getId() != id)
                             .collect(Collectors.toList());
                     
+                    this.logService.logMessage("calculando valor da compra", "removeItem");
                     double valueItem = item.getProduct().getProductValue() * item.getAmount();
                     this.totalValue = this.totalValue - valueItem;
                     
@@ -496,14 +613,15 @@ public class SGV extends javax.swing.JFrame {
                     this.setTableList();
                 }
             } else {
-                JOptionPane.showMessageDialog(null, Messages.table_item_no_select);
+                JOptionPane.showMessageDialog(null, "Selecione um item da lista de produtos para executar está ação.");
             }
         } else {
-            JOptionPane.showMessageDialog(null, Messages.table_void);
+            JOptionPane.showMessageDialog(null, "Não existe itens na cesta de produtos.");
         }
     }
     
     private void setTableList() {
+        this.logService.logMessage("atualizando lista de produtos na tabela", "setTableList");
         this.table.setNumRows(0);
         
         listItemsSale.stream().forEach(item -> {
@@ -529,13 +647,15 @@ public class SGV extends javax.swing.JFrame {
     
     private void finallySale() {
         if (verifyFieldsRequiredSale()) {
-            int option = JOptionPane.showConfirmDialog(null, Messages.confirm_sale);
+            int option = JOptionPane.showConfirmDialog(null, "Deseja confirmar a venda?");
             
             if (option == OptionEnum.YES.value) {
+                this.logService.logMessage("iniciando finalização da compra", "finallySale");
                 PayType payType = new PayType();
                 this.amountSale = 0;
                 this.weightSale = 0;
                 
+                this.logService.logMessage("calculando valor da compra", "finallySale");
                 this.listItemsSale.stream().forEach(item -> {
                     if (item.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
                         this.amountSale += (int)item.getAmount();
@@ -544,6 +664,7 @@ public class SGV extends javax.swing.JFrame {
                     }
                 });
                 
+                this.logService.logMessage("verificando tipo de pagamento selecionado", "finallySale");
                 if (rdbMoney.isSelected()) {
                     payType.setId(PayTypeEnum.MONEY.value);
                     payType.setPayType("Dinheiro");
@@ -552,6 +673,7 @@ public class SGV extends javax.swing.JFrame {
                     payType.setPayType("Cartão");
                 }
                 
+                this.logService.logMessage("construindo objeto de transação", "finallySale");
                 this.transactionSale = new TransactionSale();
                 this.transactionSale.setAmount(this.amountSale);
                 this.transactionSale.setWeight(this.weightSale);
@@ -561,10 +683,10 @@ public class SGV extends javax.swing.JFrame {
                 this.transactionSale.setDiscountValue(this.discountValue);
                 this.transactionSale.setPayType(payType);
                 
-                ResponseModel<Boolean> response = new TransactionSaleService().saveTransactionSale(transactionSale, listItemsSale);
+                ResponseModel<Boolean> response = new TransactionSaleService(true).saveTransactionSale(transactionSale, listItemsSale);
                 
                 if (response.getModel()) {
-                    JOptionPane.showMessageDialog(null, Messages.success_sale);
+                    JOptionPane.showMessageDialog(null, "Venda registrada com sucesso!");
                     this.finalizerTransactionScreen();
                 } else {
                     JOptionPane.showMessageDialog(null, response.getMensage());
@@ -578,15 +700,15 @@ public class SGV extends javax.swing.JFrame {
         String message = "";
         
         if (this.table.getRowCount() <= 0) {
-            message += Messages.select_product + "\n";
+            message += "Favor selecione um item na lista de produtos.\n";
         }
         
         if (!rdbMoney.isSelected() && !rdbCard.isSelected()) {
-            message += Messages.select_option_paid + "\n";
+            message += "Selecione uma opção para pagamento.\n";
         }
         
         if (this.paidValue <= 0) {
-            message += Messages.value_paid_client;
+            message += "Informe o valor pago pelo cliente.";
         }
         
         if (!message.isEmpty()) {
@@ -602,11 +724,11 @@ public class SGV extends javax.swing.JFrame {
         String message = "";
         
         if (txtProductKey.getText().isEmpty()) {
-            message += Messages.key_register_product + "\n";
+            message += "Código Produto obrigatório.\n";
         }
         
         if (txtAmount.getText().isEmpty() || txtAmount.getText().equals("0,000")) {
-            message += Messages.amount_required + "\n";
+            message += "Quantidade obrigatório.\n";
         }
         
         if (!message.isEmpty()) {
@@ -619,13 +741,13 @@ public class SGV extends javax.swing.JFrame {
     
     private void cancelSale() {
         if (this.table.getRowCount() > 0) {
-            int option = JOptionPane.showConfirmDialog(null, Messages.cancel_sale);
+            int option = JOptionPane.showConfirmDialog(null, "Deseja cancelar a(s) venda(s) em aberto?");
 
             if (option == OptionEnum.YES.value) {
                 this.finalizerTransactionScreen();
             }
         } else {
-            JOptionPane.showMessageDialog(null, Messages.not_item);
+            JOptionPane.showMessageDialog(null, "Não existe itens na cesta para serem cancelados.");
         }
     }
     
@@ -638,7 +760,7 @@ public class SGV extends javax.swing.JFrame {
             txtAmountPaid.setText("0,00");
             txtAmountPaid.grabFocus();
         } else {
-            JOptionPane.showMessageDialog(null, Messages.table_void);
+            JOptionPane.showMessageDialog(null, "Não existe itens na cesta de produtos.");
             this.rdbMoney.setSelected(false);
             txtProductKey.grabFocus();
         }
@@ -654,7 +776,7 @@ public class SGV extends javax.swing.JFrame {
             this.setChangeValue(value);
             btnFinalizeSale.grabFocus();
         } else {
-            JOptionPane.showMessageDialog(null, Messages.table_void);
+            JOptionPane.showMessageDialog(null, "Não existe itens na cesta de produtos.");
             this.rdbCard.setSelected(false); 
             txtProductKey.grabFocus();
         }
@@ -1018,7 +1140,7 @@ public class SGV extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblValueChange)
                             .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(65, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1079,7 +1201,7 @@ public class SGV extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnFinalizeSale)
                     .addComponent(btnCancel))
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1262,11 +1384,11 @@ public class SGV extends javax.swing.JFrame {
 
     private void txtAmountKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAmountKeyReleased
         if (txtProductKey.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, Messages.required_product_key);
+            JOptionPane.showMessageDialog(null, "Necessário informar código do produto.");
             txtAmount.setText("");
         } else if (!txtAmount.getText().isEmpty()) {        
             if (!FormatMoney.verifyCodeChar(evt)) {
-                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                JOptionPane.showMessageDialog(null, "Valor informado inválido.\nDigite apenas números.");
                 String text = txtAmount.getText().substring(0, txtAmount.getText().length() -1);
                 txtAmount.setText(text);
             } else {
@@ -1310,7 +1432,7 @@ public class SGV extends javax.swing.JFrame {
     private void txtAmountPaidKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAmountPaidKeyReleased
         if (!txtAmountPaid.getText().isEmpty()) {
             if (!FormatMoney.verifyCodeChar(evt)) {
-                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                JOptionPane.showMessageDialog(null, "Valor informado inválido.\nDigite apenas números.");
                 String text = txtAmountPaid.getText().substring(0, txtAmountPaid.getText().length() -1);
                 txtAmountPaid.setText(text);
             } else {
@@ -1322,7 +1444,7 @@ public class SGV extends javax.swing.JFrame {
     private void txtDiscountValueKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtDiscountValueKeyReleased
         if (!txtDiscountValue.getText().isEmpty()) {
             if (!FormatMoney.verifyCodeChar(evt)) {
-                JOptionPane.showMessageDialog(null, Messages.verif_value_field);
+                JOptionPane.showMessageDialog(null, "Valor informado inválido.\nDigite apenas números.");
                 String text = txtDiscountValue.getText().substring(0, txtDiscountValue.getText().length() -1);
                 txtAmount.setText(text);
             } else {

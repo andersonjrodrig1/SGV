@@ -8,7 +8,6 @@ import br.com.sgv.model.TransactionSale;
 import br.com.sgv.repository.SaleRepository;
 import br.com.sgv.repository.TransactionSaleRepository;
 import br.com.sgv.shared.CriptoText;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -22,14 +21,21 @@ import org.hibernate.Session;
 
 public class TransactionSaleService {
     
+    private LogService logService = null;
     private TransactionSaleRepository transactionSaleRepository = null;
     private SaleRepository saleRepository = null;
     private Session session = null;
     
-    public TransactionSaleService() {
-        this.session = ContextFactory.initContextDb();
-        this.transactionSaleRepository = new TransactionSaleRepository(this.session);
-        this.saleRepository = new SaleRepository(this.session);
+    public TransactionSaleService(boolean isTransaction) {        
+        if (isTransaction){
+            this.session = ContextFactory.initContextDb();
+            this.saleRepository = new SaleRepository(this.session);            
+            this.transactionSaleRepository = new TransactionSaleRepository(this.session);
+            this.logService = new LogService(TransactionSale.class.getName(), "RegisterTransaction", "saveTransactionSale");
+        } else {
+            this.transactionSaleRepository = new TransactionSaleRepository();
+            this.logService = new LogService(TransactionSale.class.getName(), "RegisterTransaction");
+        }
     }
     
     public ResponseModel<Boolean> saveTransactionSale(TransactionSale transactionSale, List<Sale> itemsSale) {
@@ -37,6 +43,7 @@ public class TransactionSaleService {
         
         if (transactionSale != null && itemsSale != null && itemsSale.size() > 0){
             try {
+                this.logService.addLogMessage("iniciando transacao de venda");
                 long transactionMaxId = 0L;
                 
                 Object obj = this.transactionSaleRepository.getMaxTransaction();
@@ -50,6 +57,7 @@ public class TransactionSaleService {
                 }
                 
                 String transactionId = "T".concat(CriptoText.convertHexadecimal(transactionMaxId));
+                this.logService.addLogMessage("código de transação " + transactionId + " gerado");
                 
                 StatusRegister statusRegister = new StatusRegister();
                 statusRegister.setId(StatusRegisterEnum.PENDING.value);
@@ -59,6 +67,7 @@ public class TransactionSaleService {
                 transactionSale.setStatusRegister(statusRegister);
                 transactionSale.setRegisterDate(now);
                 
+                this.logService.addLogMessage("salvando transacao");
                 this.transactionSaleRepository.saveTransactionSale(transactionSale);
                 
                 itemsSale.stream().forEach(item -> {
@@ -66,28 +75,25 @@ public class TransactionSaleService {
                     item.setSaleDate(now);
                 });
                 
-                this.saleRepository.saveSaleList(itemsSale);
-                
+                this.logService.addLogMessage("salvando lista de produtos vendidos");
+                this.saleRepository.saveSaleList(itemsSale);              
                 ContextFactory.commit();
                 
                 response.setModel(true);
             } catch(Exception ex) {
-                ContextFactory.rollback();
-                
-                System.out.printf("Error: ", ex);
+                this.logService.addLogMessage(ex.toString());
                 response.setModel(false);
-                response.setMensage(Messages.fail_save);
+                response.setMensage("Falha ao salvar os dados!");
                 response.setException(ex);
             }
         } else {            
-            ContextFactory.rollback();
-            
             response.setModel(false);
-            response.setMensage(Messages.selected_item);
+            response.setMensage("Falha ao registrar a venda. \nVerifique se os itens foram selecionados corretamente.");
             response.setException(null);
             response.setError(null);
         }
         
+        this.logService.saveListLog();
         return response;
     } 
     
@@ -96,16 +102,15 @@ public class TransactionSaleService {
         
         try {
             String dateSearchString = new SimpleDateFormat("yyyy-MM-dd").format(dateSearch);
+            this.logService.logMessage("busca de transacao por dia: " + dateSearchString, "getTransactionSaleByDay");
+            
             List<TransactionSale> list = this.transactionSaleRepository.getTransactionSaleList(dateSearchString);
             response.setModel(list);
-            ContextFactory.commit();
         } catch(Exception ex) {
-            ContextFactory.rollback();
-            
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "getTransactionSaleByDay");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_find);
+            response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }
         

@@ -13,6 +13,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class ListMeasure extends javax.swing.JDialog {
 
+    private RegisterMeasure registerMeasure = null;
     private ResponseModel<List<MeasureType>> listResponse = null;
     private LogService logService = null;
     
@@ -53,6 +54,20 @@ public class ListMeasure extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Falha ao buscar os dados.");
         }
     }
+    
+    private void AddMeasure() {
+        this.closeScreen();
+        
+        this.registerMeasure = new RegisterMeasure(null, true);
+        this.registerMeasure.initScreen();
+    }
+    
+    private void closeScreen() {
+        this.listResponse = null;
+        this.logService = null;
+        
+        this.dispose();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -66,6 +81,8 @@ public class ListMeasure extends javax.swing.JDialog {
         lblMeasure = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblMeasure = new javax.swing.JTable();
+        btnClose = new javax.swing.JButton();
+        btnNew = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sistema de Gerenciamento de Vendas");
@@ -109,6 +126,22 @@ public class ListMeasure extends javax.swing.JDialog {
             tblMeasure.getColumnModel().getColumn(2).setMaxWidth(200);
         }
 
+        btnClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Erase.png"))); // NOI18N
+        btnClose.setText("Fechar");
+        btnClose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCloseActionPerformed(evt);
+            }
+        });
+
+        btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Add.png"))); // NOI18N
+        btnNew.setText("Adicionar");
+        btnNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNewActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -121,6 +154,12 @@ public class ListMeasure extends javax.swing.JDialog {
                 .addGap(192, 192, 192)
                 .addComponent(lblMeasure)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnNew)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClose)
+                .addGap(202, 202, 202))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -128,12 +167,24 @@ public class ListMeasure extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addComponent(lblMeasure)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnClose)
+                    .addComponent(btnNew))
+                .addGap(18, 18, 18))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
+        this.closeScreen();
+    }//GEN-LAST:event_btnCloseActionPerformed
+
+    private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
+        this.AddMeasure();
+    }//GEN-LAST:event_btnNewActionPerformed
 
     /**
      * @param args the command line arguments
@@ -151,15 +202,11 @@ public class ListMeasure extends javax.swing.JDialog {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(ListMeasure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        
         //</editor-fold>
 
         /* Create and display the dialog */
@@ -178,6 +225,8 @@ public class ListMeasure extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnClose;
+    private javax.swing.JButton btnNew;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblMeasure;
     private javax.swing.JTable tblMeasure;

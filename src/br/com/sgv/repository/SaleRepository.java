@@ -43,8 +43,21 @@ public class SaleRepository {
         String hql = "from Sale where sale_date = :datesearch";
         
         ContextFactory.initContextDb();
+        Query query = this.session.createQuery(hql).setParameter("datesearch", dateSearch);
+        List<Sale> sales = query.list();
+        ContextFactory.commit();
+        
+        return sales;
+    }
+   
+    public List<Sale> getSaleByPeriodicAndProductId(String dateInit, String dateFinish, int productId) {
+        String hql = "from Sale where product_id = :productid and sale_date between :dateInit and :dateFinish";
+        
+        ContextFactory.initContextDb();
         Query query = this.session.createQuery(hql)
-                .setParameter("datesearch", dateSearch);
+                .setParameter("productid", productId)
+                .setParameter("dateInit", dateInit)
+                .setParameter("dateFinish", dateFinish);
         List<Sale> sales = query.list();
         ContextFactory.commit();
         

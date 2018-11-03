@@ -2,7 +2,6 @@ package br.com.sgv.service;
 
 import br.com.sgv.model.AcessPermission;
 import br.com.sgv.repository.AcessPermissionRepository;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,25 +11,27 @@ import java.util.List;
  */
 public class AcessPermissionService {
     
-    ResponseModel<List<AcessPermission>> response = null;
+    private LogService logService = null;
     private AcessPermissionRepository acessPermissionRepository = null;
     
     public AcessPermissionService () {
-        acessPermissionRepository = new AcessPermissionRepository();
+        this.logService = new LogService(AcessPermission.class.getName(), "SGV");
+        this.acessPermissionRepository = new AcessPermissionRepository();
     }
     
     public ResponseModel<List<AcessPermission>> findListAcessPermissonByUserType(long userType) {
-        response = new ResponseModel<>();
+        ResponseModel<List<AcessPermission>> response = new ResponseModel<>();
         List<AcessPermission> listAcessPermission = new ArrayList<>();
         
         try {
+            this.logService.logMessage("verificando telas de acesso", "findListAcessPermissonByUserType");
             listAcessPermission = acessPermissionRepository.findByUserTypeId(userType);
             response.setModel(listAcessPermission);
         } catch(Exception ex){
-            System.out.printf("Eror: ", ex);
+            this.logService.logMessage(ex.toString(), "findListAcessPermissonByUserType");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_find);
+            response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }
         

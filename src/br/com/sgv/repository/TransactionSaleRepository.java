@@ -16,9 +16,7 @@ public class TransactionSaleRepository {
     
     private Session session = null;
     
-    public TransactionSaleRepository() {
-        this.session = ContextFactory.initContextDb();
-    }
+    public TransactionSaleRepository() { }
     
     public TransactionSaleRepository(Session session) {
         this.session = session;
@@ -56,9 +54,11 @@ public class TransactionSaleRepository {
     public List<TransactionSale> getTransactionSaleList(String dateSearch) {
         String hql = "from TransactionSale where register_date = :date";
         
+        this.session = ContextFactory.initContextDb();
         Query query = this.session.createQuery(hql)
                 .setParameter("date", dateSearch);
         List<TransactionSale> listTransactionSale = query.list();
+        ContextFactory.commit();
         
         return listTransactionSale;
     }

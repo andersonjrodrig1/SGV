@@ -131,15 +131,11 @@ public class TotalizationSaleService {
                 ContextFactory.commit();
                 response.setModel(true);
             } else {
-                ContextFactory.rollback();
-                
-                this.logService.addLogMessage("não existe vendas para totalizar para data informada");
+                this.logService.addLogMessage("Não existe vendas para totalizar para a data informada");
                 response.setMensage("Nenhuma venda encontrada para totalizar.");
                 response.setModel(false);
             }
         } catch(Exception ex) {
-            ContextFactory.rollback();
-            
             this.logService.addLogMessage(ex.toString());
             response.setError(ex.getMessage());
             response.setException(ex);

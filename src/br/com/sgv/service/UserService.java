@@ -38,7 +38,6 @@ public class UserService {
             
             response.setModel(users);
         } catch(Exception ex){
-            System.out.printf("Error: ", ex);
             response.setModel(null);
             response.setError(ex.getMessage());
             response.setMensage("Falha ao buscar os dados!");
@@ -68,7 +67,6 @@ public class UserService {
                 response.setModel(null);
             }
         } catch (Exception ex) {
-            System.out.printf("Error: ", ex);
             response.setException(ex);
             response.setError(ex.getMessage());
             response.setMensage("Falha ao buscar os dados!");
@@ -100,7 +98,6 @@ public class UserService {
             this.logService.logMessage("Usuário salvo", "saveUser");
             response.setModel(true);
         } catch (Exception ex) {
-            System.out.printf("Error: ", ex);
             response.setModel(false);
             response.setError(ex.getMessage());
             response.setMensage("Falha ao salvar os dados!");

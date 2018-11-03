@@ -59,7 +59,7 @@ public class RegisterTotalization extends javax.swing.JDialog {
             ResponseModel<Boolean> response = new TotalizationSaleService(true).totalizerSaleDay(dateSearch);
             
             if (response.getModel()) {
-                ResponseModel<List<TransactionSale>> list = new TransactionSaleService().getTransactionSaleByDay(dateSearch);
+                ResponseModel<List<TransactionSale>> list = new TransactionSaleService(false).getTransactionSaleByDay(dateSearch);
                 List<TransactionSale> listTransactionSale = list.getModel();               
                 
                 listTransactionSale.stream().forEach(transaction -> {
