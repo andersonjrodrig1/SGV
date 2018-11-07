@@ -20,6 +20,9 @@ public class InitializerDb {
     
     private static Session session;
     
+    private static final UserType userTypeAdmin = new UserType(1, "Administrador");
+    private static final UserType userTypeSalesman = new UserType(2, "Vendedor");
+    
     private static final CalcType calcUnity = new CalcType("Unidade");
     private static final CalcType calcWeight = new CalcType("Peso");
     
@@ -34,6 +37,7 @@ public class InitializerDb {
     private static final AcessScreen viewReport = new AcessScreen(9, "Consultar Relatório");
     private static final AcessScreen viewAbout = new AcessScreen(10, "Visualizar Sobre");
     private static final AcessScreen viewSaleDay = new AcessScreen(11, "Visualizar Venda Dia");
+    private static final AcessScreen viewSaleProduct = new AcessScreen(12, "Visualizar Venda Produto");
     
     public static void initializerDatabase() {
         session = ContextFactory.initContextDb();
@@ -42,12 +46,32 @@ public class InitializerDb {
             insertAcessScreen();
         }
         
+        if (session.createQuery("from AcessScreen where screen_name = :screenName")
+                .setParameter("screenName", viewSaleProduct.getScreenName())
+                .uniqueResult() == null) {
+            session.save(viewSaleProduct);
+        }
+        
         if (session.createQuery("from UserType").list().size() <= 0) {
             insertUserType();
         }
         
         if (session.createQuery("from AcessPermission").list().size() <= 0) {
             insertAcessPermission();
+        }
+        
+        if (session.createQuery("from AcessPermission where acess_screen_id = :acessScreenId and user_type_id = :userTypeId")
+                .setParameter("acessScreenId", viewSaleProduct.getId())
+                .setParameter("userTypeId", userTypeAdmin.getId())
+                .uniqueResult() == null) {
+            session.save(new AcessPermission(userTypeAdmin, viewSaleProduct, true));
+        }
+        
+        if (session.createQuery("from AcessPermission where acess_screen_id = :acessScreenId and user_type_id = :userTypeId")
+                .setParameter("acessScreenId", viewSaleProduct.getId())
+                .setParameter("userTypeId", userTypeSalesman.getId())
+                .uniqueResult() == null) {
+            session.save(new AcessPermission(userTypeSalesman, viewSaleProduct, true));
         }
         
         if (session.createQuery("from User").list().size() <= 0) {
@@ -117,28 +141,28 @@ public class InitializerDb {
     
     private static void insertAcessPermission() {
         List<AcessPermission> listAcess = new ArrayList<>();
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerProduct, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerMeasure, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerUser, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewProduct, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewMeasure, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewUser, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), checkout, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), registerReport, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewReport, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewAbout, true));
-        listAcess.add(new AcessPermission(new UserType(1, "Administrador"), viewSaleDay, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerProduct, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerMeasure, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerUser, false));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewProduct, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewMeasure, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewUser, false));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), checkout, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), registerReport, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewReport, false));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewAbout, true));
-        listAcess.add(new AcessPermission(new UserType(2, "Vendedor"), viewSaleDay, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, registerProduct, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, registerMeasure, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, registerUser, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, viewProduct, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, viewMeasure, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, viewUser, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, checkout, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, registerReport, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, viewReport, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, viewAbout, true));
+        listAcess.add(new AcessPermission(userTypeAdmin, viewSaleDay, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, registerProduct, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, registerMeasure, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, registerUser, false));
+        listAcess.add(new AcessPermission(userTypeSalesman, viewProduct, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, viewMeasure, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, viewUser, false));
+        listAcess.add(new AcessPermission(userTypeSalesman, checkout, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, registerReport, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, viewReport, false));
+        listAcess.add(new AcessPermission(userTypeSalesman, viewAbout, true));
+        listAcess.add(new AcessPermission(userTypeSalesman, viewSaleDay, true));
         
         listAcess.stream().forEach(acess -> session.save(acess));
     }

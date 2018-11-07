@@ -52,62 +52,66 @@ public class ListTotalization extends javax.swing.JDialog {
     }
     
     private void initComboBoxReportType() {
-        ResponseModel<List<ReportType>> response = new ReportTypeService().getReportTypes();
-        
-        if (response.getModel() != null && response.getModel().size() > 0) {
+        try {
+            this.logService.logMessage("buscar do tipo de relatório", "initComboBoxReportType");
+            ResponseModel<List<ReportType>> response = new ReportTypeService().getReportTypes();
             List<ReportType> listReport = response.getModel();
-            
-            listReport.stream().forEach(report -> {
-                cbxCloseType.addItem(report);
-            });
-        } else {
-            JOptionPane.showMessageDialog(null, response.getMensage());
+
+            listReport.stream().forEach(report -> cbxCloseType.addItem(report));
+        } catch (Exception ex) {
+            this.logService.logMessage(ex.toString(), "initComboBoxReportType");
+            JOptionPane.showMessageDialog(null, "Falha ao buscar o tipo de relatório!");
         }
     }
     
     private void getTotalizationPeriodic() {
         if (validateFields()) {
-            this.logService.logMessage("inicio de busca de totalizacao por periodo", "getTotalizationPeriodic");
-            Date dateInitial = dpkDateInit.getDate();
-            Date dateFinal = dpkDateFinal.getDate();
-            
-            ResponseModel<List<TotalizeSale>> response = new TotalizationSaleService(false).getTotalizationSaleByPeriodic(dateInitial, dateFinal);
-            List<TotalizeSale> listTotalizeSales = response.getModel();
-            
-            this.valeuTotal = 0; 
-            this.table = null;
-            this.table = (DefaultTableModel)tableReport.getModel();
-            this.table.setRowCount(0);
-            
-            if (listTotalizeSales != null && listTotalizeSales.size() > 0) {
-                this.logService.logMessage("total de vendas totalizadas: " + listTotalizeSales.size(), "getTotalizationPeriodic");
-                ReportType reportType = (ReportType)cbxCloseType.getSelectedItem();
-                int reportTypeId = reportType.getId() == ReportTypeEnum.PAID.value ? ReportTypeEnum.PAID.value : ReportTypeEnum.SALE.value;
-                
-                listTotalizeSales = listTotalizeSales
-                            .stream()
-                            .filter(totalization -> totalization.getReportType().getId() == reportTypeId)
-                            .collect(Collectors.toList());
-                
-                this.logService.logMessage("calculando valor total das vendas", "getTotalizationPeriodic");
-                listTotalizeSales.stream().forEach(totalization -> {
-                    this.valeuTotal += totalization.getTotalValue();
-                    
-                    this.table.addRow(new Object[] {
-                        totalization.getDescrition(),
-                        new SimpleDateFormat("dd/MM/yyyy").format(totalization.getSaleDate()),
-                        new SimpleDateFormat("dd/MM/yyyy").format(totalization.getRegisterDate()),
-                        "R$ " + new DecimalFormat("#0.00").format(totalization.getTotalValue())
+            try {
+                this.logService.logMessage("inicio de busca de totalizacao por periodo", "getTotalizationPeriodic");
+                Date dateInitial = dpkDateInit.getDate();
+                Date dateFinal = dpkDateFinal.getDate();
+
+                ResponseModel<List<TotalizeSale>> response = new TotalizationSaleService(false).getTotalizationSaleByPeriodic(dateInitial, dateFinal);
+                List<TotalizeSale> listTotalizeSales = response.getModel();
+
+                this.valeuTotal = 0; 
+                this.table = null;
+                this.table = (DefaultTableModel)tableReport.getModel();
+                this.table.setRowCount(0);
+
+                if (listTotalizeSales != null && listTotalizeSales.size() > 0) {
+                    this.logService.logMessage("total de vendas totalizadas: " + listTotalizeSales.size(), "getTotalizationPeriodic");
+                    ReportType reportType = (ReportType)cbxCloseType.getSelectedItem();
+                    int reportTypeId = reportType.getId() == ReportTypeEnum.PAID.value ? ReportTypeEnum.PAID.value : ReportTypeEnum.SALE.value;
+
+                    listTotalizeSales = listTotalizeSales
+                                .stream()
+                                .filter(totalization -> totalization.getReportType().getId() == reportTypeId)
+                                .collect(Collectors.toList());
+
+                    this.logService.logMessage("calculando valor total das vendas", "getTotalizationPeriodic");
+                    listTotalizeSales.stream().forEach(totalization -> {
+                        this.valeuTotal += totalization.getTotalValue();
+
+                        this.table.addRow(new Object[] {
+                            totalization.getDescrition(),
+                            new SimpleDateFormat("dd/MM/yyyy").format(totalization.getSaleDate()),
+                            new SimpleDateFormat("dd/MM/yyyy").format(totalization.getRegisterDate()),
+                            "R$ " + new DecimalFormat("#0.00").format(totalization.getTotalValue())
+                        });
                     });
-                });
-                
-                String value = new DecimalFormat("#0.00").format(this.valeuTotal);
-                lblValueTotal.setText(value);
-            } else {
-                this.logService.logMessage("não foi encontrado resultado para pesquisa", "getTotalizationPeriodic");
-                String value = new DecimalFormat("#0.00").format(this.valeuTotal);
-                lblValueTotal.setText(value);
-                JOptionPane.showMessageDialog(null, "Nenhuma venda totalizada para o período.");
+
+                    String value = new DecimalFormat("#0.00").format(this.valeuTotal);
+                    lblValueTotal.setText(value);
+                } else {
+                    this.logService.logMessage("não foi encontrado resultado para pesquisa", "getTotalizationPeriodic");
+                    String value = new DecimalFormat("#0.00").format(this.valeuTotal);
+                    lblValueTotal.setText(value);
+                    JOptionPane.showMessageDialog(null, "Nenhuma venda totalizada para o período.");
+                }
+            } catch (Exception ex) {
+                this.logService.logMessage(ex.toString(), "getTotalizationPeriodic");
+                JOptionPane.showMessageDialog(null, "Falha ao buscar totalização por periodo.");
             }
         }
     }

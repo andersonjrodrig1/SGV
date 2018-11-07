@@ -90,4 +90,9 @@ public class Product implements Serializable {
     public void setRegisterDate(Date registerDate) {
         this.registerDate = registerDate;
     }
+
+    @Override
+    public String toString() {
+        return getProductName();
+    }
 }

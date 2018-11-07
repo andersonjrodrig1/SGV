@@ -62,6 +62,7 @@ public class SGV extends javax.swing.JFrame {
     private ListSaleDay listSaleDay = null;
     private RegisterTotalization registerTotalisation = null;
     private ListTotalization listTotalisation = null;
+    private ListSaleProduct listSaleProduct = null;
     
     private User user = null;
     private UserType userType = null;
@@ -378,6 +379,24 @@ public class SGV extends javax.swing.JFrame {
             }
         } catch (Exception ex){
             this.logService.logMessage(ex.toString(), "initListTotalization");
+            JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
+        }
+    }
+    
+    private void initListSaleProduct() {
+        try {
+            this.logService.logMessage("permissão de acesso a tela", "initListSaleProduct");
+            this.screenType = AcessScreenEnum.VIEW_SALE_PRODUCT.value;
+            this.acessPermission = this.verifyPermissionAcess(this.screenType);
+
+            if (this.acessPermission != null && this.acessPermission.isHasAcessPermission()) {
+                this.listSaleProduct = new ListSaleProduct(this, true);
+                this.listSaleProduct.initScreen();
+            } else {
+                JOptionPane.showMessageDialog(null, "Usuário não possui permissão de acesso à tela", "Acesso Negado", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex){
+            this.logService.logMessage(ex.toString(), "initListSaleProduct");
             JOptionPane.showMessageDialog(null, "Falha ao acessar a tela");
         }
     }
@@ -1306,6 +1325,11 @@ public class SGV extends javax.swing.JFrame {
         mnSaleDay.add(mnListSaleDay);
 
         mnListSaleProduct.setText("Consultar Venda por Produto");
+        mnListSaleProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnListSaleProductActionPerformed(evt);
+            }
+        });
         mnSaleDay.add(mnListSaleProduct);
 
         jMenuBar1.add(mnSaleDay);
@@ -1463,6 +1487,10 @@ public class SGV extends javax.swing.JFrame {
     private void rdbMoneyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdbMoneyActionPerformed
         this.selectMoney();
     }//GEN-LAST:event_rdbMoneyActionPerformed
+
+    private void mnListSaleProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnListSaleProductActionPerformed
+        this.initListSaleProduct();
+    }//GEN-LAST:event_mnListSaleProductActionPerformed
 
     /**
      * @param args the command line arguments

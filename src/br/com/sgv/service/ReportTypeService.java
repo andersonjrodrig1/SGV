@@ -1,25 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.sgv.service;
 
 import br.com.sgv.model.ReportType;
 import br.com.sgv.repository.ReportTypeRepository;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.util.List;
 
 /**
- *
- * @author ander
+ * @author Anderson Junior Rodrigues
  */
 public class ReportTypeService {
     
+    private LogService logService = null;
     private ReportTypeRepository reportTypeRepository = null;
     
     public ReportTypeService() {
+        this.logService = new LogService(ReportType.class.getName(), "ReportTypeService");
         this.reportTypeRepository = new ReportTypeRepository();
     }
     
@@ -27,13 +22,14 @@ public class ReportTypeService {
         ResponseModel<List<ReportType>> response = new ResponseModel<>();
         
         try {
+            this.logService.logMessage("busca de tipos de relatórios", "getReportTypes");
             List<ReportType> listReportType = this.reportTypeRepository.getAll();
             response.setModel(listReportType);
         } catch(Exception ex) {
-            System.out.printf("Error: ", ex);
+            this.logService.logMessage(ex.toString(), "getReportTypes");
             response.setError(ex.getMessage());
             response.setException(ex);
-            response.setMensage(Messages.fail_find);
+            response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }
         

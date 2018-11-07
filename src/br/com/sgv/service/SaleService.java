@@ -42,15 +42,14 @@ public class SaleService {
         return response;
     }
     
-    public ResponseModel<List<Sale>> getSalesByPeriodicAndProductId(Date dateInit, Date dateFinish, int productId){
+    public ResponseModel<List<Sale>> getSalesByPeriodicAndProductId(Date dateSearch, long productId){
         ResponseModel<List<Sale>> response = new ResponseModel<>();
         
         try {
-            String dtInit = this.sdf.format(dateInit);
-            String dtFinish = this.sdf.format(dateFinish);
-            this.logService.logMessage(String.format("buscar de venda por periodo: %s e %s e produto id: %d", dtInit, dtFinish, productId), "getSalesByPeriodicAndProductId");
+            String dtSearch = this.sdf.format(dateSearch);
+            this.logService.logMessage(String.format("buscar de venda por periodo: %s e produto id: %d", dtSearch, productId), "getSalesByPeriodicAndProductId");
             
-            List<Sale> sales = this.saleRepository.getSaleByPeriodicAndProductId(dtInit, dtFinish, productId);
+            List<Sale> sales = this.saleRepository.getSaleByPeriodicAndProductId(dtSearch, productId);
             response.setModel(sales);
         } catch (Exception ex) {
             this.logService.logMessage(ex.toString(), "getSalesByPeriodicAndProductId");
