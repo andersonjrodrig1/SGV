@@ -28,7 +28,7 @@ public class TotalizeSale implements Serializable {
     private String descrition;
     
     @Column(name = "register_date", nullable = false)
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date registerDate;
     
     @Column(name = "sale_date", nullable = false)

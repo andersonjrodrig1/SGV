@@ -7,6 +7,7 @@ import br.com.sgv.service.SaleService;
 import br.com.sgv.shared.FormatMoney;
 import br.com.sgv.shared.ResponseModel;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -20,7 +21,6 @@ import javax.swing.table.DefaultTableModel;
 public class ListSaleDay extends javax.swing.JDialog {
 
     private LogService logService = null;
-    private DecimalFormat df = new DecimalFormat("#0.00");
     private DefaultTableModel table = null;
     private List<Sale> listSales = null;
     private double totalValue;
@@ -60,7 +60,7 @@ public class ListSaleDay extends javax.swing.JDialog {
             }
         } catch(Exception ex){
             this.logService.logMessage(ex.toString(), "getSalesByDay");
-            JOptionPane.showConfirmDialog(null, "Falha ao buscar os dados.");
+            JOptionPane.showMessageDialog(null, "Falha ao buscar os dados.");
         }
     }
     
@@ -81,9 +81,10 @@ public class ListSaleDay extends javax.swing.JDialog {
             
             this.table.addRow(new Object[] {
                 sale.getProduct().getProductName(),
-                "R$ " + this.df.format(sale.getProduct().getProductValue()),
+                new SimpleDateFormat("HH:mm:ss").format(sale.getSaleDate()),
+                "R$ " + new DecimalFormat("#0.00").format(sale.getProduct().getProductValue()),
                 amount,
-                "R$ " + this.df.format(sale.getSaleTotal())
+                "R$ " + new DecimalFormat("#0.00").format(sale.getSaleTotal())
             });
             
             this.totalValue += sale.getSaleTotal();
@@ -95,7 +96,7 @@ public class ListSaleDay extends javax.swing.JDialog {
         }
         
         this.logService.logMessage("calculando total de vendas", "setSaleTable");
-        String totalValueString = this.df.format(this.totalValue);
+        String totalValueString = new DecimalFormat("#0.00").format(this.totalValue);
         lblTotalSale.setText("R$ " + totalValueString);
     }
     
@@ -158,14 +159,14 @@ public class ListSaleDay extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Produto", "Valor Produto", "Quantidade", "Total"
+                "Produto", "Hora Venda", "Valor Produto", "Quantidade", "Total"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -179,13 +180,15 @@ public class ListSaleDay extends javax.swing.JDialog {
         jScrollPane1.setViewportView(tableSale);
         if (tableSale.getColumnModel().getColumnCount() > 0) {
             tableSale.getColumnModel().getColumn(0).setResizable(false);
-            tableSale.getColumnModel().getColumn(0).setPreferredWidth(200);
+            tableSale.getColumnModel().getColumn(0).setPreferredWidth(220);
             tableSale.getColumnModel().getColumn(1).setResizable(false);
-            tableSale.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tableSale.getColumnModel().getColumn(1).setPreferredWidth(70);
             tableSale.getColumnModel().getColumn(2).setResizable(false);
-            tableSale.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tableSale.getColumnModel().getColumn(2).setPreferredWidth(70);
             tableSale.getColumnModel().getColumn(3).setResizable(false);
-            tableSale.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tableSale.getColumnModel().getColumn(3).setPreferredWidth(70);
+            tableSale.getColumnModel().getColumn(4).setResizable(false);
+            tableSale.getColumnModel().getColumn(4).setPreferredWidth(70);
         }
 
         lblTotal.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N

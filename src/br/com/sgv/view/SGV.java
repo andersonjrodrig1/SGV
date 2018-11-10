@@ -63,6 +63,7 @@ public class SGV extends javax.swing.JFrame {
     private RegisterTotalization registerTotalisation = null;
     private ListTotalization listTotalisation = null;
     private ListSaleProduct listSaleProduct = null;
+    private RegisterTwoPayments registerTwoPayments = null;
     
     private User user = null;
     private UserType userType = null;
@@ -770,10 +771,21 @@ public class SGV extends javax.swing.JFrame {
         }
     }
     
+    protected void resetTypePayments() {
+        rdbCard.setSelected(false);
+        rdbMoney.setSelected(false);
+        rdbTwoPayment.setSelected(false);
+        txtProductKey.grabFocus();
+    }
+    
     private void selectMoney() {
         if (this.table.getRowCount() > 0) {
             if (rdbCard.isSelected()) {
                 rdbCard.setSelected(false);
+            }
+            
+            if (rdbTwoPayment.isSelected()){
+                rdbTwoPayment.setSelected(false);
             }
 
             txtAmountPaid.setText("0,00");
@@ -790,6 +802,10 @@ public class SGV extends javax.swing.JFrame {
             if (rdbMoney.isSelected()) {
                 rdbMoney.setSelected(false);
             }
+            
+            if (rdbTwoPayment.isSelected()){
+                rdbTwoPayment.setSelected(false);
+            }
 
             String value = txtTotalValue.getText();
             this.setChangeValue(value);
@@ -797,6 +813,26 @@ public class SGV extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(null, "Não existe itens na cesta de produtos.");
             this.rdbCard.setSelected(false); 
+            txtProductKey.grabFocus();
+        }
+    }
+    
+    private void selectTwoPayments() {
+        if (this.table.getRowCount() > 0) {
+            if (rdbCard.isSelected()) {
+                rdbCard.setSelected(false);
+            }
+            
+            if (rdbMoney.isSelected()) {
+                rdbMoney.setSelected(false);
+            }
+            
+            txtAmountPaid.setText("0,00");
+            this.registerTwoPayments = new RegisterTwoPayments(this, true);
+            this.registerTwoPayments.initScreen();
+        } else {
+            JOptionPane.showMessageDialog(null, "Não existe itens na cesta de produtos.");
+            this.rdbTwoPayment.setSelected(false); 
             txtProductKey.grabFocus();
         }
     }
@@ -875,6 +911,7 @@ public class SGV extends javax.swing.JFrame {
         txtValueChange = new javax.swing.JTextField();
         btnCancel = new javax.swing.JButton();
         btnFinalizeSale = new javax.swing.JButton();
+        rdbTwoPayment = new javax.swing.JRadioButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         nmRegister = new javax.swing.JMenu();
         nmRegisterProduct = new javax.swing.JMenuItem();
@@ -1088,6 +1125,13 @@ public class SGV extends javax.swing.JFrame {
             }
         });
 
+        rdbTwoPayment.setText("Dinheiro e Cartão");
+        rdbTwoPayment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdbTwoPaymentActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -1132,18 +1176,19 @@ public class SGV extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(54, 54, 54)
+                .addGap(46, 46, 46)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbCard)
+                    .addComponent(rdbMoney)
+                    .addComponent(rdbTwoPayment))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(230, 230, 230)
+                        .addGap(117, 117, 117)
                         .addComponent(btnFinalizeSale)
                         .addGap(10, 10, 10)
                         .addComponent(btnCancel))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(rdbMoney)
-                            .addComponent(rdbCard))
-                        .addGap(38, 38, 38)
+                        .addGap(46, 46, 46)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblDiscountValue)
                             .addComponent(txtDiscountValue, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1159,7 +1204,7 @@ public class SGV extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblValueChange)
                             .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(65, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1192,35 +1237,39 @@ public class SGV extends javax.swing.JFrame {
                         .addComponent(btnClear)))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
+                .addGap(30, 30, 30)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(lblTotalValue)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtTotalValue, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(lblDiscountValue)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtDiscountValue, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                            .addComponent(lblAmountPaid)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(txtAmountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblValueChange)
+                        .addComponent(lblDiscountValue)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(rdbMoney)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(rdbCard)))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnFinalizeSale)
-                    .addComponent(btnCancel))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtDiscountValue, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(rdbMoney)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(rdbCard)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(rdbTwoPayment))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(lblTotalValue)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(txtTotalValue, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(lblAmountPaid)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(txtAmountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(lblValueChange)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(19, 19, 19)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnFinalizeSale)
+                            .addComponent(btnCancel))))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1492,6 +1541,10 @@ public class SGV extends javax.swing.JFrame {
         this.initListSaleProduct();
     }//GEN-LAST:event_mnListSaleProductActionPerformed
 
+    private void rdbTwoPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdbTwoPaymentActionPerformed
+        this.selectTwoPayments();
+    }//GEN-LAST:event_rdbTwoPaymentActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1568,6 +1621,7 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JMenuItem nmRegisterUser;
     private javax.swing.JRadioButton rdbCard;
     private javax.swing.JRadioButton rdbMoney;
+    private javax.swing.JRadioButton rdbTwoPayment;
     private javax.swing.JTable tableItems;
     private javax.swing.JTextField txtAmount;
     private javax.swing.JTextField txtAmountPaid;

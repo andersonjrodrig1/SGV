@@ -5,7 +5,6 @@ import br.com.sgv.model.TransactionSale;
 import br.com.sgv.service.LogService;
 import br.com.sgv.service.TotalizationSaleService;
 import br.com.sgv.service.TransactionSaleService;
-import br.com.sgv.shared.Messages;
 import br.com.sgv.shared.ResponseModel;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;

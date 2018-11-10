@@ -38,7 +38,7 @@ public class Sale implements Serializable {
     private double saleTotal;
     
     @Column(name = "sale_date", nullable = false)
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date saleDate;
     
     public Sale() { }

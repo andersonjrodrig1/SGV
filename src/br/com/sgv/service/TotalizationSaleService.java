@@ -49,11 +49,15 @@ public class TotalizationSaleService {
         ResponseModel<Boolean> response = new ResponseModel<>();
         
         try {            
-            int typeStatus = StatusRegisterEnum.PENDING.value;            
+            int typeStatus = StatusRegisterEnum.PENDING.value;
             String dateSearch = new SimpleDateFormat("yyyy-MM-dd").format(dayTotalization);
-            this.logService.addLogMessage("verificando totalização do dia: " + dateSearch);
             
-            List<TransactionSale> listTransactionSale = this.transactionSaleRepository.getTransactionSaleList(dateSearch, typeStatus);
+            String dateInit = dateSearch.concat(" 00:00:00");            
+            String dateFinal = dateSearch.concat(" 23:59:59");
+            
+            this.logService.addLogMessage("verificando totalização do dia: " + new SimpleDateFormat("yyyy-MM-dd").format(dayTotalization));
+            
+            List<TransactionSale> listTransactionSale = this.transactionSaleRepository.getTransactionSaleList(dateInit, dateFinal, typeStatus);
             
             if (listTransactionSale != null && listTransactionSale.size() > 0){ 
                 this.logService.addLogMessage("total de vendas não totalizadas: " + listTransactionSale.size());                
@@ -152,7 +156,11 @@ public class TotalizationSaleService {
         
         try {
             String dtInitial = new SimpleDateFormat("yyyy-MM-dd").format(dateInitial);
-            String dtFinal = new SimpleDateFormat("yyyy-MM-dd").format(dateFinal);
+            dtInitial = dtInitial.concat(" 00:00:00");
+            
+            String dtFinal = new SimpleDateFormat("yyyy-MM-dd").format(dateFinal);            
+            dtFinal = dtFinal.concat(" 23:59:59");
+            
             this.logService.logMessage("Periodo da consulta -> inicio: " + dtInitial + " final: " + dtFinal, "getTotalizationSaleByPeriodic");
             
             List<TotalizeSale> list = new TotalizationSaleRepository().getTotalizationByPeriodic(dtInitial, dtFinal);

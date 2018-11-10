@@ -50,7 +50,7 @@ public class TransactionSale implements Serializable {
     private PayType payType;
     
     @Column(name = "register_date", nullable = false)
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date registerDate;
     
     @ManyToOne

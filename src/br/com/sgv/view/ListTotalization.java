@@ -96,7 +96,7 @@ public class ListTotalization extends javax.swing.JDialog {
                         this.table.addRow(new Object[] {
                             totalization.getDescrition(),
                             new SimpleDateFormat("dd/MM/yyyy").format(totalization.getSaleDate()),
-                            new SimpleDateFormat("dd/MM/yyyy").format(totalization.getRegisterDate()),
+                            new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(totalization.getRegisterDate()),
                             "R$ " + new DecimalFormat("#0.00").format(totalization.getTotalValue())
                         });
                     });

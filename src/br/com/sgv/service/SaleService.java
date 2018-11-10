@@ -27,8 +27,11 @@ public class SaleService {
         
         try {
             this.logService.logMessage("montando objeto para busca", "getSalesByDay");
-            String dateSearchString = this.sdf.format(dateSearch);
-            List<Sale> sales = this.saleRepository.getSalesByDay(dateSearchString);
+            
+            String dateInit = this.sdf.format(dateSearch).concat(" 00:00:00");
+            String dateFinal = this.sdf.format(dateSearch).concat(" 23:59:59");
+            
+            List<Sale> sales = this.saleRepository.getSalesByDay(dateInit, dateFinal);
             response.setModel(sales);
             this.logService.logMessage("busca realizada", "getSalesByDay");
         } catch (Exception ex) {
@@ -47,9 +50,12 @@ public class SaleService {
         
         try {
             String dtSearch = this.sdf.format(dateSearch);
+            String dateInit = dtSearch.concat(" 00:00:00");
+            String dateFinal = dtSearch.concat(" 23:59:59");
+            
             this.logService.logMessage(String.format("buscar de venda por periodo: %s e produto id: %d", dtSearch, productId), "getSalesByPeriodicAndProductId");
             
-            List<Sale> sales = this.saleRepository.getSaleByPeriodicAndProductId(dtSearch, productId);
+            List<Sale> sales = this.saleRepository.getSaleByPeriodicAndProductId(dateInit, dateFinal, productId);
             response.setModel(sales);
         } catch (Exception ex) {
             this.logService.logMessage(ex.toString(), "getSalesByPeriodicAndProductId");

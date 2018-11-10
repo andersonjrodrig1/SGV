@@ -40,11 +40,12 @@ public class TransactionSaleRepository {
         return maxId;
     }
     
-    public List<TransactionSale> getTransactionSaleList(String dateSearch, int statusRegisterType) {
-        String hql = "from TransactionSale where register_date = :date and status_register_id = :status";
+    public List<TransactionSale> getTransactionSaleList(String dateInit, String dateFinal, int statusRegisterType) {
+        String hql = "from TransactionSale where register_date between :dateInit and :dateFinal and status_register_id = :status";
         
         Query query = this.session.createQuery(hql)
-                .setParameter("date", dateSearch)
+                .setParameter("dateInit", dateInit)
+                .setParameter("dateFinal", dateFinal)
                 .setParameter("status", statusRegisterType);
         List<TransactionSale> listTransactionSale = query.list();
         

@@ -94,6 +94,16 @@ public class InitializerDb {
             insertPayType();
         }
         
+        if (session.createQuery("from PayType where pay_type = :payType")
+                .setParameter("payType", "Dinheiro e Cartão")
+                .uniqueResult() == null) {
+            PayType payType = new PayType();
+            payType.setId(3);
+            payType.setPayType("Dinheiro e Cartão");
+            
+            session.save(payType);
+        }
+        
         if (session.createQuery("from ReportType").list().size() <= 0) {
             insertReportType();
         }

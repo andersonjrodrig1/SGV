@@ -8,6 +8,7 @@ import br.com.sgv.service.ProductService;
 import br.com.sgv.service.SaleService;
 import br.com.sgv.shared.ResponseModel;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -21,8 +22,6 @@ public class ListSaleProduct extends javax.swing.JDialog {
 
     private LogService logService = null;
     private DefaultTableModel table = null;
-    private DecimalFormat formatMoney = new DecimalFormat("#0.00");
-    private DecimalFormat formatWeight = new DecimalFormat("#0.000");
     private double valueTotal = 0;
     private double quantityTotal = 0;
     
@@ -86,23 +85,24 @@ public class ListSaleProduct extends javax.swing.JDialog {
 
                         table.addRow(new Object[] {
                             sale.getProduct().getProductName(),
-                            "R$ " + this.formatMoney.format(sale.getProduct().getProductValue()),
-                            sale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value ? (int)sale.getAmount() : this.formatWeight.format(sale.getAmount()),
-                            "R$ " + this.formatMoney.format(sale.getSaleTotal())
+                            new SimpleDateFormat("HH:mm:ss").format(sale.getSaleDate()),
+                            "R$ " + new DecimalFormat("#0.00").format(sale.getProduct().getProductValue()),
+                            sale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value ? (int)sale.getAmount() : new DecimalFormat("#0.000").format(sale.getAmount()),
+                            "R$ " + new DecimalFormat("#0.00").format(sale.getSaleTotal())
                         });
                     });
                     
                     if (listSale.get(0).getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
                         lblQuantityValue.setText(String.valueOf((int)this.quantityTotal));
                     } else {
-                        lblQuantityValue.setText(this.formatWeight.format(this.quantityTotal));
+                        lblQuantityValue.setText(new DecimalFormat("#0.000").format(this.quantityTotal));
                     }
                     
-                    lblValueTotal.setText("R$ " + this.formatMoney.format(this.valueTotal));
+                    lblValueTotal.setText("R$ " + new DecimalFormat("#0.00").format(this.valueTotal));
                     
                 } else {
                     lblQuantityValue.setText("0");
-                    lblValueTotal.setText("R$ " + this.formatMoney.format(this.valueTotal));
+                    lblValueTotal.setText("R$ " + new DecimalFormat("#0.00").format(this.valueTotal));
                     JOptionPane.showMessageDialog(null, "Nenhuma venda encontrada para o produto informado!");
                 }
                 
@@ -176,14 +176,14 @@ public class ListSaleProduct extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Produto", "Valor Produto", "Quantidade", "Total"
+                "Produto", "Hora Venda", "Valor Produto", "Quantidade", "Total"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -197,13 +197,15 @@ public class ListSaleProduct extends javax.swing.JDialog {
         jScrollPane1.setViewportView(tableProduct);
         if (tableProduct.getColumnModel().getColumnCount() > 0) {
             tableProduct.getColumnModel().getColumn(0).setResizable(false);
-            tableProduct.getColumnModel().getColumn(0).setPreferredWidth(250);
+            tableProduct.getColumnModel().getColumn(0).setPreferredWidth(220);
             tableProduct.getColumnModel().getColumn(1).setResizable(false);
-            tableProduct.getColumnModel().getColumn(1).setPreferredWidth(85);
+            tableProduct.getColumnModel().getColumn(1).setPreferredWidth(70);
             tableProduct.getColumnModel().getColumn(2).setResizable(false);
-            tableProduct.getColumnModel().getColumn(2).setPreferredWidth(85);
+            tableProduct.getColumnModel().getColumn(2).setPreferredWidth(70);
             tableProduct.getColumnModel().getColumn(3).setResizable(false);
-            tableProduct.getColumnModel().getColumn(3).setPreferredWidth(85);
+            tableProduct.getColumnModel().getColumn(3).setPreferredWidth(70);
+            tableProduct.getColumnModel().getColumn(4).setResizable(false);
+            tableProduct.getColumnModel().getColumn(4).setPreferredWidth(70);
         }
 
         lblValue.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
