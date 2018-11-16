@@ -1,6 +1,7 @@
 package br.com.sgv.view;
 
 import br.com.sgv.shared.FormatMoney;
+import java.awt.Color;
 import javax.swing.JOptionPane;
 
 /**
@@ -9,6 +10,8 @@ import javax.swing.JOptionPane;
 public class RegisterTwoPayments extends javax.swing.JDialog {
 
     private SGV sgv = null;
+    private double paymentMoney = 0;
+    private double paymentCard = 0;
     
     public RegisterTwoPayments(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -18,24 +21,38 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
     }
     
     public void initScreen() {
-        this.setSize(450, 230);
+        this.setSize(450, 300);
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
+        
+        this.setColorFields();
     }
     
     private void setValuePaymentsMoney(String value) {
-        
+        value = FormatMoney.formatMoney(value);
+        txtMoney.setText(value);
+        value = value.replace(",", ".");
+        this.paymentMoney = Double.valueOf(value);
     }
     
     private void setValuePaymentsCard(String value) {
-        
+        value = FormatMoney.formatMoney(value);
+        txtCard.setText(value);
+        value = value.replace(",", ".");
+        this.paymentCard = Double.valueOf(value);
     }
     
     private void closeScreen() {
         this.sgv.resetTypePayments();
         this.sgv = null;
         this.dispose();
+    }
+    
+    private void setColorFields() {
+        txtPurchaseValue.setBackground(Color.WHITE);
+        txtPaymentValue.setBackground(Color.WHITE);
+        txtChangeValue.setBackground(Color.WHITE);
     }
 
     /**
@@ -54,6 +71,12 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
         txtCard = new javax.swing.JTextField();
         btnCancel = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
+        lblPurchaseValue = new javax.swing.JLabel();
+        txtPurchaseValue = new javax.swing.JTextField();
+        txtPaymentValue = new javax.swing.JTextField();
+        lblPaymentValue = new javax.swing.JLabel();
+        txtChangeValue = new javax.swing.JTextField();
+        lblChangeValue = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Sistema de Gerenciamento de Vendas");
@@ -91,6 +114,21 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
         btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
         btnSave.setText("Salvar");
 
+        lblPurchaseValue.setText("Valor Compra..:");
+
+        txtPurchaseValue.setEditable(false);
+        txtPurchaseValue.setText("0,00");
+
+        txtPaymentValue.setEditable(false);
+        txtPaymentValue.setText("0,00");
+
+        lblPaymentValue.setText("Valor Pago..:");
+
+        txtChangeValue.setEditable(false);
+        txtChangeValue.setText("0,00");
+
+        lblChangeValue.setText("Troco..:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -98,22 +136,36 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(52, 52, 52)
+                        .addGap(108, 108, 108)
+                        .addComponent(lblTitle))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(56, 56, 56)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(lblMoney)
                             .addComponent(txtMoney)
                             .addComponent(lblCard)
-                            .addComponent(txtCard, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(108, 108, 108)
-                        .addComponent(lblTitle)))
-                .addContainerGap(59, Short.MAX_VALUE))
+                            .addComponent(txtCard, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(lblPurchaseValue)
+                                        .addGap(0, 0, Short.MAX_VALUE))
+                                    .addComponent(txtPurchaseValue))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblPaymentValue)
+                                    .addComponent(txtPaymentValue, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtChangeValue, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lblChangeValue))))))
+                .addContainerGap(55, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(btnSave)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCancel)
-                .addGap(124, 124, 124))
+                .addGap(116, 116, 116))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -121,18 +173,32 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addComponent(lblTitle)
                 .addGap(18, 18, 18)
+                .addComponent(lblCard)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCard, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblMoney)
                 .addGap(4, 4, 4)
                 .addComponent(txtMoney, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblCard)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCard, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(13, 13, 13)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblPurchaseValue)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPurchaseValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblChangeValue)
+                            .addComponent(lblPaymentValue))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtChangeValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtPaymentValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnCancel)
                     .addComponent(btnSave))
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
 
         pack();
@@ -212,9 +278,15 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnSave;
     private javax.swing.JLabel lblCard;
+    private javax.swing.JLabel lblChangeValue;
     private javax.swing.JLabel lblMoney;
+    private javax.swing.JLabel lblPaymentValue;
+    private javax.swing.JLabel lblPurchaseValue;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JTextField txtCard;
+    private javax.swing.JTextField txtChangeValue;
     private javax.swing.JTextField txtMoney;
+    private javax.swing.JTextField txtPaymentValue;
+    private javax.swing.JTextField txtPurchaseValue;
     // End of variables declaration//GEN-END:variables
 }

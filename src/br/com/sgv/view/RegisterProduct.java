@@ -47,6 +47,7 @@ public class RegisterProduct extends javax.swing.JDialog {
     }
     
     public void initScreenUpdate(Product product, boolean isUpdate, ListProduct jDialog) {
+        this.logService = new LogService(Product.class.getName(), "RegisterProduct");
         this.logService.logMessage("atualização de produto cancelada", "initScreenUpdate");
         String value = FormatMoney.verifyDecimal(String.valueOf(product.getProductValue()), CalcTypeEnum.UNITY.value);
         value = FormatMoney.formatMoney(value);
