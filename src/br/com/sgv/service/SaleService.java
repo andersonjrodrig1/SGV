@@ -1,7 +1,9 @@
 package br.com.sgv.service;
 
+import br.com.sgv.enumerator.ImportArchiveEnum;
 import br.com.sgv.model.Sale;
 import br.com.sgv.repository.SaleRepository;
+import br.com.sgv.shared.ArchiveFactory;
 import br.com.sgv.shared.ResponseModel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -64,6 +66,25 @@ public class SaleService {
             response.setMensage("Falha ao buscar os dados!");
             response.setModel(null);
         }        
+        
+        return response;
+    }
+    
+    public ResponseModel<List<Sale>> getSalesByImportation(String path, ImportArchiveEnum archiveEnum) {
+        ResponseModel<List<Sale>> response = new ResponseModel<>();
+        List<Sale> sales = null;
+        
+        try {
+            if (archiveEnum.equals(ImportArchiveEnum.TEXT)) {
+                sales = new ArchiveFactory().processArchive(path);
+            } else if (archiveEnum.equals(ImportArchiveEnum.EXCEL)) {
+                
+            }
+            
+            response.setModel(sales);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         
         return response;
     }

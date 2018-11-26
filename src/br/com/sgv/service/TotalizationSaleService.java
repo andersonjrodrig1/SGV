@@ -27,6 +27,8 @@ public class TotalizationSaleService {
     private double totalValueSale = 0;
     private double totalValueMoney = 0;
     private double totalValueCard = 0;
+    private double totalTwoPaymentMoney = 0;
+    private double totalTwoPaymentCard = 0;
     
     private LogService logService = null;
     private Session session = null;
@@ -66,8 +68,14 @@ public class TotalizationSaleService {
                     
                     if (transaction.getPayType().getId() == PayTypeEnum.MONEY.value){
                         this.totalValueMoney += transaction.getTotalValue();
-                    } else {
+                    } else if (transaction.getPayType().getId() == PayTypeEnum.CARD.value) {
                         this.totalValueCard += transaction.getTotalValue();
+                    } else if (transaction.getPayType().getId() == PayTypeEnum.TWO_PAYMENTS.value) {
+                        if (transaction.getTransactionId().equals("C")){
+                            this.totalTwoPaymentCard += transaction.getTotalValue();
+                        } else if (transaction.getTransactionId().equals("D")) {
+                            this.totalTwoPaymentMoney += transaction.getTotalValue();
+                        }
                     }
                 });
                 
@@ -79,15 +87,23 @@ public class TotalizationSaleService {
                     listTotalizeSearch.stream().forEach(totalization -> {
                         totalization.setRegisterDate(now);
                         
-                        if (totalization.getReportType().getId() == ReportTypeEnum.SALE.value){
+                        if (totalization.getReportType().getId() == ReportTypeEnum.SALE.value) {
                             this.totalValueSale += totalization.getTotalValue();
                             totalization.setTotalValue(this.totalValueSale);
-                        } else if (totalization.getDescrition().equals("Venda Cartão")) {
-                            this.totalValueCard += totalization.getTotalValue();
-                            totalization.setTotalValue(this.totalValueCard);
-                        } else if (totalization.getDescrition().equals("Venda Dinheiro")) {
-                            this.totalValueMoney += totalization.getTotalValue();
-                            totalization.setTotalValue(this.totalValueMoney);
+                        } else if (totalization.getReportType().getId() == ReportTypeEnum.PAID.value) {
+                            if (totalization.getDescrition().equals("Venda Cartão")) {
+                                this.totalValueCard += totalization.getTotalValue();
+                                totalization.setTotalValue(this.totalValueCard);
+                            } else if (totalization.getDescrition().equals("Venda Dinheiro")) {
+                                this.totalValueMoney += totalization.getTotalValue();
+                                totalization.setTotalValue(this.totalValueMoney);
+                            } else if (totalization.getDescrition().equals("Divisão de Venda: Cartão")) {
+                                this.totalTwoPaymentCard += totalization.getTotalValue();
+                                totalization.setTotalValue(this.totalTwoPaymentCard);
+                            } else if (totalization.getDescrition().equals("Divisão de Venda: Dinheiro")) {
+                                this.totalTwoPaymentMoney += totalization.getTotalValue();
+                                totalization.setTotalValue(this.totalTwoPaymentMoney);
+                            }
                         }
                     });
                     
@@ -120,6 +136,22 @@ public class TotalizationSaleService {
                     totalizationByCard.setTotalValue(this.totalValueCard);
                     totalizationByCard.setReportType(new ReportType(ReportTypeEnum.PAID.value, "Por Pagamento"));
                     listtotalizeSale.add(totalizationByCard);
+                    
+                    TotalizeSale totalizationByTwoPaymentCard = new TotalizeSale();
+                    totalizationByTwoPaymentCard.setDescrition("Divisão de Venda: Cartão");
+                    totalizationByTwoPaymentCard.setRegisterDate(now);
+                    totalizationByTwoPaymentCard.setSaleDate(dayTotalization);
+                    totalizationByTwoPaymentCard.setTotalValue(this.totalTwoPaymentCard);
+                    totalizationByTwoPaymentCard.setReportType(new ReportType(ReportTypeEnum.PAID.value, "Por Pagamento"));
+                    listtotalizeSale.add(totalizationByTwoPaymentCard);
+                    
+                    TotalizeSale totalizationByTwoPaymentMoney = new TotalizeSale();
+                    totalizationByTwoPaymentMoney.setDescrition("Divisão de Venda: Dinheiro");
+                    totalizationByTwoPaymentMoney.setRegisterDate(now);
+                    totalizationByTwoPaymentMoney.setSaleDate(dayTotalization);
+                    totalizationByTwoPaymentMoney.setTotalValue(this.totalTwoPaymentMoney);
+                    totalizationByTwoPaymentMoney.setReportType(new ReportType(ReportTypeEnum.PAID.value, "Por Pagamento"));
+                    listtotalizeSale.add(totalizationByTwoPaymentMoney);
 
                     this.logService.addLogMessage("registrando totalização das vendas do dia");
                     this.totalizationSaleRepository.saveTotalizationSaleList(listtotalizeSale);

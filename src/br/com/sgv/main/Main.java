@@ -11,7 +11,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 /**
  * @author Anderson Junior Rodrigues
  */
-
 public class Main {
     
     private static Login login;

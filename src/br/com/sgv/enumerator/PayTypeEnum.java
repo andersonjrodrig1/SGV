@@ -7,7 +7,8 @@ package br.com.sgv.enumerator;
 public enum PayTypeEnum {
 
     MONEY(1),
-    CARD(2);
+    CARD(2),
+    TWO_PAYMENTS(3);
     
     public int value;
     

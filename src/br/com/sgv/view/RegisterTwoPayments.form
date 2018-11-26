@@ -48,7 +48,7 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="lblPaymentValue" min="-2" max="-2" attributes="0"/>
-                                  <Component id="txtPaymentValue" min="-2" pref="108" max="-2" attributes="0"/>
+                                  <Component id="txtAmountPaid" min="-2" pref="108" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
@@ -98,7 +98,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="txtChangeValue" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtPaymentValue" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtAmountPaid" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -166,6 +166,9 @@
         </Property>
         <Property name="text" type="java.lang.String" value="Salvar"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="lblPurchaseValue">
       <Properties>
@@ -178,7 +181,7 @@
         <Property name="text" type="java.lang.String" value="0,00"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtPaymentValue">
+    <Component class="javax.swing.JTextField" name="txtAmountPaid">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="text" type="java.lang.String" value="0,00"/>

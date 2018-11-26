@@ -2,6 +2,7 @@ package br.com.sgv.view;
 
 import br.com.sgv.enumerator.AcessScreenEnum;
 import br.com.sgv.enumerator.CalcTypeEnum;
+import br.com.sgv.enumerator.ImportArchiveEnum;
 import br.com.sgv.enumerator.MeasureTypeEnum;
 import br.com.sgv.enumerator.OptionEnum;
 import br.com.sgv.enumerator.PayTypeEnum;
@@ -15,6 +16,7 @@ import br.com.sgv.model.UserType;
 import br.com.sgv.service.AcessPermissionService;
 import br.com.sgv.service.LogService;
 import br.com.sgv.service.ProductService;
+import br.com.sgv.service.SaleService;
 import br.com.sgv.service.TransactionSaleService;
 import br.com.sgv.service.UserTypeService;
 import br.com.sgv.shared.FormatMoney;
@@ -26,7 +28,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -48,6 +52,8 @@ public class SGV extends javax.swing.JFrame {
     private double changeValue = 0d;
     private int amountSale = 0;
     private double weightSale = 0d;
+    private double valueCard = 0;
+    private double valueMoney = 0;
     
     private Login login = null;
     private About about = null;
@@ -505,84 +511,116 @@ public class SGV extends javax.swing.JFrame {
     }
     
     private void setDiscountValue(String value) {
-        this.logService.logMessage("calculando valor de compra com desconto informado", "setDiscountValue");
-        this.changeValue = 0d;
-        this.discountValue = 0d;
-        
-        value = FormatMoney.formatMoney(value);
-        txtDiscountValue.setText(value);
-        value = value.replace(",", ".");        
-        this.discountValue = Double.valueOf(value);
-        
-        if (this.discountValue > 0d){
-            this.valueWithDiscount = this.totalValue - this.discountValue;
-            
-            if (this.paidValue > 0d) {
-                this.changeValue = this.paidValue - this.valueWithDiscount;
-                txtValueChange.setText(this.df.format(this.changeValue));
-            }
+        if (!rdbCard.isSelected() && !rdbMoney.isSelected() && !rdbTwoPayment.isSelected()) {
+            txtDiscountValue.setText("0,00");
+            JOptionPane.showMessageDialog(null, "Selecione uma forma de pagamento!");            
         } else {
-            this.valueWithDiscount = this.totalValue;
-        }        
-        
-        String discount = this.df.format(this.valueWithDiscount);
-        txtTotalValue.setText(discount);
+            this.logService.logMessage("calculando valor de compra com desconto informado", "setDiscountValue");
+            this.changeValue = 0d;
+            this.discountValue = 0d;
+
+            value = FormatMoney.formatMoney(value);
+            txtDiscountValue.setText(value);
+            value = value.replace(",", ".");        
+            this.discountValue = Double.valueOf(value);
+
+            if (this.discountValue > 0d){
+                this.valueWithDiscount = this.totalValue - this.discountValue;
+
+                if (this.paidValue > 0d) {
+                    this.changeValue = this.paidValue - this.valueWithDiscount;
+                    txtValueChange.setText(this.df.format(this.changeValue));
+
+                    if  (this.changeValue < 0) {
+                        txtValueChange.setBackground(Color.PINK);
+                    } else {
+                        txtValueChange.setBackground(Color.WHITE);
+                    }
+                }
+            } else {
+                this.valueWithDiscount = this.totalValue;
+            }        
+
+            String discount = this.df.format(this.valueWithDiscount);
+            txtTotalValue.setText(discount);
+        }
     }
     
     private void setChangeValue(String value) {
-        this.logService.logMessage("calculando valor total da compra", "setChangeValue");
-        this.changeValue = 0d;
-        
-        value = FormatMoney.formatMoney(value);
-        txtAmountPaid.setText(value);
-        value = value.replace(",", ".");
-        
-        if (this.discountValue > 0d) {
-            this.valueWithDiscount = this.totalValue - this.discountValue;
+        if (!rdbCard.isSelected() && !rdbMoney.isSelected() && !rdbTwoPayment.isSelected()) {
+            txtAmountPaid.setText("0,00");
+            JOptionPane.showMessageDialog(null, "Selecione uma forma de pagamento!");            
         } else {
-            this.valueWithDiscount = this.totalValue;
+            this.logService.logMessage("calculando valor total da compra", "setChangeValue");
+            
+            this.changeValue = 0d;
+            this.totalValue = Double.valueOf(new DecimalFormat("#0.00").format(this.totalValue).replace(",", "."));
+            this.discountValue = Double.valueOf(new DecimalFormat("#0.00").format(this.discountValue).replace(",", "."));
+
+            value = FormatMoney.formatMoney(value);
+            txtAmountPaid.setText(value);
+            value = value.replace(",", ".");
+
+            if (this.discountValue > 0d) {
+                this.valueWithDiscount = this.totalValue - this.discountValue;
+            } else {
+                this.valueWithDiscount = this.totalValue;
+            }
+
+            this.paidValue = Double.valueOf(value);
+            this.changeValue = this.paidValue - this.valueWithDiscount;
+
+            if  (Math.ceil(this.changeValue) < 0) {
+                txtValueChange.setBackground(Color.PINK);
+            } else {
+                txtValueChange.setBackground(Color.WHITE);
+            }
+
+            txtValueChange.setText(this.df.format(this.changeValue));
         }
-        
-        this.paidValue = Double.valueOf(value);
-        this.changeValue = this.paidValue - this.valueWithDiscount;
-        txtValueChange.setText(this.df.format(this.changeValue));
     }
     
     private void reserveProductList() {
         if (verifyFieldsRequired()) {
-            this.logService.logMessage("adicionando produto na cesta de compra", "reserveProductList");
-            String amountString = "";
-            this.totalValue = 0d;
-            
-            if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
-                int amount = (int)this.itemSale.getAmount();
-                amountString = String.valueOf(amount);
-            } else {
-                amountString = String.valueOf(this.itemSale.getAmount());
-                amountString = FormatMoney.verifyDecimal(amountString, this.itemSale.getProduct().getMeasureType().getCalcType().getId());
-            }
-            this.logService.logMessage("atualizando cesta de compra", "reserveProductList");
-            this.table.addRow(new Object[] {
-                this.itemSale.getProduct().getId(),
-                this.itemSale.getProduct().getProductName(),
-                "R$ " + this.df.format(this.itemSale.getProduct().getProductValue()),
-                amountString,
-                "R$ " + this.df.format(this.itemSale.getSaleTotal())
-            });
-            
-            this.listItemsSale.add(this.itemSale);            
-            this.listItemsSale.stream().forEach(item -> this.totalValue += item.getSaleTotal());
-            
-            this.logService.logMessage("atualizando valor da compra", "reserveProductList");
-            
-            if (this.paidValue > 0d || this.changeValue > 0d) {
-                this.changeValue -= this.itemSale.getSaleTotal();
-                txtValueChange.setText(this.df.format(this.changeValue));
-            }
-            
-            txtTotalValue.setText(this.df.format(this.totalValue));
-            this.clearFields();
+            this.reserveProduct();
         }
+    }
+    
+    private void reserveProduct() {
+        this.logService.logMessage("adicionando produto na cesta de compra", "reserveProductList");
+        String amountString = "";
+        this.totalValue = 0d;
+
+        if (this.itemSale.getProduct().getMeasureType().getCalcType().getId() == CalcTypeEnum.UNITY.value) {
+            int amount = (int)this.itemSale.getAmount();
+            amountString = String.valueOf(amount);
+        } else {
+            amountString = String.valueOf(this.itemSale.getAmount());
+            amountString = FormatMoney.verifyDecimal(amountString, this.itemSale.getProduct().getMeasureType().getCalcType().getId());
+        }
+
+        this.logService.logMessage("atualizando cesta de compra", "reserveProductList");
+
+        this.table.addRow(new Object[] {
+            this.itemSale.getProduct().getId(),
+            this.itemSale.getProduct().getProductName(),
+            "R$ " + this.df.format(this.itemSale.getProduct().getProductValue()),
+            amountString,
+            "R$ " + this.df.format(this.itemSale.getSaleTotal())
+        });
+
+        this.listItemsSale.add(this.itemSale);            
+        this.listItemsSale.stream().forEach(item -> this.totalValue += item.getSaleTotal());
+
+        this.logService.logMessage("atualizando valor da compra", "reserveProductList");
+
+        if (this.paidValue > 0d || this.changeValue > 0d) {
+            this.changeValue -= this.itemSale.getSaleTotal();
+            txtValueChange.setText(this.df.format(this.changeValue));
+        }
+
+        txtTotalValue.setText(this.df.format(this.totalValue));
+        this.clearFields();
     }
     
     private void removeItem() {
@@ -671,6 +709,7 @@ public class SGV extends javax.swing.JFrame {
             
             if (option == OptionEnum.YES.value) {
                 this.logService.logMessage("iniciando finalização da compra", "finallySale");
+                List<TransactionSale> list = new ArrayList<>();
                 PayType payType = new PayType();
                 this.amountSale = 0;
                 this.weightSale = 0;
@@ -688,22 +727,51 @@ public class SGV extends javax.swing.JFrame {
                 if (rdbMoney.isSelected()) {
                     payType.setId(PayTypeEnum.MONEY.value);
                     payType.setPayType("Dinheiro");
-                } else {
+                } else if (rdbCard.isSelected()) {
                     payType.setId(PayTypeEnum.CARD.value);
                     payType.setPayType("Cartão");
+                } else if (rdbTwoPayment.isSelected()) {
+                    payType.setId(PayTypeEnum.TWO_PAYMENTS.value);
+                    payType.setPayType("Dinheiro e Cartão");
                 }
                 
-                this.logService.logMessage("construindo objeto de transação", "finallySale");
-                this.transactionSale = new TransactionSale();
-                this.transactionSale.setAmount(this.amountSale);
-                this.transactionSale.setWeight(this.weightSale);
-                this.transactionSale.setPaidValue(this.paidValue);
-                this.transactionSale.setTotalValue(this.totalValue);
-                this.transactionSale.setValueWithDiscount(this.valueWithDiscount);
-                this.transactionSale.setDiscountValue(this.discountValue);
-                this.transactionSale.setPayType(payType);
+                if (payType.getId() == PayTypeEnum.TWO_PAYMENTS.value) {
+                    this.transactionSale = new TransactionSale();
+                    this.transactionSale.setTotalValue(this.valueCard);
+                    this.transactionSale.setAmount(0);
+                    this.transactionSale.setWeight(0);
+                    this.transactionSale.setPaidValue(0);
+                    this.transactionSale.setValueWithDiscount(0);
+                    this.transactionSale.setDiscountValue(0);
+                    this.transactionSale.setPayType(payType);
+                    
+                    list.add(this.transactionSale);
+                    
+                    this.transactionSale = new TransactionSale();
+                    this.transactionSale.setTotalValue(this.valueMoney);
+                    this.transactionSale.setAmount(0);
+                    this.transactionSale.setWeight(0);
+                    this.transactionSale.setPaidValue(0);
+                    this.transactionSale.setValueWithDiscount(0);
+                    this.transactionSale.setDiscountValue(0);
+                    this.transactionSale.setPayType(payType);
+                    
+                    list.add(this.transactionSale);
+                } else {
+                    this.logService.logMessage("construindo objeto de transação", "finallySale");
+                    this.transactionSale = new TransactionSale();
+                    this.transactionSale.setAmount(this.amountSale);
+                    this.transactionSale.setWeight(this.weightSale);
+                    this.transactionSale.setPaidValue(this.paidValue);
+                    this.transactionSale.setTotalValue(this.totalValue);
+                    this.transactionSale.setValueWithDiscount(this.valueWithDiscount);
+                    this.transactionSale.setDiscountValue(this.discountValue);
+                    this.transactionSale.setPayType(payType);
+                    
+                    list.add(this.transactionSale);
+                }
                 
-                ResponseModel<Boolean> response = new TransactionSaleService(true).saveTransactionSale(transactionSale, listItemsSale);
+                ResponseModel<Boolean> response = new TransactionSaleService(true).saveTransactionSale(list, this.listItemsSale);
                 
                 if (response.getModel()) {
                     JOptionPane.showMessageDialog(null, "Venda registrada com sucesso!");
@@ -723,7 +791,7 @@ public class SGV extends javax.swing.JFrame {
             message += "Favor selecione um item na lista de produtos.\n";
         }
         
-        if (!rdbMoney.isSelected() && !rdbCard.isSelected()) {
+        if (!rdbMoney.isSelected() && !rdbCard.isSelected() && !rdbTwoPayment.isSelected()) {
             message += "Selecione uma opção para pagamento.\n";
         }
         
@@ -778,6 +846,17 @@ public class SGV extends javax.swing.JFrame {
         txtProductKey.grabFocus();
     }
     
+    protected void setValueTwoPayments(double valueCard, double valueMoney, double amountPaid, double changeValue) {
+        this.valueCard = valueCard;
+        this.valueMoney = valueMoney;
+        this.paidValue = amountPaid;
+        this.changeValue = changeValue;
+        
+        txtAmountPaid.setText(new DecimalFormat("#0.00").format(this.paidValue));
+        txtValueChange.setText(new DecimalFormat("#0.00").format(this.changeValue));
+        btnFinalizeSale.grabFocus();
+    }
+    
     private void selectMoney() {
         if (this.table.getRowCount() > 0) {
             if (rdbCard.isSelected()) {
@@ -787,8 +866,15 @@ public class SGV extends javax.swing.JFrame {
             if (rdbTwoPayment.isSelected()){
                 rdbTwoPayment.setSelected(false);
             }
+            
+            this.valueCard = 0;
+            this.valueMoney = 0;
+            this.paidValue = 0;
+            this.changeValue = 0;
 
+            rdbMoney.setSelected(true);
             txtAmountPaid.setText("0,00");
+            txtValueChange.setText("0,00");
             txtAmountPaid.grabFocus();
         } else {
             JOptionPane.showMessageDialog(null, "Não existe itens na cesta de produtos.");
@@ -806,7 +892,13 @@ public class SGV extends javax.swing.JFrame {
             if (rdbTwoPayment.isSelected()){
                 rdbTwoPayment.setSelected(false);
             }
+            
+            this.valueCard = 0;
+            this.valueMoney = 0;
+            this.changeValue = 0;
 
+            rdbCard.setSelected(true);
+            txtValueChange.setText("0,00");
             String value = txtTotalValue.getText();
             this.setChangeValue(value);
             btnFinalizeSale.grabFocus();
@@ -827,14 +919,95 @@ public class SGV extends javax.swing.JFrame {
                 rdbMoney.setSelected(false);
             }
             
+            rdbTwoPayment.setSelected(true);
             txtAmountPaid.setText("0,00");
+            txtValueChange.setText("0,00");
+            txtValueChange.setBackground(Color.WHITE);
             this.registerTwoPayments = new RegisterTwoPayments(this, true);
-            this.registerTwoPayments.initScreen();
+            this.registerTwoPayments.initScreen(this.totalValue);
         } else {
             JOptionPane.showMessageDialog(null, "Não existe itens na cesta de produtos.");
             this.rdbTwoPayment.setSelected(false); 
             txtProductKey.grabFocus();
         }
+    }
+    
+    private void ImportExcel() {
+        JFileChooser fileChooser = this.setFileChooser("Excel", "xls", "xlsx");
+        int result = fileChooser.showOpenDialog(null);
+
+        if (result == JFileChooser.APPROVE_OPTION)
+        {
+            String filename = fileChooser.getSelectedFile().getPath();
+            
+            
+            
+            JOptionPane.showMessageDialog(null, "Planilha importada com sucesso!.");
+        }
+        else if (result == JFileChooser.CANCEL_OPTION)
+        {   
+            JOptionPane.showMessageDialog(null, "Nenhum arquivo foi selecionado.");
+        }
+        else if (result == JFileChooser.ERROR_OPTION)
+        {
+            JOptionPane.showMessageDialog(null, "Ocorreu um erro ao importar a planinha.");  
+        }
+    }
+    
+    private void importArchive() {
+        JFileChooser fileChooser = this.setFileChooser("Texto", "txt");
+        int result = fileChooser.showOpenDialog(null);        
+        
+        if (result == JFileChooser.APPROVE_OPTION)
+        {
+            String pathName = fileChooser.getSelectedFile().getPath();
+            ResponseModel<List<Sale>> response = new SaleService().getSalesByImportation(pathName, ImportArchiveEnum.TEXT);
+            List<Sale> sales = response.getModel();
+            
+            this.setSalesListImport(sales);
+            
+            JOptionPane.showMessageDialog(null, "Arquivo importado com sucesso!.");
+        }
+        else if (result == JFileChooser.CANCEL_OPTION)
+        {   
+            JOptionPane.showMessageDialog(null, "Nenhum arquivo foi selecionado.");
+        }
+        else if (result == JFileChooser.ERROR_OPTION)
+        {
+            JOptionPane.showMessageDialog(null, "Ocorreu um erro ao importar o arquivo.");  
+        }
+    }
+    
+    private JFileChooser setFileChooser(String fileName, String... extension){
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(fileName, extension);
+        fileChooser.setFileFilter(filter);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        
+        return fileChooser;
+    }
+    
+    private void setSalesListImport(List<Sale> sales) {
+        ResponseModel<List<Product>> response = new ProductService().getProducts();
+        List<Product> products = response.getModel();
+        
+        sales.stream().forEach(sale -> {
+            this.itemSale = null;
+            Product product = products
+                    .stream()
+                    .filter(x -> x.getProductKey().equals(sale.getProduct().getProductKey()))
+                    .findFirst()
+                    .orElse(null);
+            
+            double totalValue = sale.getAmount() * product.getProductValue();
+            
+            sale.setProduct(product);
+            sale.setSaleTotal(totalValue);
+            
+            this.itemSale = sale;
+            this.reserveProduct();
+        });
     }
     
     private void finalizerTransactionScreen() {
@@ -851,6 +1024,7 @@ public class SGV extends javax.swing.JFrame {
     private void clearTypePaid() {
        this.rdbMoney.setSelected(false);
        this.rdbCard.setSelected(false); 
+       this.rdbTwoPayment.setSelected(false);
     }
     
     private void clearDataPaySale() {
@@ -863,11 +1037,14 @@ public class SGV extends javax.swing.JFrame {
         this.valueWithDiscount = 0d;
         this.amountSale = 0;
         this.weightSale = 0d;
+        this.valueCard = 0;
+        this.valueMoney = 0;
         
         txtDiscountValue.setText("0,00");
         txtTotalValue.setText("0,00");
         txtAmountPaid.setText("0,00");
         txtValueChange.setText("0,00");
+        txtValueChange.setBackground(Color.WHITE);
     }
     
     /**
@@ -912,6 +1089,8 @@ public class SGV extends javax.swing.JFrame {
         btnCancel = new javax.swing.JButton();
         btnFinalizeSale = new javax.swing.JButton();
         rdbTwoPayment = new javax.swing.JRadioButton();
+        btnImportExcel = new javax.swing.JButton();
+        btnImportArchive = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         nmRegister = new javax.swing.JMenu();
         nmRegisterProduct = new javax.swing.JMenuItem();
@@ -1132,6 +1311,22 @@ public class SGV extends javax.swing.JFrame {
             }
         });
 
+        btnImportExcel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Table.png"))); // NOI18N
+        btnImportExcel.setText("Importar Excel");
+        btnImportExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImportExcelActionPerformed(evt);
+            }
+        });
+
+        btnImportArchive.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Upload.png"))); // NOI18N
+        btnImportArchive.setText("Importar Arquivo");
+        btnImportArchive.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImportArchiveActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -1165,7 +1360,7 @@ public class SGV extends javax.swing.JFrame {
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtGrossValue)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(178, 178, 178)
+                        .addGap(25, 25, 25)
                         .addComponent(btnAdd)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSearch)
@@ -1173,6 +1368,10 @@ public class SGV extends javax.swing.JFrame {
                         .addComponent(btnClear)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnExclude)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnImportExcel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnImportArchive)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -1204,7 +1403,7 @@ public class SGV extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblValueChange)
                             .addComponent(txtValueChange, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(65, Short.MAX_VALUE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1229,12 +1428,13 @@ public class SGV extends javax.swing.JFrame {
                         .addComponent(txtNetValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtGrossValue, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(11, 11, 11)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnExclude)
+                    .addComponent(btnSearch)
+                    .addComponent(btnClear)
                     .addComponent(btnAdd)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnExclude)
-                        .addComponent(btnSearch)
-                        .addComponent(btnClear)))
+                    .addComponent(btnImportExcel)
+                    .addComponent(btnImportArchive))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
@@ -1545,6 +1745,14 @@ public class SGV extends javax.swing.JFrame {
         this.selectTwoPayments();
     }//GEN-LAST:event_rdbTwoPaymentActionPerformed
 
+    private void btnImportExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportExcelActionPerformed
+        this.ImportExcel();
+    }//GEN-LAST:event_btnImportExcelActionPerformed
+
+    private void btnImportArchiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportArchiveActionPerformed
+        this.importArchive();
+    }//GEN-LAST:event_btnImportArchiveActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1586,6 +1794,8 @@ public class SGV extends javax.swing.JFrame {
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnExclude;
     private javax.swing.JButton btnFinalizeSale;
+    private javax.swing.JButton btnImportArchive;
+    private javax.swing.JButton btnImportExcel;
     private javax.swing.JButton btnSearch;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;

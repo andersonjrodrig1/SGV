@@ -2,6 +2,7 @@ package br.com.sgv.view;
 
 import br.com.sgv.shared.FormatMoney;
 import java.awt.Color;
+import java.text.DecimalFormat;
 import javax.swing.JOptionPane;
 
 /**
@@ -12,6 +13,9 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
     private SGV sgv = null;
     private double paymentMoney = 0;
     private double paymentCard = 0;
+    private double purchaseValue = 0;
+    private double amountPaid = 0;
+    private double changeValue = 0;
     
     public RegisterTwoPayments(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -20,13 +24,26 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
         this.sgv = (SGV) parent;
     }
     
-    public void initScreen() {
+    public void initScreen(double value) {
+        txtPurchaseValue.setText(new DecimalFormat("#0.00").format(value));
+        this.purchaseValue = Double.valueOf(new DecimalFormat("#0.00").format(value).replace(",", "."));
+        
         this.setSize(450, 300);
         this.setLocationRelativeTo(null);
-        this.pack();
-        this.setVisible(true);
-        
+        this.pack();       
         this.setColorFields();
+        this.setVisible(true);
+    }
+    
+    private void saveTwoPayment() {
+        if (validateFields()) {
+            
+            this.paymentMoney -= this.changeValue;
+            
+            this.sgv.setValueTwoPayments(this.paymentCard, this.paymentMoney, this.amountPaid, this.changeValue);
+            this.sgv = null;
+            this.dispose();
+        }
     }
     
     private void setValuePaymentsMoney(String value) {
@@ -34,6 +51,8 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
         txtMoney.setText(value);
         value = value.replace(",", ".");
         this.paymentMoney = Double.valueOf(value);
+        
+        this.setFieldsScreen();
     }
     
     private void setValuePaymentsCard(String value) {
@@ -41,6 +60,36 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
         txtCard.setText(value);
         value = value.replace(",", ".");
         this.paymentCard = Double.valueOf(value);
+        
+        this.setFieldsScreen();
+    }
+    
+    private void setFieldsScreen() {
+        this.amountPaid = this.paymentMoney + this.paymentCard;
+        this.changeValue = this.amountPaid - this.purchaseValue;
+        
+        if (Math.ceil(this.changeValue) < 0){
+            txtChangeValue.setBackground(Color.PINK);
+        } else {
+            txtChangeValue.setBackground(Color.WHITE);
+        }
+        
+        txtAmountPaid.setText(new DecimalFormat("#0.00").format(this.amountPaid));
+        txtChangeValue.setText(new DecimalFormat("#0.00").format(this.changeValue));
+    }
+    
+    private boolean validateFields() {
+        if (txtCard.getText().equals("0,00") && txtMoney.getText().equals("0,00")) {
+            JOptionPane.showMessageDialog(null, "Informe o valor de pelo menos um dos tipos de pagamento.");
+            return false;
+        }
+        
+        if (this.changeValue < 0) {
+            JOptionPane.showMessageDialog(null, "Valor de troco negativo.\nVerifique o valor pago.");
+            return false;
+        }
+        
+        return true;
     }
     
     private void closeScreen() {
@@ -51,7 +100,7 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
     
     private void setColorFields() {
         txtPurchaseValue.setBackground(Color.WHITE);
-        txtPaymentValue.setBackground(Color.WHITE);
+        txtAmountPaid.setBackground(Color.WHITE);
         txtChangeValue.setBackground(Color.WHITE);
     }
 
@@ -73,7 +122,7 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
         btnSave = new javax.swing.JButton();
         lblPurchaseValue = new javax.swing.JLabel();
         txtPurchaseValue = new javax.swing.JTextField();
-        txtPaymentValue = new javax.swing.JTextField();
+        txtAmountPaid = new javax.swing.JTextField();
         lblPaymentValue = new javax.swing.JLabel();
         txtChangeValue = new javax.swing.JTextField();
         lblChangeValue = new javax.swing.JLabel();
@@ -113,14 +162,19 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
 
         btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/sgv/images/png/Apply.png"))); // NOI18N
         btnSave.setText("Salvar");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
 
         lblPurchaseValue.setText("Valor Compra..:");
 
         txtPurchaseValue.setEditable(false);
         txtPurchaseValue.setText("0,00");
 
-        txtPaymentValue.setEditable(false);
-        txtPaymentValue.setText("0,00");
+        txtAmountPaid.setEditable(false);
+        txtAmountPaid.setText("0,00");
 
         lblPaymentValue.setText("Valor Pago..:");
 
@@ -154,7 +208,7 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(lblPaymentValue)
-                                    .addComponent(txtPaymentValue, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txtAmountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtChangeValue, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -193,7 +247,7 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtChangeValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPaymentValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(txtAmountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnCancel)
@@ -231,6 +285,10 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
             }
         }
     }//GEN-LAST:event_txtCardKeyReleased
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        this.saveTwoPayment();
+    }//GEN-LAST:event_btnSaveActionPerformed
 
     /**
      * @param args the command line arguments
@@ -283,10 +341,10 @@ public class RegisterTwoPayments extends javax.swing.JDialog {
     private javax.swing.JLabel lblPaymentValue;
     private javax.swing.JLabel lblPurchaseValue;
     private javax.swing.JLabel lblTitle;
+    private javax.swing.JTextField txtAmountPaid;
     private javax.swing.JTextField txtCard;
     private javax.swing.JTextField txtChangeValue;
     private javax.swing.JTextField txtMoney;
-    private javax.swing.JTextField txtPaymentValue;
     private javax.swing.JTextField txtPurchaseValue;
     // End of variables declaration//GEN-END:variables
 }

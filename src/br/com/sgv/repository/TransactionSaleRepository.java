@@ -52,12 +52,13 @@ public class TransactionSaleRepository {
         return listTransactionSale;
     }
     
-    public List<TransactionSale> getTransactionSaleList(String dateSearch) {
-        String hql = "from TransactionSale where register_date = :date";
+    public List<TransactionSale> getTransactionSaleList(String dateInit, String dateFinal) {
+        String hql = "from TransactionSale where register_date between :dateInit and :dateFinal";
         
         this.session = ContextFactory.initContextDb();
         Query query = this.session.createQuery(hql)
-                .setParameter("date", dateSearch);
+                .setParameter("dateInit", dateInit)
+                .setParameter("dateFinal", dateFinal);
         List<TransactionSale> listTransactionSale = query.list();
         ContextFactory.commit();
         

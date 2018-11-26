@@ -1,6 +1,7 @@
 package br.com.sgv.service;
 
 import br.com.sgv.database.ContextFactory;
+import br.com.sgv.enumerator.PayTypeEnum;
 import br.com.sgv.enumerator.StatusRegisterEnum;
 import br.com.sgv.model.Sale;
 import br.com.sgv.model.StatusRegister;
@@ -25,6 +26,7 @@ public class TransactionSaleService {
     private TransactionSaleRepository transactionSaleRepository = null;
     private SaleRepository saleRepository = null;
     private Session session = null;
+    private String transactionId = null;
     
     public TransactionSaleService(boolean isTransaction) {        
         if (isTransaction){
@@ -38,40 +40,54 @@ public class TransactionSaleService {
         }
     }
     
-    public ResponseModel<Boolean> saveTransactionSale(TransactionSale transactionSale, List<Sale> itemsSale) {
+    public ResponseModel<Boolean> saveTransactionSale(List<TransactionSale> transactionSale, List<Sale> itemsSale) {
         ResponseModel<Boolean> response = new ResponseModel<>();
         
-        if (transactionSale != null && itemsSale != null && itemsSale.size() > 0){
+        if (transactionSale != null && transactionSale.size() > 0 && itemsSale != null && itemsSale.size() > 0){
             try {
                 this.logService.addLogMessage("iniciando transacao de venda");
+                Date now = Date.from(Instant.now());
                 long transactionMaxId = 0L;
                 
-                Object obj = this.transactionSaleRepository.getMaxTransaction();
-                Date now = Date.from(Instant.now());
-                
-                if (obj != null) {
-                    String id = String.valueOf(obj);
-                    transactionMaxId = Long.valueOf(id) + 1;
+                if (transactionSale.get(0).getPayType().getId() == PayTypeEnum.TWO_PAYMENTS.value) {
+                    transactionSale.get(0).setTransactionId("C");
+                    transactionSale.get(1).setTransactionId("D");
                 } else {
-                    transactionMaxId = 1;
+                    Object obj = this.transactionSaleRepository.getMaxTransaction();
+
+                    if (obj != null) {
+                        String id = String.valueOf(obj);
+                        transactionMaxId = Long.valueOf(id) + 1;
+                    } else {
+                        transactionMaxId = 1;
+                    }
+                    
+                    this.transactionId = "T".concat(CriptoText.convertHexadecimal(transactionMaxId));
+                    this.logService.addLogMessage("código de transação " + transactionId + " gerado");
                 }
-                
-                String transactionId = "T".concat(CriptoText.convertHexadecimal(transactionMaxId));
-                this.logService.addLogMessage("código de transação " + transactionId + " gerado");
                 
                 StatusRegister statusRegister = new StatusRegister();
                 statusRegister.setId(StatusRegisterEnum.PENDING.value);
                 statusRegister.setStatusRegister("Pendente");
                 
-                transactionSale.setTransactionId(transactionId);
-                transactionSale.setStatusRegister(statusRegister);
-                transactionSale.setRegisterDate(now);
+                transactionSale.stream().forEach(transaction -> {
+                    if (transaction.getPayType().getId() != PayTypeEnum.TWO_PAYMENTS.value){
+                        transaction.setTransactionId(this.transactionId);
+                    }
+                    
+                    transaction.setStatusRegister(statusRegister);
+                    transaction.setRegisterDate(now);
+
+                    this.logService.addLogMessage("salvando transacao");
+                    this.transactionSaleRepository.saveTransactionSale(transaction);
+                });
                 
-                this.logService.addLogMessage("salvando transacao");
-                this.transactionSaleRepository.saveTransactionSale(transactionSale);
+                if (transactionSale.get(0).getPayType().getId() == PayTypeEnum.TWO_PAYMENTS.value) {
+                    this.transactionId = "CD";
+                }
                 
                 itemsSale.stream().forEach(item -> {
-                    item.setTransactionId(transactionId);
+                    item.setTransactionId(this.transactionId);
                     item.setSaleDate(now);
                 });
                 
@@ -102,9 +118,12 @@ public class TransactionSaleService {
         
         try {
             String dateSearchString = new SimpleDateFormat("yyyy-MM-dd").format(dateSearch);
+            String dateInit = dateSearchString.concat(" 00:00:00");
+            String dateFinish = dateSearchString.concat(" 23:59:59");
+            
             this.logService.logMessage("busca de transacao por dia: " + dateSearchString, "getTransactionSaleByDay");
             
-            List<TransactionSale> list = this.transactionSaleRepository.getTransactionSaleList(dateSearchString);
+            List<TransactionSale> list = this.transactionSaleRepository.getTransactionSaleList(dateInit, dateFinish);
             response.setModel(list);
         } catch(Exception ex) {
             this.logService.logMessage(ex.toString(), "getTransactionSaleByDay");
